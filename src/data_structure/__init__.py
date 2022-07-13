@@ -1,0 +1,2 @@
+from data_structure.params_class import prop_params
+from data_structure.rcwa_params_class import rcwa_params

@@ -1,0 +1,16 @@
+.vscode
+dflat.code-workspace
+2022_Paper_Experiments**
+
+**/output/*
+**/pdf_images/*
+**__pycache__
+**/dev_test**
+**/dev_testing**
+
+datasets_image/flying*
+datasets_image/Flying*
+datasets_image/BearFruitGray*
+datasets_image/DeltaE*
+datasets_image/COCO_2017_train*
+
