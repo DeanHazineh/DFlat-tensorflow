@@ -5,3 +5,5 @@ imageio==2.9.0
 keras-flops==0.1.2
 tensorflow-probability==0.17.0
 opencv-python==4.5.5.62
+scikit-image==0.18.3
+scikit-learn==0.24.2
