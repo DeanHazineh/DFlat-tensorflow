@@ -17,6 +17,7 @@ This is the documentation for DFlat!
    
    introduction
    usage
+   modules
    examples
    userapi
    devapi
