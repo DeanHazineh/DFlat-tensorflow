@@ -8,7 +8,7 @@
 - A community driven, maintained framework for rendering and end-to-end design
 
 ## Usage and Documentation: 
-For usage and documentation, refer to the readthedocs at [Coming soon]. 
+For usage and documentation, refer to the readthedocs at https://dflat-master.readthedocs.io/en/latest/. 
 
 ## Installation:
 [Installation guide coming]
