@@ -1,7 +1,6 @@
 import tensorflow as tf
 from tensorflow.python.framework.convert_to_constants import convert_variables_to_constants_v2_as_graph
 
-# This is a place to store useful helper functions for the MLP classes
 
 def leakyrelu100(x):
     x_pos = (x + tf.abs(x)) / 2
