@@ -1,6 +1,5 @@
 .vscode
 dflat.code-workspace
-2022_Paper_Experiments**
 
 **/output/*
 **/pdf_images/*
@@ -16,3 +15,4 @@ datasets_image/COCO_2017_train*
 
 TRASH/*
 DEAN_EXCLUDE_WORK/*
+**training_testDataError.pickle
