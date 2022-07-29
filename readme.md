@@ -1,4 +1,4 @@
-# Public Branch - V0.2 (Final Stages of Development)
+# Public Branch - V0.2 (In Active Development)
 <img src=/docs/imgs/DFlat_Long.png alt="Dflat" width="500"/>
 
 ## A Design Framework for Metasurface-Based Visual Sensors (Python Tensorflow)
