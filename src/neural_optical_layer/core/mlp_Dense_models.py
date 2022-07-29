@@ -14,8 +14,8 @@ mlp_model_names = [
     "MLP_Nanofins_Dense512_U350_H600",
     "MLP_Nanofins_Dense256_U350_H600",
     "MLP_Nanofins_Dense128_U350_H600",
-    "MLP_Nanofins_Dense_64_U350_H600",
-    "MLP_Nanofins_Dense_32_U350_H600",
+    "MLP_Nanofins_Dense64_U350_H600",
+    "MLP_Nanofins_Dense32_U350_H600",
 ]
 
 
