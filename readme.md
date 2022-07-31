@@ -1,17 +1,29 @@
 # Public - V1.0.0
 <img src=/docs/imgs/DFlat_Long.png alt="Dflat" width="500"/>
 
-## A Design Framework for Metasurface-Based Visual Sensors (Python Tensorflow)
+# A Design Framework for Metasurface-Based Visual Sensors (Python Tensorflow)
 `D-Flat` is a forward and inverse design framework for flat optics, specially geared to the design of dielectric metasurfaces for imaging and sensing. This package is reviewed in paper [Link coming]. D-Flat provides users with: 
 - A validated, autodifferentiable framework for optical field propagation
 - Pre-trained, efficient neural models to describe the optical response of metasurface cells
 - A community driven, maintained framework for rendering and end-to-end design
 
 ## Usage and Documentation: 
-For usage and documentation, refer to the readthedocs at https://dflat-master.readthedocs.io/en/latest/. 
+For usage and documentation, refer to the readthedocs at https://dflat-master.readthedocs.io/en/latest/. (Documentation is in active development).
+An example is provided in DFlat/examples/.
 
 ## Installation:
-[Installation guide coming]
+To use DFlat, first download the repository:
+```
+git clone https://github.com/DeanHazineh/DFlat
+```
+Then install the local repository to your venv by entering the following in terminal:
+```
+python setup.py develop
+```
+or
+```
+pip install -e DFlat
+```
 
 ## Contact:
 This repository is intended to be accessible and community driven. It may not be fully error-proof and will be continually updated.
