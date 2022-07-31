@@ -1,4 +1,6 @@
+.vscode
 examples/output*
-examples/metalens
-
+DEAN_EXCLUDE_WORK
 *DS_Store
+**.egg-info
+

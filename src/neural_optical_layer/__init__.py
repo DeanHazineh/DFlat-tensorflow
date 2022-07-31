@@ -1,1 +1,0 @@
-from neural_optical_layer.neural_optical_layers import MLP_Latent_Layer, MLP_Layer

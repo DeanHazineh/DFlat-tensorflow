@@ -1,0 +1,23 @@
+**/dev_test**
+**/dev_testing**
+**/output/*
+TRASH/*
+
+**__pycache__
+**training_testDataError.pickle
+**.pdf
+**.png
+
+datasets_image/flying*
+datasets_image/Flying*
+datasets_image/BearFruitGray*
+datasets_image/DeltaE*
+datasets_image/COCO_2017_train*
+
+**fitted_regression_models/
+**trained_erbf_models copy
+**trained_MLP_models old
+
+neural_optical_layer/core/trained_MLP_models/MLP_Nanofins_Dense32_U350_H600*
+neural_optical_layer/core/trained_MLP_models/MLP_Nanofins_Dense64_U350_H600*
+neural_optical_layer/core/trained_MLP_models/MLP_Nanofins_Dense1024_U350_H600*

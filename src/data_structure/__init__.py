@@ -1,2 +1,0 @@
-from data_structure.fourier_params import prop_params
-from data_structure.rcwa_params import rcwa_params

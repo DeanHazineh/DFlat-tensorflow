@@ -1,1 +1,0 @@
-DFlat is in final stage development. Updated examples will be released soon.
