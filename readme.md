@@ -10,11 +10,11 @@
 ## Usage and Documentation: 
 For usage and documentation, refer to the readthedocs at https://dflat-master.readthedocs.io/en/latest/. (Documentation is in active development and will be updated slowly in the future).
 
-An example for inverse design is provided in DFlat/examples/. Additional examples will be provided in the future.
+An example for inverse design is provided in `DFlat/examples/`. Additional examples will be provided in the future.
 
 For developers and researchers, 
-- a script to train neural models can be found in DFlat/dflat/neural_optical_layer/core/runtraining_neural_models.py 
-- a script to build a cell library using RCWA_TF can be found in DFlat/dflat/cell_library_generation/generate_cell_library.py
+- a script to train neural models can be found in `DFlat/dflat/neural_optical_layer/core/runtraining_neural_models.py`
+- a script to build a cell library using RCWA_TF can be found in `DFlat/dflat/cell_library_generation/generate_cell_library.py`
 
 ## Installation:
 To use DFlat, first download the repository:
