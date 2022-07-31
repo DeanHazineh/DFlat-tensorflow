@@ -36,9 +36,9 @@ pip install -r requirements.txt
 
 ## Contact:
 This repository is intended to be accessible and community driven. It may not be fully error-proof and will be continually updated.
-If you have improvements, fixes, or contributions, please branch and initiate a merge request to master. You can also contact me directly with suggestions.
+If you have improvements, fixes, or contributions, please branch and initiate a merge request to master (or email me)!
 
-For any questions, functionality requests, or other concerns, don't hesitate to contact me directly at dhazineh@g.harvard.edu or submit a form in Github "Issues"! 
+For any questions, functionality requests, or other concerns, don't hesitate to contact me t dhazineh@g.harvard.edu. 
 
 ## Acknowledgements and Support:
 This work pulls inspiration from, builds on, or otherwise ports/modifies previous open-source contributions from the following individuals:
