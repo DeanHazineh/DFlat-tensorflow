@@ -21,7 +21,7 @@ To use DFlat, first download the repository:
 ```
 git clone https://github.com/DeanHazineh/DFlat
 ```
-Then install the local repository to your venv by entering the following in terminal:
+Note that git LFS should be installed if not already via `git lfs install` at the terminal. Next install the local repository to your venv by entering the following in terminal:
 ```
 python setup.py develop
 ```
