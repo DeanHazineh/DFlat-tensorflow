@@ -1,6 +1,7 @@
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
+import os
 
 import dflat.optimization_helpers as df_optimizer
 import dflat.fourier_layer as df_fourier_layer
@@ -182,6 +183,9 @@ def optimize_metalens_mlp():
 
     # Call the pipeline
     savepath = "examples/output/metalens_example/"
+    if not os.path.exists(savepath):
+        os.makedirs(savepath)
+
     pipeline = pipeline_Metalens_MLP(propagation_parameters, point_source_locs, savepath, saveAtEpochs=5)
     pipeline.customLoad()
 
