@@ -49,3 +49,17 @@ This work pulls inspiration from, builds on, or otherwise ports/modifies previou
 This work was supported by the National Science Foundation (IIS) for End-to-End Computational Sensing.
 We thank Professors Todd Zickler, Qi Guo, and Federico Capasso for their role in the conception of this software. For further interest or discussion on research, please direct contact and questions there. We also thank Dr. Zhujun Shi for contributions to the conception and early development and Soon Wei Daniel Lim for help with validations.
 
+## Credits
+If you utilize DFlat or included data sets for your own work, please cite it by clicking the github citation link on the right or by copying:
+```
+  @misc{https://doi.org/10.48550/arxiv.2207.14780,
+    doi = {10.48550/ARXIV.2207.14780},
+    url = {https://arxiv.org/abs/2207.14780},
+    author = {Hazineh, Dean S. and Lim, Soon Wei Daniel and Shi, Zhujun and Capasso, Federico and Zickler, Todd and Guo, Qi},
+    keywords = {Optics (physics.optics), Applied Physics (physics.app-ph), FOS: Physical sciences, FOS: Physical sciences},
+    title = {D-Flat: A Differentiable Flat-Optics Framework for End-to-End Metasurface Visual Sensor Design},
+    publisher = {arXiv},
+    year = {2022},
+    copyright = {Creative Commons Attribution 4.0 International}
+  }
+```
