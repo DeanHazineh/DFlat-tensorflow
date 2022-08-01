@@ -1,13 +1,6 @@
 import tensorflow as tf
 import numpy as np
 
-# NOTE: THESE CONSTANTS NEED TO BE MOVED INSIDE EACH FUNCTION CALL SO THE GRAPH IS NOT EAGER MODE!
-# D.H.
-# TF_ZERO = tf.constant(0.0, dtype=tf.float32)
-# TF_ONE = tf.constant(1.0, dtype=tf.float32)
-# TF_ONE_COMPLEX = tf.complex(TF_ONE, TF_ZERO)
-# POWER_EXP = 10
-
 
 def get_cartesian_grid(Lx, Nx, Ly, Ny):
     dx = Lx / Nx  # grid resolution along x
@@ -28,7 +21,6 @@ def build_rectangle_resonator(norm_param, span_limits, Lx, Ly, x_mesh, y_mesh, s
     # norm_param: A 'tf.Tensor' of shape (2, pixelsX, pixelsY, 1)
     TF_ZERO = tf.constant(0.0, dtype=tf.float32)
     TF_ONE = tf.constant(1.0, dtype=tf.float32)
-    TF_ONE_COMPLEX = tf.complex(TF_ONE, TF_ZERO)
 
     # unpack inputs
     norm_px = norm_param[0:1, :, :, :]
@@ -58,100 +50,17 @@ def build_rectangle_resonator(norm_param, span_limits, Lx, Ly, x_mesh, y_mesh, s
     return struct_binaries
 
 
-def build_elliptical_resonator(norm_param, span_limits, Lx, Ly, erd, x_mesh, y_mesh, sigmoid_coeff):
-    # norm_param: A 'tf.Tensor' of shape (2, pixelsX, pixelsY, 1)
-
-    # unpack inputs
-    norm_px = norm_param[0:1, :, :, :]
-    norm_py = norm_param[1:2, :, :, :]
-    batchSize = erd.shape[0]
-    span_max = tf.cast(span_limits["max"], dtype=tf.float32)
-    span_min = tf.cast(span_limits["min"], dtype=tf.float32)
-
-    #
-    r_x = (norm_px * (span_max - span_min) + span_min) * Lx
-    r_y = (norm_py * (span_max - span_min) + span_min) * Ly
-    r_x = tf.tile(r_x, multiples=(batchSize, 1, 1, 1))
-    r_y = tf.tile(r_y, multiples=(batchSize, 1, 1, 1))
-    r_x = r_x[:, :, :, tf.newaxis, tf.newaxis, tf.newaxis, :]
-    r_y = r_y[:, :, :, tf.newaxis, tf.newaxis, tf.newaxis, :]
-    r1 = 1 - (x_mesh * 2 / r_x[:, :, :, :, :, :, 0]) ** 2 - (y_mesh * 2 / r_y[:, :, :, :, :, :, 0]) ** 2
-
-    r1 = tf.complex(tf.math.sigmoid(sigmoid_coeff * r1), TF_ZERO)
-    r1 = 1 + (erd - TF_ONE_COMPLEX) * r1
-
-    return r1
-
-
-def build_cylindrical_nanoposts(norm_param, span_limits, Lx, Ly, erd, x_mesh, y_mesh, sigmoid_coeff):
-    # norm_param: A 'tf.Tensor' of shape (1, pixelsX, pixelsY, 1)
-
-    # unpack inputs
-    norm_pr = norm_param[0:1, :, :, :]
-    batchSize = erd.shape[0]
-    span_max = tf.cast(span_limits["max"], dtype=tf.float32)
-    span_min = tf.cast(span_limits["min"], dtype=tf.float32)
-
-    #
-    radius = ((norm_pr * (span_max - span_min) + span_min) * 0.5) * tf.math.minimum(Lx, Ly)
-    radius = tf.tile(radius, multiples=(batchSize, 1, 1, 1))
-    radius = radius[:, :, :, tf.newaxis, tf.newaxis, tf.newaxis, :]
-
-    r1 = 1 - (x_mesh / radius[:, :, :, :, :, :, 0]) ** 2 - (y_mesh / radius[:, :, :, :, :, :, 0]) ** 2
-    r1 = tf.complex(tf.math.sigmoid(sigmoid_coeff * r1), TF_ZERO)
-    r1 = 1 + (erd - TF_ONE_COMPLEX) * r1
-
-    return r1
-
-
-def build_coupled_elliptical_resonators(norm_param, span_limits, Lx, Ly, erd, x_mesh, y_mesh, sigmoid_coeff):
+def build_coupled_rectangular_resonators(norm_param, span_limits, Lx, Ly, x_mesh, y_mesh, sigmoid_coeff, Nlay):
     # norm_param: A 'tf.Tensor' of shape (2, pixelsX, pixelsY, 4)
 
-    # unpack inputs
-    norm_px = norm_param[0:1, :, :, :]
-    norm_py = norm_param[1:2, :, :, :]
-    batchSize = erd.shape[0]
-    span_max = tf.cast(span_limits["max"], dtype=tf.float32)
-    span_min = tf.cast(span_limits["min"], dtype=tf.float32)
-
-    # Nanopost centers.
-    c1_x = -Lx / 4
-    c1_y = -Ly / 4
-    c2_x = -Lx / 4
-    c2_y = Ly / 4
-    c3_x = Lx / 4
-    c3_y = -Ly / 4
-    c4_x = Lx / 4
-    c4_y = Ly / 4
-
-    # Clip the optimization ranges.
-    r_x = (norm_px * (span_max - span_min) + span_min) * Lx
-    r_y = (norm_py * (span_max - span_min) + span_min) * Ly
-    r_x = tf.tile(r_x, multiples=(batchSize, 1, 1, 1))
-    r_y = tf.tile(r_y, multiples=(batchSize, 1, 1, 1))
-    r_x = r_x[:, :, :, tf.newaxis, tf.newaxis, tf.newaxis, :]
-    r_y = r_y[:, :, :, tf.newaxis, tf.newaxis, tf.newaxis, :]
-
-    # Calculate the nanopost boundaries.
-    c1 = 1 - ((x_mesh - c1_x) / r_x[:, :, :, :, :, :, 0]) ** 2 - ((y_mesh - c1_y) / r_y[:, :, :, :, :, :, 0]) ** 2
-    c2 = 1 - ((x_mesh - c2_x) / r_x[:, :, :, :, :, :, 1]) ** 2 - ((y_mesh - c2_y) / r_y[:, :, :, :, :, :, 1]) ** 2
-    c3 = 1 - ((x_mesh - c3_x) / r_x[:, :, :, :, :, :, 2]) ** 2 - ((y_mesh - c3_y) / r_y[:, :, :, :, :, :, 2]) ** 2
-    c4 = 1 - ((x_mesh - c4_x) / r_x[:, :, :, :, :, :, 3]) ** 2 - ((y_mesh - c4_y) / r_y[:, :, :, :, :, :, 3]) ** 2
-
-    c1 = tf.complex(tf.math.sigmoid(sigmoid_coeff * c1), TF_ZERO)
-    c2 = tf.complex(tf.math.sigmoid(sigmoid_coeff * c2), TF_ZERO)
-    c3 = tf.complex(tf.math.sigmoid(sigmoid_coeff * c3), TF_ZERO)
-    c4 = tf.complex(tf.math.sigmoid(sigmoid_coeff * c4), TF_ZERO)
-    return 1 + (erd - TF_ONE_COMPLEX) * (c1 + c2 + c3 + c4)
-
-
-def build_coupled_rectangular_resonators(norm_param, span_limits, Lx, Ly, erd, x_mesh, y_mesh, sigmoid_coeff):
-    # norm_param: A 'tf.Tensor' of shape (2, pixelsX, pixelsY, 4)
+    POWER_EXP = 10
+    TF_ZERO = tf.constant(0.0, dtype=tf.float32)
+    TF_ONE = tf.constant(1.0, dtype=tf.float32)
+    TF_ONE_COMPLEX = tf.complex(TF_ONE, TF_ZERO)
 
     # unpack inputs
     norm_px = norm_param[0:1, :, :, :]
     norm_py = norm_param[1:2, :, :, :]
-    batchSize = erd.shape[0]
     span_max = tf.cast(span_limits["max"], dtype=tf.float32)
     span_min = tf.cast(span_limits["min"], dtype=tf.float32)
 
@@ -168,8 +77,8 @@ def build_coupled_rectangular_resonators(norm_param, span_limits, Lx, Ly, erd, x
     # Nanopost width ranges
     r_x = (norm_px * (span_max - span_min) + span_min) * Lx
     r_y = (norm_py * (span_max - span_min) + span_min) * Ly
-    r_x = tf.tile(r_x, multiples=(batchSize, 1, 1, 1))
-    r_y = tf.tile(r_y, multiples=(batchSize, 1, 1, 1))
+    r_x = tf.tile(r_x, multiples=(1, 1, 1, 1))
+    r_y = tf.tile(r_y, multiples=(1, 1, 1, 1))
     r_x = r_x[:, :, :, tf.newaxis, tf.newaxis, tf.newaxis, :]
     r_y = r_y[:, :, :, tf.newaxis, tf.newaxis, tf.newaxis, :]
 
@@ -198,7 +107,119 @@ def build_coupled_rectangular_resonators(norm_param, span_limits, Lx, Ly, erd, x
     c2 = tf.complex(tf.math.sigmoid(sigmoid_coeff * c2), TF_ZERO)
     c3 = tf.complex(tf.math.sigmoid(sigmoid_coeff * c3), TF_ZERO)
     c4 = tf.complex(tf.math.sigmoid(sigmoid_coeff * c4), TF_ZERO)
-    return 1 + (erd - TF_ONE_COMPLEX) * (c1 + c2 + c3 + c4)
+
+    struct_binaries = []
+    for i in range(Nlay):
+        struct_binaries.append(None)
+    struct_binaries[1] = c1 + c2 + c3 + c4
+
+    return struct_binaries
+
+
+def build_elliptical_resonator(norm_param, span_limits, Lx, Ly, x_mesh, y_mesh, sigmoid_coeff, Nlay):
+    # norm_param: A 'tf.Tensor' of shape (2, pixelsX, pixelsY, 1)
+    TF_ZERO = tf.constant(0.0, dtype=tf.float32)
+    TF_ONE = tf.constant(1.0, dtype=tf.float32)
+    TF_ONE_COMPLEX = tf.complex(TF_ONE, TF_ZERO)
+
+    # unpack inputs
+    norm_px = norm_param[0:1, :, :, :]
+    norm_py = norm_param[1:2, :, :, :]
+    span_max = tf.cast(span_limits["max"], dtype=tf.float32)
+    span_min = tf.cast(span_limits["min"], dtype=tf.float32)
+
+    #
+    r_x = (norm_px * (span_max - span_min) + span_min) * Lx
+    r_y = (norm_py * (span_max - span_min) + span_min) * Ly
+    r_x = tf.tile(r_x, multiples=(1, 1, 1, 1))
+    r_y = tf.tile(r_y, multiples=(1, 1, 1, 1))
+    r_x = r_x[:, :, :, tf.newaxis, tf.newaxis, tf.newaxis, :]
+    r_y = r_y[:, :, :, tf.newaxis, tf.newaxis, tf.newaxis, :]
+    r1 = 1 - (x_mesh * 2 / r_x[:, :, :, :, :, :, 0]) ** 2 - (y_mesh * 2 / r_y[:, :, :, :, :, :, 0]) ** 2
+
+    r1 = tf.complex(tf.math.sigmoid(sigmoid_coeff * r1), TF_ZERO)
+
+    struct_binaries = []
+    for i in range(Nlay):
+        struct_binaries.append(None)
+    struct_binaries[1] = r1
+
+    return struct_binaries
+
+
+def build_coupled_elliptical_resonators(norm_param, span_limits, Lx, Ly, x_mesh, y_mesh, sigmoid_coeff, Nlay):
+    # norm_param: A 'tf.Tensor' of shape (2, pixelsX, pixelsY, 4)
+    TF_ZERO = tf.constant(0.0, dtype=tf.float32)
+    TF_ONE = tf.constant(1.0, dtype=tf.float32)
+    TF_ONE_COMPLEX = tf.complex(TF_ONE, TF_ZERO)
+
+    # unpack inputs
+    norm_px = norm_param[0:1, :, :, :]
+    norm_py = norm_param[1:2, :, :, :]
+    span_max = tf.cast(span_limits["max"], dtype=tf.float32)
+    span_min = tf.cast(span_limits["min"], dtype=tf.float32)
+
+    # Nanopost centers.
+    c1_x = -Lx / 4
+    c1_y = -Ly / 4
+    c2_x = -Lx / 4
+    c2_y = Ly / 4
+    c3_x = Lx / 4
+    c3_y = -Ly / 4
+    c4_x = Lx / 4
+    c4_y = Ly / 4
+
+    # Clip the optimization ranges.
+    r_x = (norm_px * (span_max - span_min) + span_min) * Lx
+    r_y = (norm_py * (span_max - span_min) + span_min) * Ly
+    r_x = tf.tile(r_x, multiples=(1, 1, 1, 1))
+    r_y = tf.tile(r_y, multiples=(1, 1, 1, 1))
+    r_x = r_x[:, :, :, tf.newaxis, tf.newaxis, tf.newaxis, :]
+    r_y = r_y[:, :, :, tf.newaxis, tf.newaxis, tf.newaxis, :]
+
+    # Calculate the nanopost boundaries.
+    c1 = 1 - ((x_mesh - c1_x) / r_x[:, :, :, :, :, :, 0]) ** 2 - ((y_mesh - c1_y) / r_y[:, :, :, :, :, :, 0]) ** 2
+    c2 = 1 - ((x_mesh - c2_x) / r_x[:, :, :, :, :, :, 1]) ** 2 - ((y_mesh - c2_y) / r_y[:, :, :, :, :, :, 1]) ** 2
+    c3 = 1 - ((x_mesh - c3_x) / r_x[:, :, :, :, :, :, 2]) ** 2 - ((y_mesh - c3_y) / r_y[:, :, :, :, :, :, 2]) ** 2
+    c4 = 1 - ((x_mesh - c4_x) / r_x[:, :, :, :, :, :, 3]) ** 2 - ((y_mesh - c4_y) / r_y[:, :, :, :, :, :, 3]) ** 2
+
+    c1 = tf.complex(tf.math.sigmoid(sigmoid_coeff * c1), TF_ZERO)
+    c2 = tf.complex(tf.math.sigmoid(sigmoid_coeff * c2), TF_ZERO)
+    c3 = tf.complex(tf.math.sigmoid(sigmoid_coeff * c3), TF_ZERO)
+    c4 = tf.complex(tf.math.sigmoid(sigmoid_coeff * c4), TF_ZERO)
+
+    struct_binaries = []
+    for i in range(Nlay):
+        struct_binaries.append(None)
+    struct_binaries[1] = c1 + c2 + c3 + c4
+
+    return struct_binaries
+
+
+def build_cylindrical_nanoposts(norm_param, span_limits, Lx, Ly, x_mesh, y_mesh, sigmoid_coeff, Nlay):
+    # norm_param: A 'tf.Tensor' of shape (1, pixelsX, pixelsY, 1)
+    TF_ZERO = tf.constant(0.0, dtype=tf.float32)
+    TF_ONE = tf.constant(1.0, dtype=tf.float32)
+
+    # unpack inputs
+    norm_pr = norm_param[0:1, :, :, :]
+    span_max = tf.cast(span_limits["max"], dtype=tf.float32)
+    span_min = tf.cast(span_limits["min"], dtype=tf.float32)
+
+    #
+    radius = ((norm_pr * (span_max - span_min) + span_min) * 0.5) * tf.math.minimum(Lx, Ly)
+    radius = tf.tile(radius, multiples=(1, 1, 1, 1))
+    radius = radius[:, :, :, tf.newaxis, tf.newaxis, tf.newaxis, :]
+
+    r1 = 1 - (x_mesh / radius[:, :, :, :, :, :, 0]) ** 2 - (y_mesh / radius[:, :, :, :, :, :, 0]) ** 2
+    r1 = tf.complex(tf.math.sigmoid(sigmoid_coeff * r1), TF_ZERO)
+
+    struct_binaries = []
+    for i in range(Nlay):
+        struct_binaries.append(None)
+    struct_binaries[1] = r1
+
+    return struct_binaries
 
 
 def generate_cell_perm(norm_param, rcwa_parameters):
@@ -265,18 +286,18 @@ def generate_cell_perm(norm_param, rcwa_parameters):
 
 ALLOWED_PARAMETERIZATION_TYPE = {
     "rectangular_resonators": build_rectangle_resonator,
-    "elliptical_resonators": build_elliptical_resonator,
-    "cylindrical_nanoposts": build_cylindrical_nanoposts,
-    "coupled_elliptical_resonators": build_coupled_elliptical_resonators,
     "coupled_rectangular_resonators": build_coupled_rectangular_resonators,
+    "elliptical_resonators": build_elliptical_resonator,
+    "coupled_elliptical_resonators": build_coupled_elliptical_resonators,
+    "cylindrical_nanoposts": build_cylindrical_nanoposts,
     "None": None,
 }
 
 CELL_SHAPE_DEGREE = {  # See rcwa_params.__get_param_shape()
     "rectangular_resonators": [2, 1],
-    "elliptical_resonators": [2, 1],
-    "cylindrical_nanoposts": [1, 1],
-    "coupled_elliptical_resonators": [2, 4],
     "coupled_rectangular_resonators": [2, 4],
+    "elliptical_resonators": [2, 1],
+    "coupled_elliptical_resonators": [2, 4],
+    "cylindrical_nanoposts": [1, 1],
     "None": None,
 }

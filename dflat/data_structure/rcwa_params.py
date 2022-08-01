@@ -42,10 +42,10 @@ ADDED_KEYS_PASS = ["shape_vect_size", "span_limits"]
 
 DEFAULT_SPAN_LIMITS = {
     "rectangular_resonators": {"min": 0.10, "max": 0.80},
-    "elliptical_resonators": {"min": 0.10, "max": 0.80},
-    "cylindrical_nanoposts": {"min": 0.10, "max": 0.80},
-    "coupled_elliptical_resonators": {"min": 0.05, "max": 0.20},
     "coupled_rectangular_resonators": {"min": 0.05, "max": 0.20},
+    "elliptical_resonators": {"min": 0.10, "max": 0.80},
+    "coupled_elliptical_resonators": {"min": 0.05, "max": 0.20},
+    "cylindrical_nanoposts": {"min": 0.10, "max": 0.80},
 }
 
 
@@ -103,7 +103,7 @@ class rcwa_params(dict):
 
         # Add required simulation keys
         if not input_dict["batch_wavelength_dim"]:
-            self.__add_sim_keys(input_dict)
+            self.__add_sim_keys(self.__dict__)
 
         return
 
