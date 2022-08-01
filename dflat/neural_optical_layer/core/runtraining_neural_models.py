@@ -143,8 +143,8 @@ def run_mlp_training_nanofins(train=True, verb=False):
     # )
     # run_training_neural_model(
     #     model_caller=MLP_models.MLP_Nanofins_Dense1024_U350_H600,
-    #     epochs=1,
-    #     miniEpoch=1,
+    #     epochs=60000,
+    #     miniEpoch=1000,
     #     lr=1e-4,
     #     train=train,
     #     verbose=verb,

@@ -1,0 +1,44 @@
+cff-version: 1.2.0
+message: "If you use this software or included datasets, please cite it as below."
+authors:
+- family-names: "Hazineh"
+  given-names: "Dean"
+  orcid: "https://orcid.org/0000-0002-8762-1621"
+- family-names: "Lim"
+  given-names: "Soon Wei Daniel"
+- family-names: "Shi"
+  given-names: "Zhujun"
+- family-names: "Capasso"
+  given-names: "Federico"
+- family-names: "Zickler"
+  given-names: "Todd"
+- family-names: "Guo"
+  given-names: "Qi"
+
+title: "D-Flat: A Differentiable Flat-Optics Framework for End-to-End Metasurface Visual Sensor Design"
+version: 1.0.0
+doi: 10.48550/ARXIV.2207.14780
+date-released: 2022-07-29
+url: "https://github.com/DeanHazineh/DFlat"
+preferred-citation:
+  type: misc
+  authors:
+  - family-names: "Hazineh"
+    given-names: "Dean"
+    orcid: "https://orcid.org/0000-0002-8762-1621"
+  - family-names: "Lim"
+    given-names: "Soon Wei Daniel"
+  - family-names: "Shi"
+    given-names: "Zhujun"
+  - family-names: "Capasso"
+    given-names: "Federico"
+  - family-names: "Zickler"
+    given-names: "Todd"
+  - family-names: "Guo"
+    given-names: "Qi"
+  doi: "10.48550/ARXIV.2207.14780"
+  url: "https://arxiv.org/abs/2207.14780"
+  month: 7
+  title: "D-Flat: A Differentiable Flat-Optics Framework for End-to-End Metasurface Visual Sensor Design"
+  publisher: "arXiv"
+  year: "2022" 
