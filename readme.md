@@ -8,7 +8,7 @@
 - A community driven, maintained framework for rendering and end-to-end design
 
 ## Usage and Documentation: 
-For usage and documentation, refer to the readthedocs at https://dflat-master.readthedocs.io/en/latest/. (Documentation is in active development and will be updated slowly in the future).
+For usage and documentation, a readthedocs page is in active development. 
 
 An example for inverse design is provided in `DFlat/examples/`. Additional examples will be provided in the future.
 
