@@ -175,9 +175,8 @@ def simulate(ER_t, UR_t, params):
     Q = tf.concat([Q_row0, Q_row1], axis=4)
 
     # Compute eignmodes for the layers in each pixel for the whole batch.
-    eps = params["eps"]
     OMEGA_SQ = tf.linalg.matmul(P, Q)
-    LAM, W = tensor_utils.eig_general(OMEGA_SQ, eps)
+    LAM, W = tensor_utils.eig_general(OMEGA_SQ)
     LAM = tf.sqrt(LAM)
     LAM = tf.linalg.diag(LAM)
 

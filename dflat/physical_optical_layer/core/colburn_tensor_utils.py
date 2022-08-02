@@ -10,7 +10,7 @@ def expand_and_tile_np(array, batchSize, pixelsX, pixelsY):
     Returns:
         A `np.ndarray` of shape `(batchSize, pixelsX, pixelsY, Nx, Ny)` with
         the values from `array` tiled over the new dimensions.
-  """
+    """
     array = array[np.newaxis, np.newaxis, np.newaxis, :, :]
     return np.tile(array, reps=(batchSize, pixelsX, pixelsY, 1, 1))
 
@@ -23,7 +23,7 @@ def expand_and_tile_tf(tensor, batchSize, pixelsX, pixelsY):
     Returns:
         A `tf.Tensor` of shape `(batchSize, pixelsX, pixelsY, Nx, Ny)` with
         the values from `tensor` tiled over the new dimensions.
-  """
+    """
     tensor = tensor[tf.newaxis, tf.newaxis, tf.newaxis, :, :]
     return tf.tile(tensor, multiples=(batchSize, pixelsX, pixelsY, 1, 1))
 
@@ -31,32 +31,32 @@ def expand_and_tile_tf(tensor, batchSize, pixelsX, pixelsY):
 @tf.custom_gradient
 def eig_general(A, eps=1e-6):
     """
-    Computes the eigendecomposition of a batch of matrices, the same as 
+    Computes the eigendecomposition of a batch of matrices, the same as
     `tf.eig()` but assumes the input shape also has extra dimensions for pixels
-    and layers. This function also provides the reverse mode gradient of the 
-    eigendecomposition as derived in 10.1109/ICASSP.2017.7952140. This applies 
-    for general, complex matrices that do not have to be self adjoint. This 
-    result gives the exact reverse mode gradient for nondegenerate eigenvalue 
+    and layers. This function also provides the reverse mode gradient of the
+    eigendecomposition as derived in 10.1109/ICASSP.2017.7952140. This applies
+    for general, complex matrices that do not have to be self adjoint. This
+    result gives the exact reverse mode gradient for nondegenerate eigenvalue
     problems. To extend to the case of degenerate eigenvalues common in RCWA, we
-    approximate the gradient by a Lorentzian broadening technique that 
+    approximate the gradient by a Lorentzian broadening technique that
     introduces a small error but stabilizes the calculation. This is based on
     10.1103/PhysRevX.9.031041.
     Args:
-        A: A `tf.Tensor` of shape `(batchSize, pixelsX, pixelsY, Nlayers, Nx, 
-        Ny)` and dtype `tf.complex64` where the last two dimensions define 
-        matrices for which we will calculate the eigendecomposition of their 
+        A: A `tf.Tensor` of shape `(batchSize, pixelsX, pixelsY, Nlayers, Nx,
+        Ny)` and dtype `tf.complex64` where the last two dimensions define
+        matrices for which we will calculate the eigendecomposition of their
         reverse mode gradients.
 
-        eps: A `float` defining a regularization parameter used in the 
+        eps: A `float` defining a regularization parameter used in the
         denominator of the Lorentzian broadening calculation to enable reverse
         mode gradients for degenerate eigenvalues.
 
     Returns:
         A `Tuple(List[tf.Tensor, tf.Tensor], tf.Tensor)`, where the `List`
-        specifies the eigendecomposition as computed by `tf.eig()` and the 
+        specifies the eigendecomposition as computed by `tf.eig()` and the
         second element of the `Tuple` gives the reverse mode gradient of the
         eigendecompostion of the input argument `A`.
-  """
+    """
 
     # Perform the eigendecomposition.
     eigenvalues, eigenvectors = tf.eig(A)
@@ -85,7 +85,7 @@ def eig_general(A, eps=1e-6):
         E = tf.linalg.adjoint(D) - D
 
         # Lorentzian broadening.
-        F = E / (E ** 2 + eps)
+        F = E / (E**2 + eps)
         F = F - I * F
 
         # Compute the reverse mode gradient of the eigendecomposition of A.

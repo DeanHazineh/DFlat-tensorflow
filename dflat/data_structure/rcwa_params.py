@@ -33,7 +33,6 @@ ALL_OPTIONAL_KEYS = {
     "ur2": 1.0,
     "urd": 1.0,
     "urs": 1.0,
-    "eps": 1e-6,
     "dtype": tf.float32,
     "cdtype": tf.complex64,
 }
