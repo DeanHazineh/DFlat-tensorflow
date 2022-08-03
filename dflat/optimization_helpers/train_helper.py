@@ -39,20 +39,20 @@ def train_loop(pipeline, optimizer, loss_fn, num_epochs):
 
     # Run All Training Steps
     for epoch in range(num_epochs):
-        # Before every N steps, save a figure with useful information
-        if mini_ckpt:
-            if np.mod(epoch, mini_ckpt) == 0 and epoch > 0:
-                print("Log Training at step: " + str(epoch))
-                pipeline.visualizeTrainingCheckpoint(str(epoch))
-                pipeline.customSaveCheckpoint(lossVec)
-                lossVec = []
-
         start = time.time()
         current_loss = train(pipeline, loss_fn, optimizer)
         end = time.time()
 
         print("Training Log | (Step, time, loss): ", epoch, end - start, current_loss)
         lossVec.append(current_loss)
+
+        # After every N steps, save a figure with useful information
+        if mini_ckpt:
+            if np.mod(epoch, mini_ckpt) == 0 and epoch > 0:
+                print("Log Training at step: " + str(epoch))
+                pipeline.visualizeTrainingCheckpoint(str(epoch))
+                pipeline.customSaveCheckpoint(lossVec)
+                lossVec = []
 
     # Save the model and loss post-training
     pipeline.customSaveCheckpoint(lossVec)

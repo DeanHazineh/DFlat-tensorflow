@@ -116,6 +116,44 @@ def build_coupled_rectangular_resonators(norm_param, span_limits, Lx, Ly, x_mesh
     return struct_binaries
 
 
+def build_nine_rectangle_pattern(norm_param, span_limits, Lx, Ly, x_mesh, y_mesh, sigmoid_coeff, Nlay):
+    TF_ZERO = tf.constant(0.0, dtype=tf.float32)
+
+    dLx = Lx / 4
+    dLy = Ly / 4
+    cidx_x = [-dLx, 0, dLx, -dLx, 0, dLx, -dLx, 0, dLx]
+    cidx_y = [-dLy, -dLy, -dLy, 0, 0, 0, dLy, dLy, dLy]
+
+    struct_meta = []
+    for shape_idx in range(norm_param.shape[3]):
+        unit_shape = norm_param[:, :, :, shape_idx : shape_idx + 1]
+        unit_binary = build_rectangle_resonator(
+            unit_shape,
+            span_limits,
+            Lx,
+            Ly,
+            x_mesh + cidx_x[shape_idx],
+            y_mesh + cidx_y[shape_idx],
+            sigmoid_coeff,
+            Nlay,
+        )
+        # struct_meta.append(tf.math.abs(unit_binary[1]))
+        struct_meta.append(unit_binary[1])
+
+    struct_meta = tf.math.reduce_sum(tf.stack(struct_meta), 0)
+    # additional care needs to be taken for overlapping squares
+    # struct_meta = struct_meta - tf.constant(0.25, dtype=tf.float32)
+    # struct_meta = tf.complex(tf.math.sigmoid(sigmoid_coeff * struct_meta), TF_ZERO)
+    # struct_meta = tf.complex(struct_meta, TF_ZERO)
+
+    struct_binaries = []
+    for i in range(Nlay):
+        struct_binaries.append(None)
+    struct_binaries[1] = struct_meta
+
+    return struct_binaries
+
+
 def build_elliptical_resonator(norm_param, span_limits, Lx, Ly, x_mesh, y_mesh, sigmoid_coeff, Nlay):
     # norm_param: A 'tf.Tensor' of shape (2, pixelsX, pixelsY, 1)
     TF_ZERO = tf.constant(0.0, dtype=tf.float32)
@@ -213,6 +251,7 @@ def build_cylindrical_nanoposts(norm_param, span_limits, Lx, Ly, x_mesh, y_mesh,
 
     r1 = 1 - (x_mesh / radius[:, :, :, :, :, :, 0]) ** 2 - (y_mesh / radius[:, :, :, :, :, :, 0]) ** 2
     r1 = tf.complex(tf.math.sigmoid(sigmoid_coeff * r1), TF_ZERO)
+    # return r1
 
     struct_binaries = []
     for i in range(Nlay):
@@ -270,8 +309,8 @@ def generate_cell_perm(norm_param, rcwa_parameters):
     span_limits = rcwa_parameters["span_limits"]
     sigmoid_coeff = rcwa_parameters["sigmoid_coeff"]
     lay_eps_list = rcwa_parameters["lay_eps_list"]
-
     struct_binary = init_function(norm_param, span_limits, Lx, Ly, x_mesh, y_mesh, sigmoid_coeff, Nlay)
+
     ER = []
     for i in range(Nlay):
         if struct_binary[i] != None:
@@ -287,6 +326,7 @@ def generate_cell_perm(norm_param, rcwa_parameters):
 ALLOWED_PARAMETERIZATION_TYPE = {
     "rectangular_resonators": build_rectangle_resonator,
     "coupled_rectangular_resonators": build_coupled_rectangular_resonators,
+    "nine_rectangle_pattern": build_nine_rectangle_pattern,
     "elliptical_resonators": build_elliptical_resonator,
     "coupled_elliptical_resonators": build_coupled_elliptical_resonators,
     "cylindrical_nanoposts": build_cylindrical_nanoposts,
@@ -296,6 +336,7 @@ ALLOWED_PARAMETERIZATION_TYPE = {
 CELL_SHAPE_DEGREE = {  # See rcwa_params.__get_param_shape()
     "rectangular_resonators": [2, 1],
     "coupled_rectangular_resonators": [2, 4],
+    "nine_rectangle_pattern": [2, 9],
     "elliptical_resonators": [2, 1],
     "coupled_elliptical_resonators": [2, 4],
     "cylindrical_nanoposts": [1, 1],

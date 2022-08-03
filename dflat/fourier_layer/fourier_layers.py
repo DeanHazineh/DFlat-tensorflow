@@ -167,8 +167,9 @@ class PSF_Layer(tf.keras.layers.Layer):
                 second argument, of shape
                 (len(wavelength_set_m), profile_batch, num_point_sources, sensor_pixel_number["y"], sensor_pixel_number["x"])
         """
-        ms_trans = inputs[0]
-        ms_phase = inputs[1]
+        dtype = self.parameters["dtype"]
+        ms_trans = tf.cast(inputs[0], dtype)
+        ms_phase = tf.cast(inputs[1], dtype)
 
         # Allow for tensor conversion when non-tensor is passed as input
         if not tf.is_tensor(ms_trans):

@@ -42,6 +42,7 @@ ADDED_KEYS_PASS = ["shape_vect_size", "span_limits"]
 DEFAULT_SPAN_LIMITS = {
     "rectangular_resonators": {"min": 0.10, "max": 0.80},
     "coupled_rectangular_resonators": {"min": 0.05, "max": 0.20},
+    "nine_rectangle_pattern": {"min": 0.05, "max": 0.24},
     "elliptical_resonators": {"min": 0.10, "max": 0.80},
     "coupled_elliptical_resonators": {"min": 0.05, "max": 0.20},
     "cylindrical_nanoposts": {"min": 0.10, "max": 0.80},
@@ -150,6 +151,7 @@ class rcwa_params(dict):
 
         if not isinstance(Lay_mat, list):
             raise TypeError("Error in rcwa_params: Lay_mat must be a list of strings")
+
         if len(Lay_mat) != len(self.__dict__["L"]):
             raise ValueError("Error in rcwa_param: list of layer materials must be same length as L")
 
@@ -175,7 +177,6 @@ class rcwa_params(dict):
             if not (material_dielectric in MATERIAL_DICT.keys()):
                 print(MATERIAL_DICT.keys())
                 raise ValueError("Error in rcwa_params: 'material_dielectric must be one from the above")
-
         elif not isinstance(material_dielectric, complex):
             raise TypeError("Error in rcwa_params: material_dielectric must be string name or complex float")
 
@@ -349,6 +350,7 @@ class rcwa_params(dict):
             eps_rel = get_material_index(er2, wavelength_set_m) ** 2
         else:
             eps_rel = np.ones_like(wavelength_set_m) * er2
+
         eps_rel = tf.convert_to_tensor(
             eps_rel[:, tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis], dtype=cdtype
         )

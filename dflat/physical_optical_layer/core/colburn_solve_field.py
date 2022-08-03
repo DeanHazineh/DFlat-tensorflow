@@ -46,10 +46,12 @@ def simulate(ER_t, UR_t, params):
     I = tf.convert_to_tensor(I, dtype=cdtype)
     I = I[tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis, :, :]
     I = tf.tile(I, multiples=(batchSize, pixelsX, pixelsY, Nlay, 1, 1))
+
     Z = np.zeros((np.prod(PQ), np.prod(PQ)), dtype=complex)
     Z = tf.convert_to_tensor(Z, dtype=cdtype)
     Z = Z[tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis, :, :]
     Z = tf.tile(Z, multiples=(batchSize, pixelsX, pixelsY, Nlay, 1, 1))
+
     n1 = tf.math.sqrt(params["er1"])
     n2 = tf.math.sqrt(params["er2"])
 

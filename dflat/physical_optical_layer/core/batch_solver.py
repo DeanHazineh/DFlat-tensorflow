@@ -39,6 +39,7 @@ def full_rcwa_shape(norm_param, rcwa_parameters):
     ### NOTE: Transmittance is returned here!!! Not Transmission.
 
     Er, Ur = generate_cell_perm(norm_param, rcwa_parameters)
+
     PQ_zero = tf.math.reduce_prod(rcwa_parameters["PQ"]) // 2
     outputs = simulate(Er, Ur, rcwa_parameters)
     tx = outputs["tx"][:, :, :, PQ_zero, 0]
