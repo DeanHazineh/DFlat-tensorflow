@@ -1,4 +1,4 @@
-# DFlat - V1.0.0
+# DFlat - V1.0.1
 <img src=/docs/imgs/DFlat_Long.png alt="Dflat" width="500"/>
 
 # An End-to-End Design Framework for Metasurface-Based Visual Sensors (Python Tensorflow)
