@@ -40,6 +40,7 @@ ALL_OPTIONAL_KEYS = {
 ADDED_KEYS_PASS = ["shape_vect_size", "span_limits"]
 
 DEFAULT_SPAN_LIMITS = {
+    "None": {},
     "rectangular_resonators": {"min": 0.10, "max": 0.80},
     "coupled_rectangular_resonators": {"min": 0.05, "max": 0.20},
     "nine_rectangle_pattern": {"min": 0.05, "max": 0.24},
@@ -211,12 +212,14 @@ class rcwa_params(dict):
         pixelsX = self.__dict__["pixelsX"]
         pixelsY = self.__dict__["pixelsY"]
 
-        shape_vect_size = [cell_shape_degree[0], pixelsX, pixelsY, cell_shape_degree[1]]
-        self.__dict__["shape_vect_size"] = shape_vect_size
+        if parameterization_type != "None":
+            shape_vect_size = [cell_shape_degree[0], pixelsX, pixelsY, cell_shape_degree[1]]
+            self.__dict__["shape_vect_size"] = shape_vect_size
 
         return
 
     def __regularize_span_limits(self):
+
         if self.__dict__["force_span_limits"] == None:
             # set latent limits to the default values
             self.__dict__["span_limits"] = DEFAULT_SPAN_LIMITS[self.__dict__["parameterization_type"]]

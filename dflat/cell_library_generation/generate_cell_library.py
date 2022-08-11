@@ -8,10 +8,10 @@ import dflat.data_structure as df_struct
 import dflat.tools as df_tools
 
 
-def run_nanofin_Sweep(FM=11):
+def run_nanofin_Sweep(FM=9):
 
     ### Specify RCWA Solver parameters
-    wavelength_set_m = [450e-9, 500e-9, 550e-9, 600e-9]
+    wavelength_set_m = np.linspace(400e-9, 700e-9, 10)
     rcwa_settings = {
         "wavelength_set_m": wavelength_set_m,
         "thetas": [0.0 for i in wavelength_set_m],
@@ -28,20 +28,18 @@ def run_nanofin_Sweep(FM=11):
         "material_dielectric": "TiO2",
         "er1": "Vacuum",
         "er2": "Vacuum",
-        "Nx": 1024,
-        "Ny": 1024,
+        "Nx": 512,
+        "Ny": 512,
         "parameterization_type": "None",
-        "batch_wavelength_dim": False,
+        "batch_wavelength_dim": False,  # Library generation will be very slow if you batch! lib_gen not allowing it! Run in CPU instead of GPU if you run into memory issues.
         "dtype": tf.float32,
         "cdtype": tf.complex64,
     }
-    rcwa_parameters = df_struct.rcwa_params(rcwa_settings, bare=True)
+    rcwa_parameters = df_struct.rcwa_params(rcwa_settings)
 
     ### Define sweep ranges and savepath
     len_x = np.arange(60e-9, 300e-9, 5e-9)
     len_y = np.arange(60e-9, 300e-9, 5e-9)
-    len_x = np.arange(60e-9, 65e-9, 5e-9)
-    len_y = np.arange(60e-9, 65e-9, 5e-9)
     Len_x, Len_y = np.meshgrid(len_x, len_y)
     paramlist = np.transpose(np.vstack((Len_x.flatten(), Len_y.flatten())))
     savepath = "dflat/cell_library_generation/output/"
@@ -52,11 +50,7 @@ def run_nanofin_Sweep(FM=11):
     )
 
     trans = np.abs(hold_field_zero_order) ** 2
-    ref_trans = np.abs(ref_field) ** 2
-    phase = np.angle(hold_field_zero_order)
-    ref_phase = np.angle(ref_field)
-
-    phase = phase - ref_phase
+    phase = np.angle(hold_field_zero_order) - np.angle(ref_field)
     trans = trans.reshape([len(len_y), len(len_x), len(wavelength_set_m), 2])
     phase = phase.reshape([len(len_y), len(len_x), len(wavelength_set_m), 2])
 
@@ -77,4 +71,4 @@ def run_nanofin_Sweep(FM=11):
 
 
 if __name__ == "__main__":
-    run_nanofin_Sweep(FM=3)
+    run_nanofin_Sweep(FM=7)

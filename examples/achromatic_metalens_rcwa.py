@@ -182,7 +182,7 @@ def run_achromatic_metalens(try_gpu=False):
     pipeline = pipeline_metalens_rcwa(
         rcwa_settings, propagation_parameters, point_source_locs, savepath, saveAtEpochs=5
     )
-    pipeline.customLoad()  # restore previous checkpoint if it exists
+    #pipeline.customLoad()  # restore previous checkpoint if it exists
 
     ## Define custom Loss function (Should always have pipeline_output as the function input)
     sensor_pixel_number = propagation_parameters["sensor_pixel_number"]

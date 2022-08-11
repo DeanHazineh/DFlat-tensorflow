@@ -9,6 +9,9 @@ import dflat.tools.graphFunc as gF
 
 
 def run_zeroOrder_library_gen(rcwa_parameters, paramlist, cell_fun, showDebugPlot=False):
+    if rcwa_parameters["batch_wavelength_dim"] == True:
+        raise ValueError("For library generation, dont batch wavelengths! Run in CPU instead of GPU of out of Memory")
+
     ### Unpack some RCWA settings
     batchSize = rcwa_parameters["batchSize"]
     pixelsX = rcwa_parameters["pixelsX"]

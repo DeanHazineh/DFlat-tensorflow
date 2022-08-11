@@ -206,4 +206,4 @@ def optimize_metalens_mlp(radial_symmetry, try_gpu=True):
 
 if __name__ == "__main__":
     # Play around with the settings in the function call to compare gpu vs no gpu, different propagators, lr, etc.
-    optimize_metalens_mlp(radial_symmetry=True, try_gpu=False)
+    optimize_metalens_mlp(radial_symmetry=False, try_gpu=False)
