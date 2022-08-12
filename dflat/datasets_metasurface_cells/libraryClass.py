@@ -1,11 +1,17 @@
 import scipy.io
 import matplotlib.pyplot as plt
 import numpy as np
+import pickle
 
 import dflat.tools.graphFunc as graphFunc
 from .util_library_lookup import *
 
-listLibraryNames = ["Nanofins_U350nm_H600nm", "Nanocylinders_U180nm_H600nm", "Nanoellipse_U350nm_H600nm"]
+listLibraryNames = [
+    "Nanofins_U350nm_H600nm",
+    "Nanocylinders_U180nm_H600nm",
+    "Nanoellipse_U350nm_H600nm",
+    "Nanofins_U350nm_H600nm_RCWA",
+]
 
 
 class Nanofins_U350nm_H600nm:
@@ -40,6 +46,7 @@ class Nanofins_U350nm_H600nm:
         lx = self.params[0][0, :, 0] * 1e9
         ly = self.params[1][:, 0, 0] * 1e9
         wavelength = self.params[2][0, 0, :] * 1e9
+        print(wavelength)
 
         fig = plt.figure(figsize=(22, 18))
         axisList = graphFunc.addAxis(fig, 2, 2)
@@ -52,7 +59,15 @@ class Nanofins_U350nm_H600nm:
             self.transmission[1, :, :, idx], extent=(min(lx), max(lx), max(ly), min(ly)), vmin=0, vmax=1
         )
 
-        graphFunc.formatPlots(fig, axisList[0], phix, "len x (nm)", "len y (nm)", "phase x", addcolorbar=True)
+        graphFunc.formatPlots(
+            fig,
+            axisList[0],
+            phix,
+            "len x (nm)",
+            "len y (nm)",
+            title="wl: " + f"{wavelength[idx]:3.0f}" + "\n" + "phase x",
+            addcolorbar=True,
+        )
         graphFunc.formatPlots(fig, axisList[1], phiy, "len x (nm)", "len y (nm)", "phase y", addcolorbar=True)
         graphFunc.formatPlots(fig, axisList[2], tx, "len x (nm)", "len y (nm)", "Trans x", addcolorbar=True)
         graphFunc.formatPlots(fig, axisList[3], ty, "len x (nm)", "len y (nm)", "Trans y", addcolorbar=True)
@@ -237,6 +252,8 @@ class Nanoellipse_U350nm_H600nm:
         param1, param2, param3 = np.meshgrid(param1, param2, param3)
         self.params = [param1, param2, param3]
 
+        print(param1.shape, param2.shape, param3.shape)
+
         # These are the min-max for the FDTD gridsweep
         self.__param1Limits = [60e-9, 300e-9]
         self.__param2Limits = [60e-9, 300e-9]
@@ -337,3 +354,34 @@ class Nanoellipse_U350nm_H600nm:
                 )
 
         return shape_Vector, shape_Vector_norm
+
+
+class Nanofins_U350nm_H600nm_RCWA(Nanofins_U350nm_H600nm):
+    def __init__(self):
+        super(Nanofins_U350nm_H600nm_RCWA, self).__init__()
+        __rawPath = (
+            "dflat/datasets_metasurface_cells/raw_meta_libraries/data_Nanofins_Unit350nm_Height600_RCWATF_9b.pickle"
+        )
+
+        with open(__rawPath, "rb") as f:
+            data = pickle.load(f)
+
+        # Phase and transmission (reshape if needed to match the shape used in other classes)
+        # Phase and transmission has a shape [Npol=2, leny=48, lenx=48, wavelength=62]
+        trans = data["trans"]
+        phase = data["phase"]
+        self.transmission = np.transpose(trans, [3, 0, 1, 2])
+        self.phase = np.transpose(phase, [3, 0, 1, 2])
+
+        # Get the input parameters
+        # all parameters must be converted to meshgrid format for compatibility with model class
+        param1 = data["lenx"]
+        param2 = data["leny"]
+        param3 = data["wavelength_set_m"].flatten()
+        param1, param2, param3 = np.meshgrid(param1, param2, param3)
+        self.params = [param1, param2, param3]
+
+        # These are the min-max for the gridsweep
+        self.__param1Limits = [np.min(param1), np.max(param1)]
+        self.__param2Limits = [np.min(param2), np.max(param2)]
+        self.__param3Limits = [np.min(param3), np.max(param3)]
