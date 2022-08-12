@@ -76,7 +76,7 @@ o data_Nanofins_Unit350nm_Height600nm_RCWATF_9b.pickle
         "Nx": 512,
         "Ny": 512,
         "parameterization_type": "None",
-        "batch_wavelength_dim": False,  # Library generation will be very slow if you batch! lib_gen not allowing it! Run in CPU instead of GPU if you run into memory issues.
+        "batch_wavelength_dim": False,  
         "dtype": tf.float64,
         "cdtype": tf.complex128,
     }
