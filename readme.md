@@ -8,16 +8,14 @@
 - A community driven, maintained framework for rendering and end-to-end design
 
 ## Usage and Documentation: 
-For usage and documentation, a readthedocs page is in active development. 
-
-An example for inverse design is provided in `DFlat/examples/`. Additional examples will be provided in the future.
+For usage and documentation, a readthedocs page is in active development. Examples for inverse design are provided in `DFlat/examples/`. Additional examples will be provided in the future (we welcome community made examples).
 
 For developers and researchers, 
 - a script to train neural models can be found in `DFlat/dflat/neural_optical_layer/core/runtraining_neural_models.py`
 - a script to build a cell library using RCWA_TF can be found in `DFlat/dflat/cell_library_generation/generate_cell_library.py`
 
-## Installation:
-To use DFlat, first download the repository:
+## (A) Install and run locally:
+To use DFlat on your own machine, first download the repository:
 ```
 git clone https://github.com/DeanHazineh/DFlat
 ```
@@ -33,6 +31,11 @@ Install additional dependencies via
 ```
 pip install -r requirements.txt
 ```
+## (B) Install and run DFlat in Google Collab:
+DFlat can be easily installed in used in the cloud on Google Collab. This is ideal for Mac os users as tensorflow_gpu is not supported by mac. 
+Google collab notebooks for the two current examples can be accessed at the links:
+ - <a href="https://colab.research.google.com/drive/1CVZnfwPmyd6V2qdYSXI5vShGgJecMENX?usp=sharing" target="_blank">achromatic_metalens_rcwa.py</a>
+
 
 ## Contact:
 This repository is intended to be accessible and community driven. It may not be fully error-proof and will be continually updated.
