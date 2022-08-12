@@ -14,7 +14,7 @@ For developers and researchers,
 - a script to train neural models can be found in `DFlat/dflat/neural_optical_layer/core/runtraining_neural_models.py`
 - a script to build a cell library using RCWA_TF can be found in `DFlat/dflat/cell_library_generation/generate_cell_library.py`
 
-## (A) Install and run locally:
+## (a) install and run locally:
 To use DFlat on your own machine, first download the repository:
 ```
 git clone https://github.com/DeanHazineh/DFlat
@@ -31,7 +31,7 @@ Install additional dependencies via
 ```
 pip install -r requirements.txt
 ```
-## (B) Install and run DFlat in Google Collab:
+## (b) install and run DFlat in Google collab:
 DFlat can be easily installed in used in the cloud on Google Collab. This is ideal for Mac os users as tensorflow_gpu is not supported by mac. 
 Google collab notebooks for the two current examples can be accessed at the links:
  - <a href="https://colab.research.google.com/drive/1CVZnfwPmyd6V2qdYSXI5vShGgJecMENX?usp=sharing" target="_blank">achromatic_metalens_rcwa.py</a>
