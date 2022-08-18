@@ -38,7 +38,7 @@ class pipeline_Metalens_MLP(df_optimizer.Pipeline_Object):
         #     [focus_trans], [focus_phase], [532e-9], "Nanocylinders_U180nm_H600nm", reshape=True
         # )
         # latent_tensor = df_tools.param_to_latent(norm_shape[0])
-        # latent_tensor_variable = tf.Variable(
+        # self.latent_tensor_variable = tf.Variable(
         #     latent_tensor, trainable=True, dtype=tf.float64, name="metasurface_latent_tensor"
         # )
         return
@@ -185,7 +185,7 @@ def optimize_metalens_mlp(radial_symmetry, try_gpu=True):
         os.makedirs(savepath)
 
     pipeline = pipeline_Metalens_MLP(propagation_parameters, point_source_locs, savepath, saveAtEpochs=5)
-    pipeline.customLoad()  # restore previous training checkpoint if it exists
+    # pipeline.customLoad()  # restore previous training checkpoint if it exists
 
     # Define custom Loss function (Should always have pipeline_output as the function input)
     sensor_pixel_number = propagation_parameters["sensor_pixel_number"]
@@ -206,4 +206,4 @@ def optimize_metalens_mlp(radial_symmetry, try_gpu=True):
 
 if __name__ == "__main__":
     # Play around with the settings in the function call to compare gpu vs no gpu, different propagators, lr, etc.
-    optimize_metalens_mlp(radial_symmetry=False, try_gpu=False)
+    optimize_metalens_mlp(radial_symmetry=False, try_gpu=True)
