@@ -2,13 +2,16 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import time
+import pickle
 
 from dflat.physical_optical_layer.core.ms_parameterization import get_cartesian_grid
 from dflat.physical_optical_layer.core.colburn_solve_field import simulate
 import dflat.tools.graphFunc as gF
 
 
-def run_zeroOrder_library_gen(rcwa_parameters, paramlist, cell_fun, showDebugPlot=False):
+def run_zeroOrder_library_gen(
+    rcwa_parameters, paramlist, cell_fun, showDebugPlot=False, savepath=None, checkpoint_num=500
+):
     if rcwa_parameters["batch_wavelength_dim"] == True:
         raise ValueError("For library generation, dont batch wavelengths! Run in CPU instead of GPU of out of Memory")
 
@@ -75,7 +78,7 @@ def run_zeroOrder_library_gen(rcwa_parameters, paramlist, cell_fun, showDebugPlo
                 image1.set_data(np.abs(ER[0, 0, 0, 0, :, :]))
                 image2.set_data(np.abs(ER[0, 0, 0, 1, :, :]))
                 image3.set_data(np.abs(ER[0, 0, 0, 2, :, :]))
-            plt.pause(1e-3)
+            plt.pause(1e-1)
 
         ### Call Simulation
         outputs = simulate(ER, UR, rcwa_parameters)
@@ -86,5 +89,19 @@ def run_zeroOrder_library_gen(rcwa_parameters, paramlist, cell_fun, showDebugPlo
 
         end = time.time()
         print("Progress: ", f"{i / paramlist.shape[0] * 100:3.2f}", " Step: ", i, " Time Elapsed: ", end - start)
+        print("paramlist used: ", paramlist[i, :])
+
+        # Save checkpoint in case of termination
+        # This is important for long runs
+        if savepath and (np.mod(i, checkpoint_num) == 0):
+            ### Save the data as a checkpoint that can be used to resume later
+            print("saving checkpoint at step: ", i)
+            data = {
+                "hold_field_zero_order": hold_field_zero_order,
+                "i": i,
+            }
+            save_data_path = savepath + "Checkpoint.pickle"
+            with open(save_data_path, "wb") as handle:
+                pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     return ref_field, hold_field_zero_order

@@ -74,7 +74,82 @@ def run_nanofin_Sweep(FM=9):
     return
 
 
+def run_double_nanofins_Sweep(FM=9):
+    ### Specify RCWA Solver parameters
+    wavelength_set_m = np.arange(400e-9, 700e-9, 5e-9)
+
+    rcwa_settings = {
+        "wavelength_set_m": wavelength_set_m,
+        "thetas": [0.0 for i in wavelength_set_m],
+        "phis": [0.0 for i in wavelength_set_m],
+        "pte": [1.0 for i in wavelength_set_m],
+        "ptm": [1.0 for i in wavelength_set_m],
+        "pixelsX": 1,
+        "pixelsY": 1,
+        "PQ": [FM, FM],
+        "Lx": 350e-9,
+        "Ly": 350e-9,
+        "L": [1e-3, 600.0e-9, 1e-3],
+        "Lay_mat": ["SiO2", "Vacuum", "Vacuum"],
+        "material_dielectric": "TiO2",
+        "er1": "Vacuum",
+        "er2": "Vacuum",
+        "Nx": 512,
+        "Ny": 512,
+        "parameterization_type": "None",
+        "batch_wavelength_dim": False,
+        "dtype": tf.float32,
+        "cdtype": tf.complex64,
+    }
+    rcwa_parameters = df_struct.rcwa_params(rcwa_settings)
+
+    ### Define sweep ranges and savepath
+    len1_x = np.arange(30e-9, 70e-9, 10e-9)
+    len1_y = np.arange(30e-9, 260e-9, 10e-9)
+    len2_x = np.arange(30e-9, 70e-9, 10e-9)
+    len2_y = np.arange(30e-9, 260e-9, 10e-9)
+    offsetx = np.array([55e-9])
+    offsety = np.array([0e-9])
+
+    params_flat = [len1_x, len1_y, len2_x, len2_y, offsetx, offsety]
+    paramlist = np.meshgrid(*params_flat)
+    paramlist = np.transpose(np.vstack([p.flatten() for p in paramlist]))
+    # paramlist = np.array([[70e-9, 200e-9, 70e-9, 200e-9, 55e-9, 0e-9]])
+    print(paramlist.shape)
+    savepath = "dflat/cell_library_generation/output/rcwatf_double_nanofin"
+
+    ### Run library Sweep
+    ref_field, hold_field_zero_order = lib_gen.run_zeroOrder_library_gen(
+        rcwa_parameters,
+        paramlist,
+        cell_fun=lib_gen.assemble_double_nanofins,
+        showDebugPlot=False,
+        savepath=savepath,
+        checkpoint_num=100,
+    )
+
+    trans = np.abs(hold_field_zero_order) ** 2
+    phase = np.angle(hold_field_zero_order) - np.angle(ref_field)
+    # # trans_reshape = trans.reshape([len(len1_x), len(len1_y), len() len(wavelength_set_m), 2])
+    # # phase = phase.reshape([len(len_y), len(len_x), len(wavelength_set_m), 2])
+
+    ### Save the data
+    data = {
+        "trans": trans,
+        "phase": phase,
+        "params_flat": params_flat,
+        "paramlist": paramlist,
+        "wavelength_set_m": wavelength_set_m,
+    }
+    save_data_path = savepath + "_FM" + str(FM) + "b.pickle"
+    with open(save_data_path, "wb") as handle:
+        pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    return
+
+
 if __name__ == "__main__":
 
-    with tf.device("/cpu:0"):  # comment to run on gpu
-        run_nanofin_Sweep(FM=9)
+    # with tf.device("/cpu:0"):  # you should find gpu speedups for many wavelength simulations
+    # run_nanofin_Sweep(FM=9)
+    run_double_nanofins_Sweep(FM=9)
