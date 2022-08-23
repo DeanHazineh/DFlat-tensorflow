@@ -100,193 +100,217 @@ def run_training_neural_model(
 
 
 ##
-def run_mlp_training_nanofins(train=True, verb=False):
+def train_caller(train=True, verb=False):
     # run_training_neural_model(
-    #     model_caller=MLP_models.MLP_Nanofins_Dense32_U350_H600,
-    #     epochs=1,
-    #     miniEpoch=1,
+    #     model_caller=MLP_models.MLP_Nanofins_Dense256_U350_H600,
+    #     epochs=10000,
+    #     miniEpoch=200,
     #     lr=1e-4,
     #     train=train,
     #     verbose=verb,
     # )
-    # run_training_neural_model(
-    #     mode8l_caller=MLP_models.MLP_Nanofins_Dense64_U350_H600,
-    #     epochs=1,
-    #     miniEpoch=1,
-    #     lr=1e-4,
-    #     train=train,
-    #     verbose=verb,
-    # )
-    # run_training_neural_model(
-    #     model_caller=MLP_models.MLP_Nanofins_Dense128_U350_H600,
-    #     epochs=1,
-    #     miniEpoch=1,
-    #     lr=1e-4,
-    #     train=train,
-    #     verbose=verb,
-    # )
+
     run_training_neural_model(
-        model_caller=MLP_models.MLP_Nanofins_Dense256_U350_H600,
-        epochs=100000,
-        miniEpoch=1000,
+        model_caller=MLP_models.MLP_Nanofins_GFFDense_256_U350_H600,
+        epochs=10000,
+        miniEpoch=200,
         lr=1e-4,
         train=train,
         verbose=verb,
     )
-    # run_training_neural_model(
-    #     model_caller=MLP_models.MLP_Nanofins_Dense512_U350_H600,
-    #     epochs=1,
-    #     miniEpoch=1,
-    #     lr=1e-4,
-    #     train=train,
-    #     verbose=verb,
-    # )
-    # run_training_neural_model(
-    #     model_caller=MLP_models.MLP_Nanofins_Dense1024_U350_H600,
-    #     epochs=60000,
-    #     miniEpoch=1000,
-    #     lr=1e-4,
-    #     train=train,
-    #     verbose=verb,
-    # )
 
     return
 
 
-def run_mlp_training_nanocylinders(train=True, verb=False):
-    run_training_neural_model(
-        model_caller=MLP_models.MLP_Nanocylinders_Dense256_U180_H600,
-        epochs=1,
-        miniEpoch=1,
-        train=train,
-        verbose=verb,
-    )
-    run_training_neural_model(
-        model_caller=MLP_models.MLP_Nanocylinders_Dense128_U180_H600,
-        epochs=1,
-        miniEpoch=1,
-        train=train,
-        verbose=verb,
-    )
-    run_training_neural_model(
-        model_caller=MLP_models.MLP_Nanocylinders_Dense64_U180_H600,
-        epochs=1,
-        miniEpoch=1,
-        train=train,
-        verbose=verb,
-    )
-    run_training_neural_model(
-        model_caller=MLP_models.MLP_Nanocylinders_Dense32_U180_H600,
-        epochs=1,
-        miniEpoch=1,
-        train=train,
-        verbose=verb,
-    )
+# ##
+# def run_mlp_training_nanofins(train=True, verb=False):
+#     # run_training_neural_model(
+#     #     model_caller=MLP_models.MLP_Nanofins_Dense32_U350_H600,
+#     #     epochs=1,
+#     #     miniEpoch=1,
+#     #     lr=1e-4,
+#     #     train=train,
+#     #     verbose=verb,
+#     # )
+#     # run_training_neural_model(
+#     #     mode8l_caller=MLP_models.MLP_Nanofins_Dense64_U350_H600,
+#     #     epochs=1,
+#     #     miniEpoch=1,
+#     #     lr=1e-4,
+#     #     train=train,
+#     #     verbose=verb,
+#     # )
+#     # run_training_neural_model(
+#     #     model_caller=MLP_models.MLP_Nanofins_Dense128_U350_H600,
+#     #     epochs=1,
+#     #     miniEpoch=1,
+#     #     lr=1e-4,
+#     #     train=train,
+#     #     verbose=verb,
+#     # )
+#     run_training_neural_model(
+#         model_caller=MLP_models.MLP_Nanofins_Dense256_U350_H600,
+#         epochs=100000,
+#         miniEpoch=1000,
+#         lr=1e-4,
+#         train=train,
+#         verbose=verb,
+#     )
+#     # run_training_neural_model(
+#     #     model_caller=MLP_models.MLP_Nanofins_Dense512_U350_H600,
+#     #     epochs=1,
+#     #     miniEpoch=1,
+#     #     lr=1e-4,
+#     #     train=train,
+#     #     verbose=verb,
+#     # )
+#     # run_training_neural_model(
+#     #     model_caller=MLP_models.MLP_Nanofins_Dense1024_U350_H600,
+#     #     epochs=60000,
+#     #     miniEpoch=1000,
+#     #     lr=1e-4,
+#     #     train=train,
+#     #     verbose=verb,
+#     # )
+
+#     return
 
 
-def run_ERBF_training_nanofins(train=True, verb=False):
-    # # Nanofins
-    run_training_neural_model(
-        model_caller=eRBF_models.ERBF_Nanofins_B128_U350_H600,
-        epochs=1,
-        miniEpoch=1,
-        batch_size=30000,
-        train=train,
-        verbose=verb,
-    )
-    run_training_neural_model(
-        model_caller=eRBF_models.ERBF_Nanofins_B256_U350_H600,
-        epochs=1,
-        miniEpoch=1,
-        batch_size=30000,
-        train=train,
-        verbose=verb,
-    )
-    run_training_neural_model(
-        model_caller=eRBF_models.ERBF_Nanofins_B512_U350_H600,
-        epochs=1,
-        miniEpoch=1,
-        batch_size=30000,
-        train=train,
-        verbose=verb,
-    )
-    run_training_neural_model(
-        model_caller=eRBF_models.ERBF_Nanofins_B1024_U350_H600,
-        epochs=1,
-        miniEpoch=1,
-        batch_size=30000,
-        train=train,
-        verbose=verb,
-    )
-    run_training_neural_model(
-        model_caller=eRBF_models.ERBF_Nanofins_B2048_U350_H600,
-        epochs=1,
-        miniEpoch=1,
-        batch_size=30000,
-        train=train,
-        verbose=verb,
-    )
-    run_training_neural_model(
-        model_caller=eRBF_models.ERBF_Nanofins_B4096_U350_H600,
-        epochs=1,
-        miniEpoch=1,
-        batch_size=10000,
-        train=train,
-        verbose=verb,
-    )
-
-    return
+# def run_mlp_training_nanocylinders(train=True, verb=False):
+#     run_training_neural_model(
+#         model_caller=MLP_models.MLP_Nanocylinders_Dense256_U180_H600,
+#         epochs=1,
+#         miniEpoch=1,
+#         train=train,
+#         verbose=verb,
+#     )
+#     run_training_neural_model(
+#         model_caller=MLP_models.MLP_Nanocylinders_Dense128_U180_H600,
+#         epochs=1,
+#         miniEpoch=1,
+#         train=train,
+#         verbose=verb,
+#     )
+#     run_training_neural_model(
+#         model_caller=MLP_models.MLP_Nanocylinders_Dense64_U180_H600,
+#         epochs=1,
+#         miniEpoch=1,
+#         train=train,
+#         verbose=verb,
+#     )
+#     run_training_neural_model(
+#         model_caller=MLP_models.MLP_Nanocylinders_Dense32_U180_H600,
+#         epochs=1,
+#         miniEpoch=1,
+#         train=train,
+#         verbose=verb,
+#     )
 
 
-def run_ERBF_training_nanocylinders(train=True, verb=False):
-    # # Nanocylinders
-    run_training_neural_model(
-        model_caller=eRBF_models.ERBF_Nanocylinders_B32_U180_H600,
-        epochs=1,
-        miniEpoch=1,
-        batch_size=30000,
-        train=train,
-        verbose=verb,
-    )
-    run_training_neural_model(
-        model_caller=eRBF_models.ERBF_Nanocylinders_B64_U180_H600,
-        epochs=1,
-        miniEpoch=1,
-        batch_size=30000,
-        train=train,
-        verbose=verb,
-    )
-    run_training_neural_model(
-        model_caller=eRBF_models.ERBF_Nanocylinders_B128_U180_H600,
-        epochs=1,
-        miniEpoch=1,
-        batch_size=30000,
-        train=train,
-        verbose=verb,
-    )
-    run_training_neural_model(
-        model_caller=eRBF_models.ERBF_Nanocylinders_B256_U180_H600,
-        epochs=1,
-        miniEpoch=1,
-        batch_size=30000,
-        train=train,
-        verbose=verb,
-    )
-    run_training_neural_model(
-        model_caller=eRBF_models.ERBF_Nanocylinders_B512_U180_H600,
-        epochs=1,
-        miniEpoch=1,
-        batch_size=30000,
-        train=train,
-        verbose=verb,
-    )
+# def run_ERBF_training_nanofins(train=True, verb=False):
+#     # # Nanofins
+#     run_training_neural_model(
+#         model_caller=eRBF_models.ERBF_Nanofins_B128_U350_H600,
+#         epochs=1,
+#         miniEpoch=1,
+#         batch_size=30000,
+#         train=train,
+#         verbose=verb,
+#     )
+#     run_training_neural_model(
+#         model_caller=eRBF_models.ERBF_Nanofins_B256_U350_H600,
+#         epochs=1,
+#         miniEpoch=1,
+#         batch_size=30000,
+#         train=train,
+#         verbose=verb,
+#     )
+#     run_training_neural_model(
+#         model_caller=eRBF_models.ERBF_Nanofins_B512_U350_H600,
+#         epochs=1,
+#         miniEpoch=1,
+#         batch_size=30000,
+#         train=train,
+#         verbose=verb,
+#     )
+#     run_training_neural_model(
+#         model_caller=eRBF_models.ERBF_Nanofins_B1024_U350_H600,
+#         epochs=1,
+#         miniEpoch=1,
+#         batch_size=30000,
+#         train=train,
+#         verbose=verb,
+#     )
+#     run_training_neural_model(
+#         model_caller=eRBF_models.ERBF_Nanofins_B2048_U350_H600,
+#         epochs=1,
+#         miniEpoch=1,
+#         batch_size=30000,
+#         train=train,
+#         verbose=verb,
+#     )
+#     run_training_neural_model(
+#         model_caller=eRBF_models.ERBF_Nanofins_B4096_U350_H600,
+#         epochs=1,
+#         miniEpoch=1,
+#         batch_size=10000,
+#         train=train,
+#         verbose=verb,
+#     )
 
-    return
+#     return
+
+
+# def run_ERBF_training_nanocylinders(train=True, verb=False):
+#     # # Nanocylinders
+#     run_training_neural_model(
+#         model_caller=eRBF_models.ERBF_Nanocylinders_B32_U180_H600,
+#         epochs=1,
+#         miniEpoch=1,
+#         batch_size=30000,
+#         train=train,
+#         verbose=verb,
+#     )
+#     run_training_neural_model(
+#         model_caller=eRBF_models.ERBF_Nanocylinders_B64_U180_H600,
+#         epochs=1,
+#         miniEpoch=1,
+#         batch_size=30000,
+#         train=train,
+#         verbose=verb,
+#     )
+#     run_training_neural_model(
+#         model_caller=eRBF_models.ERBF_Nanocylinders_B128_U180_H600,
+#         epochs=1,
+#         miniEpoch=1,
+#         batch_size=30000,
+#         train=train,
+#         verbose=verb,
+#     )
+#     run_training_neural_model(
+#         model_caller=eRBF_models.ERBF_Nanocylinders_B256_U180_H600,
+#         epochs=1,
+#         miniEpoch=1,
+#         batch_size=30000,
+#         train=train,
+#         verbose=verb,
+#     )
+#     run_training_neural_model(
+#         model_caller=eRBF_models.ERBF_Nanocylinders_B512_U180_H600,
+#         epochs=1,
+#         miniEpoch=1,
+#         batch_size=30000,
+#         train=train,
+#         verbose=verb,
+#     )
+
+#     return
 
 
 if __name__ == "__main__":
+    train_caller(train=True, verb=True)
 
-    run_mlp_training_nanofins(train=True, verb=True)
+    # run_mlp_training_nanofins(train=True, verb=True)
     # run_mlp_training_nanocylinders(train=True, verb=False)
     # run_ERBF_training_nanofins(train=True, verb=False)
     # run_ERBF_training_nanocylinders(train=True, verb=True)

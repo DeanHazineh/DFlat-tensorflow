@@ -7,6 +7,7 @@ def leakyrelu100(x):
     x_neg = (x - tf.abs(x)) / 2
     return x_pos + 0.01 * x_neg
 
+
 class customLoss(tf.keras.losses.Loss):
     def __init__(self, model):
         super().__init__()
@@ -41,4 +42,3 @@ def get_flops_alternate(keras_sequential_model):
         opts = tf.compat.v1.profiler.ProfileOptionBuilder.float_operation()
         flops = tf.compat.v1.profiler.profile(graph=graph, run_meta=run_meta, cmd="op", options=opts)
         return flops.total_float_ops
-

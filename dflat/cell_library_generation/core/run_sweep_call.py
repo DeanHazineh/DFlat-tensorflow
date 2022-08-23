@@ -3,6 +3,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import time
 import pickle
+import os
 
 from dflat.physical_optical_layer.core.ms_parameterization import get_cartesian_grid
 from dflat.physical_optical_layer.core.colburn_solve_field import simulate
@@ -52,8 +53,18 @@ def run_zeroOrder_library_gen(
     ref_field = np.expand_dims(np.transpose(np.stack((tx_ref, ty_ref))), 0)
 
     ### Assemble the cells structure and simulate each shape
-    hold_field_zero_order = np.zeros(shape=(paramlist.shape[0], batchSize, 2), dtype=np.complex64)
-    for i in range(paramlist.shape[0]):
+    ## Load from previous savepath checkpoint if it exists
+    if savepath and os.path.exists(savepath + "Checkpoint.pickle"):
+        print("Resuming from previous checkpoint")
+        with open(savepath + "Checkpoint.pickle", "rb") as handle:
+            checkpoint = pickle.load(handle)
+            hold_field_zero_order = checkpoint["hold_field_zero_order"]
+            i_start = checkpoint["i"]
+    else:
+        hold_field_zero_order = np.zeros(shape=(paramlist.shape[0], batchSize, 2), dtype=np.complex64)
+        i_start = -1
+
+    for i in np.arange(i_start + 1, paramlist.shape[0], 1):
         start = time.time()
 
         ## Generate shape
@@ -62,7 +73,7 @@ def run_zeroOrder_library_gen(
 
         # Display the cell
         if showDebugPlot:
-            if i == 0:
+            if i == (i_start + 1):
                 fig = plt.figure()
                 ax = gF.addAxis(fig, 1, 3)
                 image1 = ax[0].imshow(

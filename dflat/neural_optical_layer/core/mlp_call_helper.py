@@ -3,8 +3,7 @@ import numpy as np
 
 
 def flatten_reshape_shape_parameters(shape_vector):
-    """ Takes a shape/param vector of (D, PixelsY, PixelsX) and flattens to shape (PixelsY*PixelsX,D)
-    """
+    """Takes a shape/param vector of (D, PixelsY, PixelsX) and flattens to shape (PixelsY*PixelsX,D)"""
     out = tf.zeros(shape=(1, shape_vector.shape[2] * shape_vector.shape[1]), dtype=shape_vector.dtype)
     for i in range(shape_vector.shape[0]):
         out = tf.concat([out, tf.expand_dims(tf.reshape(shape_vector[i, :, :], -1), 0)], axis=0)
@@ -13,7 +12,7 @@ def flatten_reshape_shape_parameters(shape_vector):
 
 
 def normalize_params_np(unnorm_param, MLP_model):
-    """(Helper function for neural optical models) Given an unormalized shape parameter vector and an MLP model, 
+    """(Helper function for neural optical models) Given an unormalized shape parameter vector and an MLP model,
     return the normalized params, [0,1].
 
     Args:

@@ -110,28 +110,26 @@ def run_double_nanofins_Sweep(FM=9):
     len2_y = np.arange(30e-9, 260e-9, 10e-9)
     offsetx = np.array([55e-9])
     offsety = np.array([0e-9])
+    theta = np.array([np.pi / 4])  # rotation angle in radians
+    params_flat = [len1_x, len1_y, len2_x, len2_y, offsetx, offsety, theta]
 
-    params_flat = [len1_x, len1_y, len2_x, len2_y, offsetx, offsety]
     paramlist = np.meshgrid(*params_flat)
     paramlist = np.transpose(np.vstack([p.flatten() for p in paramlist]))
-    # paramlist = np.array([[70e-9, 200e-9, 70e-9, 200e-9, 55e-9, 0e-9]])
     print(paramlist.shape)
-    savepath = "dflat/cell_library_generation/output/rcwatf_double_nanofin"
+    savepath = "dflat/cell_library_generation/output/rotated_rcwatf_double_nanofin_test"
 
     ### Run library Sweep
     ref_field, hold_field_zero_order = lib_gen.run_zeroOrder_library_gen(
         rcwa_parameters,
         paramlist,
         cell_fun=lib_gen.assemble_double_nanofins,
-        showDebugPlot=False,
+        showDebugPlot=True,
         savepath=savepath,
-        checkpoint_num=100,
+        checkpoint_num=250,
     )
 
     trans = np.abs(hold_field_zero_order) ** 2
     phase = np.angle(hold_field_zero_order) - np.angle(ref_field)
-    # # trans_reshape = trans.reshape([len(len1_x), len(len1_y), len() len(wavelength_set_m), 2])
-    # # phase = phase.reshape([len(len_y), len(len_x), len(wavelength_set_m), 2])
 
     ### Save the data
     data = {
