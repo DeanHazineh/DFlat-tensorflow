@@ -1,10 +1,11 @@
 import h5py
 from scipy.interpolate import interp1d
 import numpy as np
+from pathlib import Path
 
 MATERIAL_DICT = {
-    "TiO2": "dflat/physical_optical_layer/core/material_index/TiO2_Index.mat",
-    "SiO2": "dflat/physical_optical_layer/core/material_index/SiO2_Index.mat",
+    "TiO2": "TiO2_Index.mat",
+    "SiO2": "SiO2_Index.mat",
     "Vacuum": None,
 }
 
@@ -12,11 +13,12 @@ MATERIAL_DICT = {
 def get_material_index(material_name, wavelength_list):
     # Scipy interp1d function allows for complex numbers
 
-    index_path = MATERIAL_DICT[material_name]
     if material_name == "Vacuum":
         return (1 + 1j * 0) * np.ones(shape=(len(wavelength_list)))
-
     else:
+        resource_path = Path(__file__).parent / "material_index"
+        index_path = resource_path.joinpath(MATERIAL_DICT[material_name])
+
         data = {}
         f = h5py.File(index_path)
         for k, v in f.items():
