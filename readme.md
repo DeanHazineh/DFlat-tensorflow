@@ -1,3 +1,6 @@
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
+
 # DFlat - V1.1.3
 <img src=/docs/imgs/DFlat_Long.png alt="Dflat" width="500"/>
 
