@@ -1,4 +1,9 @@
-# Notes
+## NOTE:
+This folder will be removed from Dflat in a future update. it will instead be replaced by a small set of sample images
+used for example demos.
+
+
+# Old readme
 # The currently included data generator is designed for the  FlyingThings3D RGB images (cleanpass) downloaded as WebP lossy format
 # https://lmb.informatik.uni-freiburg.de/resources/datasets/SceneFlowDatasets.en.html#downloads
 

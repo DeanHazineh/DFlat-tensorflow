@@ -7,6 +7,7 @@ testlist = [
     test_response_to_param,
     test_fourier_layers_mono,
     test_fourier_layers_broadband,
+    test_open_meta_libraries,
 ]
 
 
@@ -14,9 +15,10 @@ def run_unit_tests():
     for fun in testlist:
         try:
             fun()
-            print(fun.__name__, " TEST PASSED")
+            print("\033[91m" + fun.__name__, " TEST PASSED" + "\033[0m")
+
         except:
-            print(fun.__name__, " TEST FAILED")
+            print("\033[31m" + fun.__name__ + " TEST FAILED" + "\033[0m")
 
     return
 

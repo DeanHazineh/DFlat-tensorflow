@@ -12,7 +12,14 @@ listLibraryNames = [
     "Nanocylinders_U180nm_H600nm",
     "Nanoellipse_U350nm_H600nm",
     "Nanofins_U350nm_H600nm_RCWA",
+    "Coupled_Nanofins_U350nm_H600nm_RCWA",
 ]
+
+
+def get_path_to_data(file_name: str):
+    ## This is not the accepted solution but it should work for bootstrapping research with few users
+    resource_path = Path(__file__).parent / "raw_meta_libraries"
+    return resource_path.joinpath(file_name)
 
 
 class Nanofins_U350nm_H600nm:
@@ -21,11 +28,7 @@ class Nanofins_U350nm_H600nm:
         # __rawPath = (
         #     "dflat/datasets_metasurface_cells/raw_meta_libraries/data_Nanofins_Unit350nm_Height600nm_EngineFDTD.mat"
         # )
-        # data = scipy.io.loadmat(__rawPath)
-
-        ## This is not the accepted solution but it should work for bootstrapping research with few users
-        resource_path = Path(__file__).parent / "raw_meta_libraries"
-        __rawPath = resource_path.joinpath("data_Nanofins_Unit350nm_Height600nm_EngineFDTD.mat")
+        __rawPath = get_path_to_data("data_Nanofins_Unit350nm_Height600nm_EngineFDTD.mat")
         data = scipy.io.loadmat(__rawPath)
 
         # Phase and transmission has shape [Npol=2, leny=49, lenx=49, wavelength=441]
@@ -48,7 +51,9 @@ class Nanofins_U350nm_H600nm:
 
     def plotLibrary(self, idx):
         # This function is added so the user may get familiar with the data themselves
-        # and poke around the visualization as a test
+        # and poke around the visualization as a test.
+        # It is also a test that we have flattened and packaged things in the way that is expected when later loading
+        # the training data
 
         lx = self.params[0][0, :, 0] * 1e9
         ly = self.params[1][:, 0, 0] * 1e9
@@ -155,10 +160,7 @@ class Nanocylinders_U180nm_H600nm:
     def __init__(self):
 
         # __rawPath = "dflat/datasets_metasurface_cells/raw_meta_libraries/data_Nanocylinders_Unit180nm_Height600nm_EngineFDTD.mat"
-        # data = scipy.io.loadmat(__rawPath)
-        ## This is not the accepted solution but it should work for bootstrapping research with few users
-        resource_path = Path(__file__).parent / "raw_meta_libraries"
-        __rawPath = resource_path.joinpath("data_Nanocylinders_Unit180nm_Height600nm_EngineFDTD.mat")
+        __rawPath = get_path_to_data("data_Nanocylinders_Unit180nm_Height600nm_EngineFDTD.mat")
         data = scipy.io.loadmat(__rawPath)
 
         # Phase and transmission has shape [wavelength=441, lenr=191]
@@ -245,13 +247,11 @@ class Nanocylinders_U180nm_H600nm:
 
 class Nanoellipse_U350nm_H600nm:
     def __init__(self):
+
         # __rawPath = (
         #    "dflat/datasets_metasurface_cells/raw_meta_libraries/data_NanoEllipse_Unit350nm_Height600nm_EngineFDTD.mat"
         # )
-        # data = scipy.io.loadmat(__rawPath)
-        ## This is not the accepted solution but it should work for bootstrapping research with few users
-        resource_path = Path(__file__).parent / "raw_meta_libraries"
-        __rawPath = resource_path.joinpath("data_NanoEllipse_Unit350nm_Height600nm_EngineFDTD.mat")
+        __rawPath = get_path_to_data("data_NanoEllipse_Unit350nm_Height600nm_EngineFDTD.mat")
         data = scipy.io.loadmat(__rawPath)
 
         # Phase and transmission has shape [Npol=2, leny=49, lenx=49, wavelength=441]
@@ -375,9 +375,7 @@ class Nanofins_U350nm_H600nm_RCWA(Nanofins_U350nm_H600nm):
         # __rawPath = (
         #     "dflat/datasets_metasurface_cells/raw_meta_libraries/data_Nanofins_Unit350nm_Height600_RCWATF_9b.pickle"
         # )
-        ## This is not the accepted solution but it should work for bootstrapping research with few users
-        resource_path = Path(__file__).parent / "raw_meta_libraries"
-        __rawPath = resource_path.joinpath("data_Nanofins_Unit350nm_Height600_RCWATF_9b.pickle")
+        __rawPath = get_path_to_data("data_Nanofins_Unit350nm_Height600_RCWATF_9b.pickle")
         with open(__rawPath, "rb") as f:
             data = pickle.load(f)
 
@@ -400,3 +398,77 @@ class Nanofins_U350nm_H600nm_RCWA(Nanofins_U350nm_H600nm):
         self.__param1Limits = [np.min(param1), np.max(param1)]
         self.__param2Limits = [np.min(param2), np.max(param2)]
         self.__param3Limits = [np.min(param3), np.max(param3)]
+
+
+class Coupled_Nanofins_U350nm_H600nm_RCWA:
+    def __init__(self):
+
+        __rawPath = get_path_to_data("data_Coupled_Nanofins_Unit350nm_Height600nm_RCWATF_9b.pickle")
+        with open(__rawPath, "rb") as f:
+            data = pickle.load(f)
+
+        ## Get the Phase and Transmission
+        # Phase and Transmission are reshaped to size [Npol=2, Ncells=66125, Nwavelength=60]
+        trans = data["trans"]
+        phase = data["phase"]
+        self.transmission = np.transpose(trans, [2, 0, 1])
+        self.phase = np.transpose(phase, [2, 0, 1])
+
+        ## Get the input parameters
+        # It might also be useful to store the parameters in a slightly different way to facilliate usage
+        self.shape_params = data["paramlist"]
+        self.wavelength_set_m = data["wavelength_set_m"]
+
+        # The format used below (and in other classes) is best suited for the mlp neural models downstream in the framework
+        # This is because each wavelength output is treated as its own datapoint
+        # paramlist includes following physical relations (in order)
+        # len1_x, len1_y, len2_x, len2_y, offsetx, offsety, theta, wavelengthta]
+        params_flat = data["params_flat"]
+        params_flat.append(self.wavelength_set_m)
+        paramlist = np.meshgrid(*params_flat)
+        paramlist = np.transpose(np.vstack([param.flatten() for param in paramlist]), [1, 0])
+
+        # These are the min-max for the gridsweep
+        min_vals = np.min(paramlist, axis=0)
+        max_vals = np.max(paramlist, axis=0)
+        self.paramLimits = np.transpose(np.vstack([min_vals, max_vals]))
+
+    def plotLibrary(self, num_cells_plot: int):
+        # show example plot of cells from the library as a check or example to users
+        num_cells = self.transmission.shape[1]
+        cell_idx = (np.floor(np.random.random(num_cells_plot) * num_cells)).astype(int)
+        wavelength_nm = self.wavelength_set_m * 1e9
+
+        trans_curves = self.transmission[:, cell_idx, :]
+        phase_curves = np.angle(np.exp(1j * (self.phase[:, cell_idx, :] + np.pi)))
+
+        #
+        fig = plt.figure(figsize=(25, 25))
+        ax = graphFunc.addAxis(fig, 2, 2)
+
+        ax[0].plot(wavelength_nm, trans_curves[0, :, :].T)
+        graphFunc.formatPlots(
+            fig, ax[0], None, title="x-polarized output", ylabel="Transmission", xlabel="wavelength (nm)"
+        )
+
+        ax[1].plot(wavelength_nm, trans_curves[1, :, :].T)
+        graphFunc.formatPlots(
+            fig, ax[1], None, title="y-polarized output", ylabel="Transmission", xlabel="wavelength (nm)"
+        )
+
+        ax[2].plot(wavelength_nm, phase_curves[0, :, :].T)
+        graphFunc.formatPlots(
+            fig, ax[2], None, title="x-polarized output", ylabel="phase delay", xlabel="wavelength (nm)"
+        )
+
+        ax[3].plot(wavelength_nm, phase_curves[1, :, :].T)
+        graphFunc.formatPlots(
+            fig, ax[3], None, title="y-polarized output", ylabel="phase delay", xlabel="wavelength (nm)"
+        )
+
+        plt.show()
+
+    def optical_response_to_param(self, trans_asList, phase_asList, wavelength_asList, reshape):
+        print("TABLE LOOK-UP NOT IMPLEMENTED FOR HIGH DIMENSIONAL LIBRARIES!")
+
+        return None, None

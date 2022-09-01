@@ -66,4 +66,3 @@ def test_rcwa_layers_batched():
         rcwa_latent_layer(shape_vect)
 
     return 1
-

@@ -84,3 +84,32 @@ o data_Nanofins_Unit350nm_Height600nm_RCWATF_9b.pickle
     - Importantly, this simulation is different from the FDTD runs. Propagation from air -> 1 mm SiO2 Substrate -> air embedding is considered. No PML conditions are used
     - This should be more consistent to the transmission spectra obtained in real life.
     
+o data_Coupled_Nanofins_Unit350nm_Height600nm_RCWATF_9b.pickle
+    - Generated using dflat/cell_library_generation/generate_cell_library.py with the rcwa_tf engine on Aug 2022 (Dean Hazineh)
+    - cell_fun=lib_gen.assemble_double_nanofins in DFlat version 1.1.3
+    - 350 nm unit cell size
+    - see class library param list for details on 7 argument parameters
+    
+    rcwa_settings = {
+        "wavelength_set_m": wavelength_set_m,
+        "thetas": [0.0 for i in wavelength_set_m],
+        "phis": [0.0 for i in wavelength_set_m],
+        "pte": [1.0 for i in wavelength_set_m],
+        "ptm": [1.0 for i in wavelength_set_m],
+        "pixelsX": 1,
+        "pixelsY": 1,
+        "PQ": [FM, FM],
+        "Lx": 350e-9,
+        "Ly": 350e-9,
+        "L": [1e-3, 600.0e-9, 1e-3],
+        "Lay_mat": ["SiO2", "Vacuum", "Vacuum"],
+        "material_dielectric": "TiO2",
+        "er1": "Vacuum",
+        "er2": "Vacuum",
+        "Nx": 512,
+        "Ny": 512,
+        "parameterization_type": "None",
+        "batch_wavelength_dim": False,
+        "dtype": tf.float32,
+        "cdtype": tf.complex64,
+    }
