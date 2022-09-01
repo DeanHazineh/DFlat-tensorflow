@@ -1,6 +1,7 @@
-v 1.2.3 -- Bug Fix
+v 1.1.3 -- Bug Fix
     - Issue: Library classes could not resolve paths to the data files in cell_library_generation.
     - Added manifest.in file to ensure data files were packaged and then bootstrapped filepath via the 
     - "bad method 1" in https://stackoverflow.com/questions/6028000/how-to-read-a-static-file-from-inside-a-python-package/58941536#58941536
 
+v 1.1.4 -- Add new library -- double fins
   
