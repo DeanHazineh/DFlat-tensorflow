@@ -7,6 +7,8 @@ def assemble_ER_superEllipse(rcwa_parameters, lay_eps, args):
     # args[0] = len_x
     # args[1] = len_y
     # args[2] = n (power)
+    if len(args) != 3:
+        raise ValueError("super Ellipse assembly function expects shape parameters with 3 arguments")
 
     x_mesh, y_mesh = get_cartesian_grid(
         rcwa_parameters["Lx"], rcwa_parameters["Nx"], rcwa_parameters["Ly"], rcwa_parameters["Ny"]
@@ -26,6 +28,9 @@ def assemble_ER_superEllipse(rcwa_parameters, lay_eps, args):
 def assemble_ER_rectangular_fin(rcwa_parameters, lay_eps, args):
     # args[0] = len_x
     # args[1] = len_y
+    if len(args) != 2:
+        raise ValueError("Rectangular fin assembly function expects shape parameters with 2 arguments")
+
     x_mesh, y_mesh = get_cartesian_grid(
         rcwa_parameters["Lx"], rcwa_parameters["Nx"], rcwa_parameters["Ly"], rcwa_parameters["Ny"]
     )
@@ -46,6 +51,8 @@ def assemble_double_nanofins(rcwa_parameters, lay_eps, args):
     # args[4] = offsetx
     # args[5] = offsety
     # args[6] = rotation theta (radians)
+    if len(args) != 7:
+        raise ValueError("Rectangular fin assembly function expects shape parameters with 7 arguments")
 
     y_meshp, x_meshp = get_cartesian_grid(
         rcwa_parameters["Lx"], rcwa_parameters["Nx"], rcwa_parameters["Ly"], rcwa_parameters["Ny"]

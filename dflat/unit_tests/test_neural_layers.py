@@ -1,8 +1,8 @@
 import numpy as np
 import dflat.neural_optical_layer as df_neural
-from dflat.datasets_metasurface_cells.libraryClass import listLibraryNames, polarization_basis
+from dflat.datasets_metasurface_cells.libraryClass import listLibraryNames
 
-model_names = ["MLP_Nanocylinders_Dense32_U180_H600", "MLP_Nanofins_Dense32_U350_H600"]
+model_names = ["MLP_Nanocylinders_Dense64_U180_H600", "MLP_Nanofins_Dense64_U350_H600"]
 wavelength_list = [400e-9, 500e-9]
 gridshape = [1, 2, 2]
 
@@ -27,8 +27,11 @@ def test_neural_layer():
 def test_response_to_param():
     num_profiles = 2
     for idx, libname in enumerate(listLibraryNames):
-        ms_trans_aslist = [np.ones((polarization_basis[idx], 2, 2)) for i_prof in range(num_profiles)]
-        ms_phase_aslist = [np.ones((polarization_basis[idx], 2, 2)) for i_prof in range(num_profiles)]
+        # Polarization response is usually 2 but is 1 for Nanocylinders. Adjust the test for this
+        pol_basis = 1 if (libname == "Nanocylinders_U180nm_H600nm") else 2
+
+        ms_trans_aslist = [np.ones((pol_basis, 2, 2)) for i_prof in range(num_profiles)]
+        ms_phase_aslist = [np.ones((pol_basis, 2, 2)) for i_prof in range(num_profiles)]
 
         df_neural.optical_response_to_param(ms_trans_aslist, ms_phase_aslist, wavelength_list, libname, reshape=False)
         df_neural.optical_response_to_param(ms_trans_aslist, ms_phase_aslist, wavelength_list, libname, reshape=True)

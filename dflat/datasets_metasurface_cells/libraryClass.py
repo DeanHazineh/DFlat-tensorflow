@@ -2,6 +2,7 @@ import scipy.io
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
+from pathlib import Path
 
 import dflat.tools.graphFunc as graphFunc
 from .util_library_lookup import *
@@ -16,9 +17,15 @@ listLibraryNames = [
 
 class Nanofins_U350nm_H600nm:
     def __init__(self):
-        __rawPath = (
-            "dflat/datasets_metasurface_cells/raw_meta_libraries/data_Nanofins_Unit350nm_Height600nm_EngineFDTD.mat"
-        )
+        ## Raw paths must be redefined for packaging
+        # __rawPath = (
+        #     "dflat/datasets_metasurface_cells/raw_meta_libraries/data_Nanofins_Unit350nm_Height600nm_EngineFDTD.mat"
+        # )
+        # data = scipy.io.loadmat(__rawPath)
+
+        ## This is not the accepted solution but it should work for bootstrapping research with few users
+        resource_path = Path(__file__).parent / "raw_meta_libraries"
+        __rawPath = resource_path.joinpath("data_Nanofins_Unit350nm_Height600nm_EngineFDTD.mat")
         data = scipy.io.loadmat(__rawPath)
 
         # Phase and transmission has shape [Npol=2, leny=49, lenx=49, wavelength=441]
@@ -46,7 +53,6 @@ class Nanofins_U350nm_H600nm:
         lx = self.params[0][0, :, 0] * 1e9
         ly = self.params[1][:, 0, 0] * 1e9
         wavelength = self.params[2][0, 0, :] * 1e9
-        print(wavelength)
 
         fig = plt.figure(figsize=(22, 18))
         axisList = graphFunc.addAxis(fig, 2, 2)
@@ -148,7 +154,11 @@ class Nanofins_U350nm_H600nm:
 class Nanocylinders_U180nm_H600nm:
     def __init__(self):
 
-        __rawPath = "dflat/datasets_metasurface_cells/raw_meta_libraries/data_Nanocylinders_Unit180nm_Height600nm_EngineFDTD.mat"
+        # __rawPath = "dflat/datasets_metasurface_cells/raw_meta_libraries/data_Nanocylinders_Unit180nm_Height600nm_EngineFDTD.mat"
+        # data = scipy.io.loadmat(__rawPath)
+        ## This is not the accepted solution but it should work for bootstrapping research with few users
+        resource_path = Path(__file__).parent / "raw_meta_libraries"
+        __rawPath = resource_path.joinpath("data_Nanocylinders_Unit180nm_Height600nm_EngineFDTD.mat")
         data = scipy.io.loadmat(__rawPath)
 
         # Phase and transmission has shape [wavelength=441, lenr=191]
@@ -235,9 +245,13 @@ class Nanocylinders_U180nm_H600nm:
 
 class Nanoellipse_U350nm_H600nm:
     def __init__(self):
-        __rawPath = (
-            "dflat/datasets_metasurface_cells/raw_meta_libraries/data_NanoEllipse_Unit350nm_Height600nm_EngineFDTD.mat"
-        )
+        # __rawPath = (
+        #    "dflat/datasets_metasurface_cells/raw_meta_libraries/data_NanoEllipse_Unit350nm_Height600nm_EngineFDTD.mat"
+        # )
+        # data = scipy.io.loadmat(__rawPath)
+        ## This is not the accepted solution but it should work for bootstrapping research with few users
+        resource_path = Path(__file__).parent / "raw_meta_libraries"
+        __rawPath = resource_path.joinpath("data_NanoEllipse_Unit350nm_Height600nm_EngineFDTD.mat")
         data = scipy.io.loadmat(__rawPath)
 
         # Phase and transmission has shape [Npol=2, leny=49, lenx=49, wavelength=441]
@@ -251,8 +265,6 @@ class Nanoellipse_U350nm_H600nm:
         param3 = data["wavelength_m"].flatten()
         param1, param2, param3 = np.meshgrid(param1, param2, param3)
         self.params = [param1, param2, param3]
-
-        print(param1.shape, param2.shape, param3.shape)
 
         # These are the min-max for the FDTD gridsweep
         self.__param1Limits = [60e-9, 300e-9]
@@ -359,10 +371,13 @@ class Nanoellipse_U350nm_H600nm:
 class Nanofins_U350nm_H600nm_RCWA(Nanofins_U350nm_H600nm):
     def __init__(self):
         super(Nanofins_U350nm_H600nm_RCWA, self).__init__()
-        __rawPath = (
-            "dflat/datasets_metasurface_cells/raw_meta_libraries/data_Nanofins_Unit350nm_Height600_RCWATF_9b.pickle"
-        )
 
+        # __rawPath = (
+        #     "dflat/datasets_metasurface_cells/raw_meta_libraries/data_Nanofins_Unit350nm_Height600_RCWATF_9b.pickle"
+        # )
+        ## This is not the accepted solution but it should work for bootstrapping research with few users
+        resource_path = Path(__file__).parent / "raw_meta_libraries"
+        __rawPath = resource_path.joinpath("data_Nanofins_Unit350nm_Height600_RCWATF_9b.pickle")
         with open(__rawPath, "rb") as f:
             data = pickle.load(f)
 

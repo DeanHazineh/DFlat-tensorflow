@@ -110,20 +110,20 @@ def run_double_nanofins_Sweep(FM=9):
     len2_y = np.arange(30e-9, 260e-9, 10e-9)
     offsetx = np.array([55e-9])
     offsety = np.array([0e-9])
-    theta = np.array([np.pi / 4])  # rotation angle in radians
+    theta = (np.array([15, 30, 45, 60, 75]) * np.pi / 180,)  # rotation angle in radians
     params_flat = [len1_x, len1_y, len2_x, len2_y, offsetx, offsety, theta]
 
     paramlist = np.meshgrid(*params_flat)
     paramlist = np.transpose(np.vstack([p.flatten() for p in paramlist]))
     print(paramlist.shape)
-    savepath = "dflat/cell_library_generation/output/rotated_rcwatf_double_nanofin_test"
+    savepath = "dflat/cell_library_generation/output/rotated_rcwatf_double_nanofin_DENSE"
 
     ### Run library Sweep
     ref_field, hold_field_zero_order = lib_gen.run_zeroOrder_library_gen(
         rcwa_parameters,
         paramlist,
         cell_fun=lib_gen.assemble_double_nanofins,
-        showDebugPlot=True,
+        showDebugPlot=False,
         savepath=savepath,
         checkpoint_num=250,
     )
