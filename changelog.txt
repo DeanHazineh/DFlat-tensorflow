@@ -4,4 +4,7 @@ v 1.1.3 -- Bug Fix
     - "bad method 1" in https://stackoverflow.com/questions/6028000/how-to-read-a-static-file-from-inside-a-python-package/58941536#58941536
 
 v 1.1.4 -- Add new library -- double fins
-  
+
+v 1.1.5 -- Bug Fix 
+    - Hardcode pathing on the neural models had same problem as metasurface datasets
+    - updated pathing with same solution as v 1.1.3 
