@@ -100,7 +100,6 @@ def run_zeroOrder_library_gen(
 
         end = time.time()
         print("Progress: ", f"{i / paramlist.shape[0] * 100:3.2f}", " Step: ", i, " Time Elapsed: ", end - start)
-        print("paramlist used: ", paramlist[i, :])
 
         # Save checkpoint in case of termination
         # This is important for long runs

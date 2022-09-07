@@ -12,6 +12,7 @@ class MLP_Nanofins_U350_H600(MLP_Object):
         # Define model input normalization during training/inference
         # Units in m; These are private class variables and should not be altered unless
         # the corresponding library class was altered
+        
         # NOTE: this is hardcoded here rather than loading directly from library because we
         # do not want the computational/memory cost of loading the library when model is
         # used for inference only!

@@ -74,7 +74,13 @@ class MLP_Latent_Layer(tf.keras.layers.Layer):
         latent_tensor = flatten_reshape_shape_parameters(latent_tensor)
         norm_param = latent_to_param(latent_tensor)
 
-        return batched_broadband_MLP(norm_param, self.mlp, wavelength_m_asList, gridShape, self.output_stack_dim,)
+        return batched_broadband_MLP(
+            norm_param,
+            self.mlp,
+            wavelength_m_asList,
+            gridShape,
+            self.output_stack_dim,
+        )
 
     def __init_MLP_model(self, model_selection_string):
         if model_selection_string not in listModelNames:
@@ -176,7 +182,13 @@ class MLP_Layer(MLP_Latent_Layer):
         gridShape = [1, norm_param.shape[1], norm_param.shape[2]]
         norm_param = flatten_reshape_shape_parameters(norm_param)
 
-        return batched_broadband_MLP(norm_param, self.mlp, wavelength_m_asList, gridShape, self.output_stack_dim,)
+        return batched_broadband_MLP(
+            norm_param,
+            self.mlp,
+            wavelength_m_asList,
+            gridShape,
+            self.output_stack_dim,
+        )
 
     def initialize_input_tensor(self, init_type, gridShape, dtype=tf.float64, init_args=[]):
         """Initialize a normalized shape param input. Valid initializations here are "uniform" and "random". To use an

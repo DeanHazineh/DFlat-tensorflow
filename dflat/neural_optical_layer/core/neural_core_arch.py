@@ -5,11 +5,19 @@ import os
 import pickle
 from keras_flops import get_flops
 import matplotlib.pyplot as plt
+from pathlib import Path
 
 import dflat.tools.graphFunc as graphFunc
 from .neural_utilities import get_flops_alternate
 
 ## BASE FOR NEURAL BASIS FUNCTION MODELS (PARENT - DO NOT ALTER THIS UNLESS YOU KNOW THE DETAILS)
+
+
+def get_path_to_data(folder_name: str):
+    ## This is not the accepted solution but it should work for bootstrapping research with few users
+    resource_path = Path(__file__).parent
+
+    return str(resource_path.joinpath(folder_name)) + "/"
 
 
 class InitCentersRandom(Initializer):
@@ -250,7 +258,7 @@ class MLP_Object(tf.keras.Model):
         self._arch = []
 
     def set_modelSavePath(self, modelSavePath):
-        self._modelSavePath = modelSavePath
+        self._modelSavePath = get_path_to_data(modelSavePath)
 
         if not os.path.exists(self._modelSavePath):
             os.makedirs(modelSavePath)
@@ -353,6 +361,8 @@ class MLP_Object(tf.keras.Model):
         if os.path.exists(self._modelSavePath + "checkpoint"):
             self.load_weights(self._modelSavePath).expect_partial()
             print("\n Model Checkpoint Loaded \n")
+        else:
+            print("\n no model checkpoint found at\n", self._modelSavePath + "checkpoint")
 
         # Load the previous training loss vector if it exists
         if os.path.exists(self._modelSavePath + "trainingHistory.pickle"):
