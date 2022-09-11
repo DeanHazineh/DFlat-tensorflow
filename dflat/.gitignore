@@ -14,3 +14,6 @@ datasets_image/COCO_2017_train*
 **fitted_regression_models/
 neural_optical_layer/core/trained_MLP_models/MLP_Nanofins_Dense256_U350_H600*
 neural_optical_layer/core/trained_MLP_models/MLP_Nanofins_GFFDense*
+image_layer/core/
+image_layer/rendering_layers*
+image_layer/scene_generator_FT3D*
