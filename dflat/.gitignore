@@ -9,9 +9,6 @@ TRASH/*
 **.png
 
 datasets_image/flying*
-datasets_image/Flying*
-datasets_image/BearFruitGray*
-datasets_image/DeltaE*
 datasets_image/COCO_2017_train*
 
 **fitted_regression_models/
