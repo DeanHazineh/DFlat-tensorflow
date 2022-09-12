@@ -8,12 +8,17 @@ TRASH/*
 **.pdf
 **.png
 
-datasets_image/flying*
-datasets_image/COCO_2017_train*
-
 **fitted_regression_models/
 neural_optical_layer/core/trained_MLP_models/MLP_Nanofins_Dense256_U350_H600*
 neural_optical_layer/core/trained_MLP_models/MLP_Nanofins_GFFDense*
+
+datasets_image/Flying*
+datasets_image/COCO_2017_train*
+datasets_image/Arad1k*
+datasets_image/CZ_Harvard*
+datasets_image/Arad_Generator*
+datasets_image/FlyingThings3D_Generator*
+
 image_layer/core/
 image_layer/rendering_layers*
-image_layer/scene_generator_FT3D*
+
