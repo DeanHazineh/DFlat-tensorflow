@@ -16,8 +16,8 @@ datasets_image/Flying*
 datasets_image/COCO_2017_train*
 datasets_image/Arad1k*
 datasets_image/CZ_Harvard*
-datasets_image/Arad_Generator*
-datasets_image/FlyingThings3D_Generator*
+datasets_image/Arad_generator*
+datasets_image/FlyingThings3D_generator*
 
 image_layer/core/
 image_layer/rendering_layers*
