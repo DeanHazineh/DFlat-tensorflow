@@ -20,8 +20,7 @@ fourier_layer/core/compute_otf.py
 fourier_layer/private_ms_initialization.py
 
 image_layer_inDev/core/
-image_layer_inDev/rendering_layer.py
-image_layer_inDev
+image_layer_inDev/rendering_layers.py
 
 neural_optical_layer/core/baseline_regression/fitted_regression_models/*
 neural_optical_layer/core/trained_erbf_models/*
