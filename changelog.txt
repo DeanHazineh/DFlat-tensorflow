@@ -8,3 +8,10 @@ v 1.1.4 -- Add new library -- double fins
 v 1.1.5 -- Bug Fix 
     - Hardcode pathing on the neural models had same problem as metasurface datasets
     - updated pathing with same solution as v 1.1.3 
+
+V 2.0.0 -- Recoded Fourier Optics propagation
+    - Fourier optics propagation handles broadband more efficiently
+    - A matrix implementation for the angular spectrum method is introduced to solve broadband field propagation with 
+    large tensors instead of for loops
+    - General package structures and names are reintroduced
+    - Fixed bug in Neural optical models where sqrt(transmission) would return NaN for some cells

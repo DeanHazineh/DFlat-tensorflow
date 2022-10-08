@@ -1,8 +1,8 @@
-numpy>=1.21
+numpy
 tensorflow_gpu>=2.9.1
 tensorflow_probability
-matplotlib>=3.5.2
-scipy>=1.7.3
+matplotlib
+scipy
 keras_flops
 sklearn
 mat73
