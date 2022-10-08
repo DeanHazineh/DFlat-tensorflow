@@ -21,16 +21,16 @@ class pipeline_Metalens_MLP(df_optimizer.Pipeline_Object):
         # define computational layers
         mlp_model = "MLP_Nanocylinders_Dense64_U180_H600"
         self.mlp_latent_layer = df_neural.MLP_Latent_Layer(mlp_model)
-        self.psf_layer = df_fourier.PSF_Layer_Mono(propagation_parameters)  # broadband psf layer can be used instead
+        self.psf_layer = df_fourier.PSF_Layer_Mono(propagation_parameters)  # Note the other psf layers one can use
 
         # Make uniform state latent tensor as initial variable for metasurface with helper function
         gridShape = propagation_parameters["grid_shape"]
         latent_tensor_variable = self.mlp_latent_layer.initialize_input_tensor("uniform", gridShape, tf.float64)
         self.latent_tensor_variable = tf.Variable(
-            latent_tensor_variable, trainable=True, dtype=tf.float64, name="metasurface_latent_tensor"
+            latent_tensor_variable, trainable=True, name="metasurface_latent_tensor"
         )
 
-        # # The lens can be initialized in another state like a focusing lens
+        # # The lens could be initialized in another state like a focusing lens
         # focus_trans, focus_phase, _, _ = df_fourier.focus_lens_init(
         #     propagation_parameters, [532e-9], [0.5], [{"x": 0, "y": 0}]
         # )
@@ -48,8 +48,10 @@ class pipeline_Metalens_MLP(df_optimizer.Pipeline_Object):
         out = self.mlp_latent_layer(self.latent_tensor_variable, [wavelength_m])
         psf_intensity, psf_phase = self.psf_layer(out, self.point_source_locs)
 
+        # Save the last lens and psf for plotting later
         self.last_lens = out
         self.last_psf = psf_intensity
+
         return psf_intensity
 
     def visualizeTrainingCheckpoint(self, saveto):
@@ -130,8 +132,9 @@ class pipeline_Metalens_MLP(df_optimizer.Pipeline_Object):
                 cbartitle="Phase (radians)",
             )
 
+        # Plot the recent PSF
         im = axList[2].imshow(
-            self.last_psf[0, 0, 0, :, :],
+            self.last_psf[0, 0, :, :],
             extent=(
                 np.min(xd) * 1e3,
                 np.max(xd) * 1e3,
@@ -157,11 +160,14 @@ class pipeline_Metalens_MLP(df_optimizer.Pipeline_Object):
 
 
 def optimize_metalens_mlp(radial_symmetry, try_gpu=True):
+    savepath = "examples/output/metalens_example_radial" + str(radial_symmetry) + "/"
+    if not os.path.exists(savepath):
+        os.makedirs(savepath)
 
     # Define propagation parameters for psf calculation
     propagation_parameters = df_struct.prop_params(
         {
-            "wavelength_m": 532e-9,
+            "wavelength_m": 532e-9,  # wavelength_set_m would be used if the PSF_layer was used instead of psf_layer_mono
             "ms_length_m": {"x": 1.0e-3, "y": 1.0e-3},
             "ms_dx_m": {"x": 10 * 180e-9, "y": 10 * 180e-9},
             "radius_m": 1.0e-3 / 2.01,
@@ -172,20 +178,18 @@ def optimize_metalens_mlp(radial_symmetry, try_gpu=True):
             "radial_symmetry": radial_symmetry,
             "diffractionEngine": "fresnel_fourier",
             "accurate_measurement": True,  # Flag ensures output grid is exact but is expensive
-        },
-        verbose=False,
+        }
     )
 
     # Point_source locs we want to compute the psf for
     point_source_locs = np.array([[0.0, 0.0, 1e6]])  # on-axis ps at 1e6 m away (~infinity)
 
     # Call the pipeline
-    savepath = "examples/output/metalens_example_radial" + str(radial_symmetry) + "/"
-    if not os.path.exists(savepath):
-        os.makedirs(savepath)
-
     pipeline = pipeline_Metalens_MLP(propagation_parameters, point_source_locs, savepath, saveAtEpochs=5)
-    # pipeline.customLoad()  # restore previous training checkpoint if it exists
+    pipeline.customLoad()  # restore previous training checkpoint if it exists
+
+    pipeline()
+    pipeline.visualizeTrainingCheckpoint("0")
 
     # Define custom Loss function (Should always have pipeline_output as the function input)
     sensor_pixel_number = propagation_parameters["sensor_pixel_number"]
@@ -193,12 +197,12 @@ def optimize_metalens_mlp(radial_symmetry, try_gpu=True):
     cidx_x = sensor_pixel_number["x"] // 2
 
     def loss_fn(pipeline_output):
-        return -pipeline_output[0, 0, 0, cidx_y, cidx_x]
+        return -pipeline_output[0, 0, cidx_y, cidx_x]
 
     learning_rate = 1e-2
     optimizer = tf.keras.optimizers.Adam(learning_rate)
     df_optimizer.run_pipeline_optimization(
-        pipeline, optimizer, num_epochs=30, loss_fn=tf.function(loss_fn), allow_gpu=try_gpu
+        pipeline, optimizer, num_epochs=100, loss_fn=tf.function(loss_fn), allow_gpu=try_gpu
     )
 
     return
@@ -206,4 +210,4 @@ def optimize_metalens_mlp(radial_symmetry, try_gpu=True):
 
 if __name__ == "__main__":
     # Play around with the settings in the function call to compare gpu vs no gpu, different propagators, lr, etc.
-    optimize_metalens_mlp(radial_symmetry=True, try_gpu=True)
+    optimize_metalens_mlp(radial_symmetry=False, try_gpu=True)

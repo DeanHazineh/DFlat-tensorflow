@@ -28,16 +28,53 @@ def assemble_ER_superEllipse(rcwa_parameters, lay_eps, args):
 def assemble_ER_rectangular_fin(rcwa_parameters, lay_eps, args):
     # args[0] = len_x
     # args[1] = len_y
-    if len(args) != 2:
-        raise ValueError("Rectangular fin assembly function expects shape parameters with 2 arguments")
+    # args[2] = rotation
+    arg_len = len(args)
+
+    if arg_len not in [2, 3]:
+        raise ValueError("Rectangular fin assembly function expects shape parameters with 2 or 3 arguments")
 
     x_mesh, y_mesh = get_cartesian_grid(
         rcwa_parameters["Lx"], rcwa_parameters["Nx"], rcwa_parameters["Ly"], rcwa_parameters["Ny"]
     )
+    if arg_len == 3:  # Modified Code
+        theta = args[2]
+        x_meshr = x_mesh * np.cos(theta) + y_mesh * np.sin(theta)
+        y_meshr = -x_mesh * np.sin(theta) + y_mesh * np.cos(theta)
+        x_mesh = x_meshr
+        y_mesh = y_meshr
 
     ## Generate Rectangle fin shape
     val = np.zeros_like(x_mesh)
     val[(np.abs(2 * x_mesh / args[0]) <= 1.0) & (np.abs(2 * y_mesh / args[1]) <= 1.0)] = 1.0
+    ER_meta = lay_eps + (rcwa_parameters["erd"] - lay_eps) * val
+
+    return ER_meta
+
+
+def assemble_ER_inverse_rectangular_fin(rcwa_parameters, lay_eps, args):
+    # args[0] = len_x
+    # args[1] = len_y
+    # args[2] = rotation
+    arg_len = len(args)
+
+    if arg_len not in [2, 3]:
+        raise ValueError("Rectangular fin assembly function expects shape parameters with 2 or 3 arguments")
+
+    x_mesh, y_mesh = get_cartesian_grid(
+        rcwa_parameters["Lx"], rcwa_parameters["Nx"], rcwa_parameters["Ly"], rcwa_parameters["Ny"]
+    )
+    if arg_len == 3:  # Modified Code
+        theta = args[2]
+        x_meshr = x_mesh * np.cos(theta) + y_mesh * np.sin(theta)
+        y_meshr = -x_mesh * np.sin(theta) + y_mesh * np.cos(theta)
+        x_mesh = x_meshr
+        y_mesh = y_meshr
+
+    ## Generate Rectangle fin shape
+    val = np.ones_like(x_mesh)
+    val[(np.abs(2 * x_mesh / args[0]) <= 1.0) & (np.abs(2 * y_mesh / args[1]) <= 1.0)] = 0.0
+
     ER_meta = lay_eps + (rcwa_parameters["erd"] - lay_eps) * val
 
     return ER_meta

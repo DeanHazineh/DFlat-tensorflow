@@ -12,7 +12,6 @@ def run_nanofin_Sweep(FM=9):
 
     ### Specify RCWA Solver parameters
     wavelength_set_m = np.arange(400e-9, 705e-9, 5e-9)
-    print(wavelength_set_m)
 
     rcwa_settings = {
         "wavelength_set_m": wavelength_set_m,
@@ -32,29 +31,34 @@ def run_nanofin_Sweep(FM=9):
         "er2": "Vacuum",
         "Nx": 512,
         "Ny": 512,
-        "parameterization_type": "None",
+        "parameterization_type": "None",  # Parameter not used for this forward design code
         "batch_wavelength_dim": False,  # Library generation will be very slow if you batch! lib_gen not allowing it! Run in CPU instead of GPU if you run into memory issues.
-        "dtype": tf.float64,
-        "cdtype": tf.complex128,
+        "dtype": tf.float32,
+        "cdtype": tf.complex64,
     }
     rcwa_parameters = df_struct.rcwa_params(rcwa_settings)
 
     ### Define sweep ranges and savepath
-    len_x = np.arange(60e-9, 300e-9, 5e-9)
-    len_y = np.arange(60e-9, 300e-9, 5e-9)
-    Len_x, Len_y = np.meshgrid(len_x, len_y)
-    paramlist = np.transpose(np.vstack((Len_x.flatten(), Len_y.flatten())))
-    savepath = "dflat/cell_library_generation/output/rcwatf_just_param"
+    # Rotation can be computed more efficiently by basis change on eigenvectors but sometimes, I actually want the values
+    len_x = np.arange(60e-9, 305e-9, 5e-9)
+    len_y = np.arange(60e-9, 305e-9, 5e-9)
+    theta = [0.0]
+    Len_x, Len_y, Theta = np.meshgrid(len_x, len_y, theta)
+
+    paramlist = np.transpose(np.vstack((Len_x.flatten(), Len_y.flatten(), Theta.flatten())))
 
     ### Run library Sweep
+    savepath = "dflat/cell_library_generation/output/rcwatf_nanofinsPML_withNorm"
     ref_field, hold_field_zero_order = lib_gen.run_zeroOrder_library_gen(
-        rcwa_parameters, paramlist, cell_fun=lib_gen.assemble_ER_rectangular_fin, showDebugPlot=False
+        rcwa_parameters,
+        paramlist,
+        cell_fun=lib_gen.assemble_ER_rectangular_fin,
+        showDebugPlot=True,
+        savepath=savepath + "_checkpoint",
+        checkpoint_num=250,
     )
-
-    trans = np.abs(hold_field_zero_order) ** 2
+    trans = np.abs(hold_field_zero_order) ** 2 / np.abs(ref_field) ** 2
     phase = np.angle(hold_field_zero_order) - np.angle(ref_field)
-    trans = trans.reshape([len(len_y), len(len_x), len(wavelength_set_m), 2])
-    phase = phase.reshape([len(len_y), len(len_x), len(wavelength_set_m), 2])
 
     ### Save the data
     data = {
@@ -63,6 +67,7 @@ def run_nanofin_Sweep(FM=9):
         "paramlist": paramlist,
         "lenx": len_x,
         "leny": len_y,
+        "theta": theta,
         "wavelength_set_m": wavelength_set_m,
         "ref_field": ref_field,
         "hold_field_zero_order": hold_field_zero_order,
@@ -149,5 +154,5 @@ def run_double_nanofins_Sweep(FM=9):
 if __name__ == "__main__":
 
     # with tf.device("/cpu:0"):  # you should find gpu speedups for many wavelength simulations
-    # run_nanofin_Sweep(FM=9)
-    run_double_nanofins_Sweep(FM=9)
+    run_nanofin_Sweep(FM=9)
+    # run_double_nanofins_Sweep(FM=9)

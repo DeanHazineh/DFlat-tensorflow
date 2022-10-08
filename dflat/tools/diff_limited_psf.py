@@ -1,6 +1,6 @@
 from scipy.special import j1  # used to compute airy profile
 import numpy as np
-from dflat.fourier_layer.core.hankel import radial_2d_transform
+from dflat.fourier_layer.core.ops_hankel import radial_2d_transform
 
 
 def airy_disk(wavelength_m, radius_m, xgrid_vect, sensor_distance_m):

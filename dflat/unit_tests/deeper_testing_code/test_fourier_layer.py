@@ -1,24 +1,21 @@
-import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import pickle
 import scipy.io as sio
 
-sys.path.append(".")
+import dflat.fourier_layer as df_fourier
+import dflat.data_structure as df_struct
+import dflat.tools.graphFunc as gF
+from dflat.tools.diff_limited_psf import airy_disk
 
-from fourier_layer import PSF_Layer, Propagate_Planes_Layer, Propagate_Planes_Layer_Mono
-from fourier_layer.ms_initialization_utilities import focus_lens_init, getCoordinates_vector
-from data_structure import prop_params
-import tools.graphFunc as gF
-from tools.diff_limited_psf import airy_disk
-
-savepath = "DFlat_tests/output/"
+savepath = "dflat/unit_tests/deeper_testing_code/output/"
 
 
-def diff_limited_psfs(inputs):
+def diff_limited_psfs_PSF_Layer(inputs):
     radial_symmetry = inputs[0]
     engine = inputs[1]
+    batch_loop = inputs[2]
 
     ### Define Simulation parameters
     simulationSettings = {
@@ -29,25 +26,25 @@ def diff_limited_psfs(inputs):
         "sensor_distance_m": 200e-6,
         "initial_sensor_dx_m": {"x": 100e-9, "y": 100e-9},
         "sensor_pixel_size_m": {"x": 100e-9, "y": 100e-9},
-        "sensor_pixel_number": {"x": 101, "y": 101},
+        "sensor_pixel_number": {"x": 256, "y": 256},
         "radial_symmetry": radial_symmetry,
         "diffractionEngine": engine,
         "accurate_measurement": True,
+        "ASM_Pad_opt": 1.0,
     }
-    parameters = prop_params(simulationSettings, verbose=False)
+    parameters = df_struct.prop_params(simulationSettings, verbose=False)
     wavelength_set_m = parameters["wavelength_set_m"]
     num_wl = len(wavelength_set_m)
 
     ### Initialize a lens
-    lens_trans, lens_phase, _, _ = focus_lens_init(
+    lens_trans, lens_phase, _, _ = df_fourier.focus_lens_init(
         parameters, wavelength_set_m, [1e6 for i in range(num_wl)], [{"x": 0, "y": 0} for i in range(num_wl)]
     )
     point_source_locs = np.array([[0.0, 0.0, 1e6]])
 
     ### Call the PSF layer
-    psf_layer = PSF_Layer(parameters)
-    calc_psf = psf_layer((lens_trans, lens_phase), point_source_locs)
-    ipsf = calc_psf[0]
+    psf_layer = df_fourier.PSF_Layer(parameters)
+    ipsf, _ = psf_layer([lens_trans, lens_phase], point_source_locs, batch_loop=batch_loop)
 
     ### Make Plots of the computed PSF
     # define the sensor coordinates
@@ -68,7 +65,7 @@ def diff_limited_psfs(inputs):
                 fig, ax[axcounter], None, rmvxLabel=True, rmvyLabel=True, title=f"{(wavelength_set_m[j] * 1e9):3.0f}"
             )
             axcounter = axcounter + 1
-    plt.savefig(savepath + "PSF_2D__radial" + str(radial_symmetry) + "__engine" + engine)
+    plt.savefig(savepath + "PSF_2D_radialFlag" + str(radial_symmetry) + "_engine" + engine)
     plt.close()
 
     fig = plt.figure(figsize=(15, 5))
@@ -87,7 +84,7 @@ def diff_limited_psfs(inputs):
             title="Wavelength (nm): " + f"{(wavelength_set_m[i] * 1e9):3.0f}",
         )
         axcounter = axcounter + 1
-    plt.savefig(savepath + "PSF_slice__radial" + str(radial_symmetry) + "__engine" + engine)
+    plt.savefig(savepath + "PSF_slice_radialFlag" + str(radial_symmetry) + "_engine" + engine)
     plt.close()
 
     plt.show()
@@ -97,7 +94,7 @@ def diff_limited_psfs(inputs):
 
 def heart_singularity(inputs):
     ### Make a plot of the experimental measurements
-    dataLoc = "DFlat_tests/dataFiles/reprocessed_Daniel_experimentalData.mat"
+    dataLoc = "dflat/unit_tests/deeper_testing_code/dataFiles/reprocessed_Daniel_experimentalData.mat"
     data = sio.loadmat(dataLoc)
     phases = data["phases"]
     intensity = data["intensity"]
@@ -136,18 +133,30 @@ def heart_singularity(inputs):
         )
 
         gF.formatPlots(
-            fig, ax[axcounter], plt_int, rmvxLabel=True, rmvyLabel=True, setxlim=[-24, 24], setylim=[-24, 24],
+            fig,
+            ax[axcounter],
+            plt_int,
+            rmvxLabel=True,
+            rmvyLabel=True,
+            setxlim=[-24, 24],
+            setylim=[-24, 24],
         )
         gF.formatPlots(
-            fig, ax[axcounter + 1], plt_pha, rmvxLabel=True, rmvyLabel=True, setxlim=[-24, 24], setylim=[-24, 24],
+            fig,
+            ax[axcounter + 1],
+            plt_pha,
+            rmvxLabel=True,
+            rmvyLabel=True,
+            setxlim=[-24, 24],
+            setylim=[-24, 24],
         )
 
         axcounter = axcounter + 2
-    plt.savefig(savepath + "HeartSingularity__Experiment")
+    plt.savefig(savepath + "HeartSingularity_Experiment")
     plt.close()
 
     ### Load in the validated heart singularity metasurface data and parameter file
-    params_loc = "DFlat_tests/dataFiles/metasurface_heart_parameters.pickle"
+    params_loc = "dflat/unit_tests/deeper_testing_code/dataFiles/metasurface_heart_parameters.pickle"
     with open(params_loc, "rb") as handle:
         exSimDict = pickle.load(handle)
     ms_phase = np.expand_dims(exSimDict["ms_phase_x"], 0)
@@ -163,11 +172,15 @@ def heart_singularity(inputs):
         "sensor_distance_m": 10e-3,  # placeholder to loop over values
         "initial_sensor_dx_m": {"x": 6.0e-8 * downsampleFactor, "y": 6.0e-8 * downsampleFactor},
         "sensor_pixel_size_m": {"x": 6.0e-8 * downsampleFactor, "y": 6.0e-8 * downsampleFactor},
-        "sensor_pixel_number": {"x": int(1001 / downsampleFactor), "y": int(1001 / downsampleFactor),},
+        "sensor_pixel_number": {
+            "x": int(1001 / downsampleFactor),
+            "y": int(1001 / downsampleFactor),
+        },
         "dtype": tf.float64,
         "radial_symmetry": False,
         "diffractionEngine": engine,
         "accurate_measurement": True,
+        "ASM_Pad_opt": 1.0,
     }
 
     ### Propagate the fields, looping over sensor distances
@@ -175,17 +188,18 @@ def heart_singularity(inputs):
     ampl_stack = []
     phase_stack = []
     for dist in sensor_distance_m:
+        print("Calculating: ", dist)
         simulationSettings["sensor_distance_m"] = dist
-        parameters = prop_params(simulationSettings, verbose=True)
+        parameters = df_struct.prop_params(simulationSettings, verbose=False)
 
         # Initialize the field propagator layer
-        field_propagator = Propagate_Planes_Layer_Mono(parameters)
+        field_propagator = df_fourier.Propagate_Planes_Layer_Mono(parameters)
         out = field_propagator((ms_trans, ms_phase))
         ampl_stack.append(tf.expand_dims(out[0], 0))
         phase_stack.append(tf.expand_dims(out[1], 0))
 
-    ampl_stack = tf.stack(ampl_stack, axis=0)
-    phase_stack = tf.stack(phase_stack, axis=0)
+    ampl_stack = tf.transpose(tf.stack(ampl_stack, axis=0), [0, 1, 2, 4, 3])
+    phase_stack = tf.transpose(tf.stack(phase_stack, axis=0), [0, 1, 2, 4, 3])
 
     ### Generate Plot of Calculated Fields
     sensor_pixel_number = parameters["sensor_pixel_number"]
@@ -220,14 +234,105 @@ def heart_singularity(inputs):
         )
 
         gF.formatPlots(
-            fig, ax[axcounter], plt_int, rmvxLabel=True, rmvyLabel=True, setxlim=[-24, 24], setylim=[-24, 24],
+            fig,
+            ax[axcounter],
+            plt_int,
+            rmvxLabel=True,
+            rmvyLabel=True,
+            setxlim=[-24, 24],
+            setylim=[-24, 24],
         )
         gF.formatPlots(
-            fig, ax[axcounter + 1], plt_pha, rmvxLabel=True, rmvyLabel=True, setxlim=[-24, 24], setylim=[-24, 24],
+            fig,
+            ax[axcounter + 1],
+            plt_pha,
+            rmvxLabel=True,
+            rmvyLabel=True,
+            setxlim=[-24, 24],
+            setylim=[-24, 24],
         )
         axcounter = axcounter + 2
 
-    plt.savefig(savepath + "HeartSingularity__engine" + engine)
+    plt.savefig(savepath + "HeartSingularity_engine" + engine)
+    plt.close()
+
+    plt.show()
+
+    return
+
+
+def test_fast_ASM(inputs):
+    radial_symmetry = inputs[0]
+
+    ### Define Simulation parameters
+    simulationSettings = {
+        "wavelength_set_m": [450e-9, 550e-9, 650e-9],
+        "ms_length_m": {"x": 100e-6, "y": 100e-6},
+        "ms_dx_m": {"x": 350e-9, "y": 350e-9},
+        "radius_m": 100e-6 / 2.01,
+        "sensor_distance_m": 200e-6,
+        "initial_sensor_dx_m": {"x": 100e-9, "y": 100e-9},
+        "sensor_pixel_size_m": {"x": 100e-9, "y": 100e-9},
+        "sensor_pixel_number": {"x": 256, "y": 256},
+        "radial_symmetry": radial_symmetry,
+        "diffractionEngine": "ASM_fourier",
+        "accurate_measurement": True,
+        "ASM_Pad_opt": 1.0,
+    }
+    parameters = df_struct.prop_params(simulationSettings, verbose=False)
+    wavelength_set_m = parameters["wavelength_set_m"]
+    num_wl = len(wavelength_set_m)
+
+    ### Initialize a lens
+    lens_trans, lens_phase, _, _ = df_fourier.focus_lens_init(
+        parameters, wavelength_set_m, [1e6 for i in range(num_wl)], [{"x": 0, "y": 0} for i in range(num_wl)]
+    )
+    point_source_locs = np.array([[0.0, 0.0, 1e6]])
+
+    ### Call the PSF layer
+    psf_layer = df_fourier.PSF_Layer_MatrixBroadband(parameters)
+    ipsf, _ = psf_layer([lens_trans, lens_phase], point_source_locs, wavelength_set_m)
+    print(ipsf.shape)
+
+    ### Make Plots of the computed PSF
+    # define the sensor coordinates
+    sensor_pixel_number = parameters["sensor_pixel_number"]
+    sensor_pixel_size_m = parameters["sensor_pixel_size_m"]
+    cidx_x = int(sensor_pixel_number["x"] // 2)
+    cidx_y = int(sensor_pixel_number["y"] // 2)
+    xvec = np.arange(sensor_pixel_number["x"])
+    xvec = (xvec - cidx_x) * sensor_pixel_size_m["x"]
+
+    fig = plt.figure(figsize=(20, 20))
+    ax = gF.addAxis(fig, 3, 3)
+    axcounter = 0
+    for i in range(num_wl):
+        for j in range(num_wl):
+            ax[axcounter].imshow(ipsf[j, i, 0, :, :])
+            gF.formatPlots(
+                fig, ax[axcounter], None, rmvxLabel=True, rmvyLabel=True, title=f"{(wavelength_set_m[j] * 1e9):3.0f}"
+            )
+            axcounter = axcounter + 1
+    plt.savefig(savepath + "MatrixASM_PSF_2D_radialFlag" + str(radial_symmetry))
+    plt.close()
+
+    fig = plt.figure(figsize=(15, 5))
+    ax = gF.addAxis(fig, 1, 3)
+    axcounter = 0
+    for i in range(num_wl):
+        airy_prof = airy_disk(wavelength_set_m[i], parameters["radius_m"], xvec, parameters["sensor_distance_m"])
+        ax[axcounter].plot(xvec, ipsf[i, i, 0, cidx_y, :] / ipsf[i, i, 0, cidx_y, cidx_x], "bo-")
+        ax[axcounter].plot(xvec, airy_prof[cidx_y, :], "rx--")
+        gF.formatPlots(
+            fig,
+            ax[axcounter],
+            None,
+            xlabel="sensor x",
+            ylabel="Normalized Intensity",
+            title="Wavelength (nm): " + f"{(wavelength_set_m[i] * 1e9):3.0f}",
+        )
+        axcounter = axcounter + 1
+    plt.savefig(savepath + "MatrixASM_PSF_slice_radialFlag" + str(radial_symmetry))
     plt.close()
 
     plt.show()
@@ -237,33 +342,37 @@ def heart_singularity(inputs):
 
 def run_all_tests():
     fun = [
-        diff_limited_psfs,
-        # diff_limited_psfs,
-        # diff_limited_psfs,
-        # diff_limited_psfs,
+        # diff_limited_psfs_PSF_Layer,
+        # diff_limited_psfs_PSF_Layer,
+        # diff_limited_psfs_PSF_Layer,
+        # diff_limited_psfs_PSF_Layer,
         # heart_singularity,
         # heart_singularity,
+        test_fast_ASM,
+        test_fast_ASM,
     ]
     arguments = [
-        [True, "fresnel_fourier"],
-        # [True, "ASM_fourier"],
-        # [False, "fresnel_fourier"],
-        # [False, "ASM_fourier"],
+        # [True, "fresnel_fourier", False],
+        # [True, "ASM_fourier", False],
+        # [False, "fresnel_fourier", True],
+        # [False, "ASM_fourier", True],
         # ["fresnel_fourier"],
         # ["ASM_fourier"],
+        [True],
+        [False],
     ]
 
     for idx, call_test in enumerate(fun):
-        try:
-            with tf.device("/gpu:0"):
-                call_test(arguments[idx])
-        except:
-            with tf.device("/cpu:0"):
-                call_test(arguments[idx])
+        # try:
+        #     with tf.device("/gpu:0"):
+        #         call_test(arguments[idx])
+        #        except:
+        # "GPU execution failed (probably due to memory)"
+        with tf.device("/cpu:0"):
+            call_test(arguments[idx])
 
     return
 
 
 if __name__ == "__main__":
     run_all_tests()
-

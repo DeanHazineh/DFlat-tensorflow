@@ -27,8 +27,10 @@ def run_zeroOrder_library_gen(
     Nlay = rcwa_parameters["Nlay"]
     dtype = rcwa_parameters["dtype"]
     cdtype = rcwa_parameters["cdtype"]
+    layer_dielectric = rcwa_parameters["layer_dielectric"]
     TF_ZERO = tf.constant(0.0, dtype=dtype)
     TF_ONE = tf.constant(1.0, dtype=dtype)
+
     x_mesh, y_mesh = get_cartesian_grid(Lx, Nx, Ly, Ny)
     xmin_nm = np.min(x_mesh) * 1e9
     ymin_nm = np.min(y_mesh) * 1e9
@@ -67,29 +69,30 @@ def run_zeroOrder_library_gen(
     for i in np.arange(i_start + 1, paramlist.shape[0], 1):
         start = time.time()
 
-        ## Generate shape
-        ER_struct = cell_fun(rcwa_parameters, lay_eps_list[1], paramlist[i, :])
-        ER = tf.concat(values=[ER_list[0], ER_struct, ER_list[1]], axis=3)
+        ## Generate shape (hardcoded for the level 1 layer!)
+        ER_struct = cell_fun(rcwa_parameters, lay_eps_list[layer_dielectric - 1], paramlist[i, :])
+        ER_list[layer_dielectric - 1] = ER_struct
+        ER = tf.concat(values=ER_list, axis=3)
 
         # Display the cell
         if showDebugPlot:
             if i == (i_start + 1):
                 fig = plt.figure()
-                ax = gF.addAxis(fig, 1, 3)
-                image1 = ax[0].imshow(
-                    np.abs(ER[0, 0, 0, 0, :, :]), extent=(xmin_nm, xmax_nm, ymin_nm, ymax_nm), vmin=1, vmax=erd_abs[0]
-                )
-                image2 = ax[1].imshow(
-                    np.abs(ER[0, 0, 0, 1, :, :]), extent=(xmin_nm, xmax_nm, ymin_nm, ymax_nm), vmin=1, vmax=erd_abs[0]
-                )
-                image3 = ax[2].imshow(
-                    np.abs(ER[0, 0, 0, 2, :, :]), extent=(xmin_nm, xmax_nm, ymin_nm, ymax_nm), vmin=1, vmax=erd_abs[0]
-                )
+                ax = gF.addAxis(fig, 1, Nlay)
+                images = []
+                for j in range(Nlay):
+                    image = ax[j].imshow(
+                        np.abs(ER[0, 0, 0, j, :, :]),
+                        extent=(xmin_nm, xmax_nm, ymin_nm, ymax_nm),
+                        vmin=1,
+                        vmax=erd_abs[0],
+                    )
+                    images.append(image)
             else:
-                image1.set_data(np.abs(ER[0, 0, 0, 0, :, :]))
-                image2.set_data(np.abs(ER[0, 0, 0, 1, :, :]))
-                image3.set_data(np.abs(ER[0, 0, 0, 2, :, :]))
+                for j in range(Nlay):
+                    images[j].set_data(np.abs(ER[0, 0, 0, j, :, :]))
             plt.pause(1e-1)
+            plt.show()
 
         ### Call Simulation
         outputs = simulate(ER, UR, rcwa_parameters)
@@ -101,8 +104,8 @@ def run_zeroOrder_library_gen(
         end = time.time()
         print("Progress: ", f"{i / paramlist.shape[0] * 100:3.2f}", " Step: ", i, " Time Elapsed: ", end - start)
 
-        # Save checkpoint in case of termination
-        # This is important for long runs
+        # Save checkpoint in case of early termination
+        # This is important for long runs where one might stop the code prematuraley
         if savepath and (np.mod(i, checkpoint_num) == 0):
             ### Save the data as a checkpoint that can be used to resume later
             print("saving checkpoint at step: ", i)

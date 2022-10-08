@@ -4,21 +4,25 @@
 TRASH/*
 
 **__pycache__
-**training_testDataError.pickle
-**.pdf
-**.png
 
-**fitted_regression_models/
-neural_optical_layer/core/trained_MLP_models/MLP_Nanofins_Dense256_U350_H600*
-neural_optical_layer/core/trained_MLP_models/MLP_Nanofins_GFFDense*
-
-datasets_image/Flying*
-datasets_image/COCO_2017_train*
 datasets_image/Arad1k*
+datasets_image/COCO_2017_train*
 datasets_image/CZ_Harvard*
+datasets_image/FlyingThings3D*
 datasets_image/Arad_generator*
 datasets_image/FlyingThings3D_generator*
 
-image_layer/core/
-image_layer/rendering_layers*
+datasets_metasurface_cells/dev_libraries/*
+datasets_metasurface_cells/libraryClass_dev.py
 
+fourier_layer/core/compute_otf.py 
+fourier_layer/private_ms_initialization.py
+
+image_layer_inDev/core/
+image_layer_inDev/rendering_layer.py
+image_layer_inDev
+
+neural_optical_layer/core/baseline_regression/fitted_regression_models/*
+neural_optical_layer/core/trained_erbf_models/*
+neural_optical_layer/core/trained_MLP_models/MLP_Nanofins_Dense256_U350_H600*
+neural_optical_layer/core/trained_MLP_models/MLP_Nanofins_GFFDense*

@@ -1,6 +1,8 @@
 .vscode
 examples/output*
-DEAN_EXCLUDE_WORK
 *DS_Store
 **.egg-info
+
+DEAN_TEST_STUDIES/**
+DEAN_EXCLUDE_WORK/**
 

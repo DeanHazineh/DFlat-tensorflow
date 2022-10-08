@@ -25,7 +25,7 @@ def simulate(ER_t, UR_t, params):
     Returns:
         outputs: A `dict` containing the keys {'rx', 'ry', 'rz', 'R', 'ref',
         'tx', 'ty', 'tz', 'T', 'TRN'} corresponding to the computed reflection/tranmission
-        coefficients and powers. tx has shape [lambda, pixelsX, pixelsY, PQ,  ]
+        coefficients and powers. tx has shape [lambda, pixelsX, pixelsY, PQ, (?)]
     """
 
     # Extract commonly used parameters from the `params` dictionary.

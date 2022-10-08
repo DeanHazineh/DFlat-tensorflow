@@ -35,13 +35,14 @@ ALL_OPTIONAL_KEYS = {
     "urs": 1.0,
     "dtype": tf.float32,
     "cdtype": tf.complex64,
+    "layer_dielectric": 0,
 }
 
 ADDED_KEYS_PASS = ["shape_vect_size", "span_limits"]
 
 DEFAULT_SPAN_LIMITS = {
     "None": {},
-    "rectangular_resonators": {"min": 0.10, "max": 0.80},
+    "rectangular_resonators": {"min": 0.1, "max": 0.9},
     "coupled_rectangular_resonators": {"min": 0.05, "max": 0.20},
     "nine_rectangle_pattern": {"min": 0.05, "max": 0.24},
     "elliptical_resonators": {"min": 0.10, "max": 0.80},
@@ -295,9 +296,6 @@ class rcwa_params(dict):
         # Coefficient for the argument of tf.math.sigmoid() when generating
         # permittivity distributions with geometric parameters.
         self.__dict__["sigmoid_coeff"] = 1000.0
-
-        # Polynomial order for rectangular resonators definition.
-        # self.__dict__["rectangle_power"] = 200
 
         return
 

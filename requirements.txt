@@ -7,3 +7,4 @@ keras_flops
 sklearn
 mat73
 opencv-python
+pandas

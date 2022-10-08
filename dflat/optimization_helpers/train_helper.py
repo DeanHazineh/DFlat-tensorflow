@@ -34,6 +34,7 @@ def run_pipeline_optimization(pipeline, optimizer, num_epochs, loss_fn, allow_gp
 def train_loop(pipeline, optimizer, loss_fn, num_epochs):
     lossVec = []
     mini_ckpt = pipeline.saveAtEpochs  # Checkpoint epoch number
+
     # Call the pipeline once before training
     pipeline()
 

@@ -51,8 +51,8 @@ def test_fourier_layers_mono():
             gridshape = propagation_parameters["grid_shape"]
             batch_size = 2
             gridshape[0] = batch_size
-            field_input = [np.ones(gridshape), np.ones(gridshape)]
 
+            field_input = [np.ones(gridshape), np.ones(gridshape)]
             Propagate_planes_layer_mono = df_fourier.Propagate_Planes_Layer_Mono(propagation_parameters)
             out = Propagate_planes_layer_mono(field_input)
 
@@ -92,8 +92,3 @@ def test_fourier_layers_broadband():
             out = psf_layer([field2, field2], point_source_locs)
 
     return
-
-
-# if __name__ == "__main__":
-#     print("temporary main")
-#     test_fourier_layers_broadband()

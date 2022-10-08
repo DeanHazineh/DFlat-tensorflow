@@ -23,6 +23,7 @@ ALL_OPTIONAL_KEYS = {
     "radius_m": None,
     "dtype": tf.float64,
     "accurate_measurement": True,
+    "ASM_Pad_opt": 1,
 }
 
 HIDDEN_KEYS = ["_prop_params__verbose"]
@@ -64,8 +65,7 @@ def estimateBandwidth(parameters):
 
 
 class prop_params(dict):
-    """Parameters object (dictionary) used for the propagation in the Fourier layers. Defines the simulation settings.    
-    """
+    """Parameters object (dictionary) used for the propagation in the Fourier layers. Defines the simulation settings."""
 
     def __init__(self, input_dict, verbose=False):
         """Parameters object (dictionary) used for the propagation in the Fourier layers. Defines the simulation settings.
@@ -309,7 +309,10 @@ class prop_params(dict):
         # Print information to the user
         if self.__verbose:
             print(
-                "PARAMS: nyquist_modifier: ", nyquist_modifier, " SamplingCutoff: ", samplingCutoff / nyquist_modifier,
+                "PARAMS: nyquist_modifier: ",
+                nyquist_modifier,
+                " SamplingCutoff: ",
+                samplingCutoff / nyquist_modifier,
             )
 
         # define calculation sampling of lens space in x (consistent to nyquist rule)
@@ -428,6 +431,13 @@ class prop_params(dict):
 
         return
 
+    def _set_wavelength_m_None(self):
+        # This is a special routine that is used in an experimental implementation of the ASM (matrix instead of loops)
+        # In that set of subroutines, we want to set the wavelength, regularize the grid, and then change wavelength to
+        # None to avoid mistakes because we don't want the wavelength parameter to be used
+        self.__dict__["wavelength_m"] = None
+        return
+
     def __setitem__(self, key, item):
         if key in self.__dict__.keys():
             # no change on the items after initialization shall be allowed
@@ -472,4 +482,3 @@ class prop_params(dict):
             return True
         else:
             return False
-

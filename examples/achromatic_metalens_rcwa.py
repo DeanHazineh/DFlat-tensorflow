@@ -2,23 +2,20 @@ import numpy as np
 import os
 import tensorflow as tf
 import matplotlib.pyplot as plt
-from copy import deepcopy
 
 import dflat.data_structure as df_struct
 import dflat.optimization_helpers as df_optimizer
 import dflat.physical_optical_layer as df_physical
 import dflat.fourier_layer as df_fourier
 import dflat.tools as df_tools
-
 from dflat.physical_optical_layer.core.ms_parameterization import generate_cell_perm
 
 
 class pipeline_metalens_rcwa(df_optimizer.Pipeline_Object):
-    def __init__(self, rcwa_settings, propagation_parameters, point_source_locs, savepath, saveAtEpochs=None):
+    def __init__(self, rcwa_parameters, propagation_parameters, point_source_locs, savepath, saveAtEpochs=None):
         super(pipeline_metalens_rcwa, self).__init__(savepath, saveAtEpochs)
 
-        copy_rcwa_settings = deepcopy(rcwa_settings)
-        self.rcwa_parameters = df_struct.rcwa_params(rcwa_settings)
+        self.rcwa_parameters = rcwa_parameters
         self.propagation_parameters = propagation_parameters
         self.point_source_locs = point_source_locs
 
@@ -33,18 +30,17 @@ class pipeline_metalens_rcwa(df_optimizer.Pipeline_Object):
             init_latent, trainable=True, dtype=tf.float32, name="metasurface_latent_tensor"
         )
 
-        # modify rcwa_settings for visualization calls to display learned cells
-        copy_rcwa_settings["batch_wavelength_dim"] = False
-        self.mod_settings = df_struct.rcwa_params(copy_rcwa_settings)
-
     def __call__(self):
         out = self.rcwa_latent_layer(self.latent_tensor_variable)
-        psf_intensity, _ = self.psf_layer(out, self.point_source_locs)
+        psf_intensity, _ = self.psf_layer(out, self.point_source_locs, batch_loop=False)
+
         # sum over the two polarization basis (x and y linear)
         psf_intensity = tf.reduce_sum(psf_intensity, axis=1)
 
+        # Save the last lens and psf for plotting later
         self.last_lens = out
         self.last_psf = psf_intensity
+
         return psf_intensity
 
     def visualizeTrainingCheckpoint(self, saveto):
@@ -67,8 +63,8 @@ class pipeline_metalens_rcwa(df_optimizer.Pipeline_Object):
             tf.float32,
         )
 
-        Lx = self.mod_settings["Lx"]
-        Ly = self.mod_settings["Ly"]
+        Lx = self.rcwa_parameters["Lx"]
+        Ly = self.rcwa_parameters["Ly"]
 
         # Display the learned phase and transmission profile on first row
         # and wavelength dependent PSFs on the second
@@ -103,7 +99,8 @@ class pipeline_metalens_rcwa(df_optimizer.Pipeline_Object):
         # Display some of the learned metacells
         latent_tensor_state = self.get_variable_by_name("metasurface_latent_tensor")[0]
         norm_shape_param = df_tools.latent_to_param(latent_tensor_state)
-        ER, _ = generate_cell_perm(norm_shape_param, self.mod_settings)
+        # We want to assemble the cell's dielectric profile so we can plot it
+        ER, _ = generate_cell_perm(norm_shape_param, self.rcwa_parameters)
         num_cells = phase.shape[3]
         disp_num = 5
         cell_idx = np.linspace(0, num_cells - 1, disp_num).astype(int)
@@ -129,16 +126,25 @@ class pipeline_metalens_rcwa(df_optimizer.Pipeline_Object):
 
 
 def run_achromatic_metalens(try_gpu=False):
+    # Define save path
+    savepath = "examples/output/achromatic_metalens_example/"
+    if not os.path.exists(savepath):
+        os.makedirs(savepath)
+
     ## Define simulation parameters
-    wavelength_list = [500e-9, 550e-9, 600e-9]
+    wavelength_list = [400e-9, 500e-9, 600e-9]
     point_source_locs = np.array([[0, 0, 1e6]])
     fourier_modes = 3
+    # This is set to a low value just so the demo runs fast
+    # Really one should use 7+ but then the backpropagation becomes quite slow. 
+    # As noted in the paper, coupling a physical field solver quickly becomes intractable for 
+    # simulating large lenses. This is where the neural optical models become important 
 
     propagation_parameters = df_struct.prop_params(
         {
             "wavelength_set_m": wavelength_list,
             "ms_length_m": {"x": 200e-6, "y": 200e-6},
-            "ms_dx_m": {"x": 4 * 350e-9, "y": 4 * 350e-9},
+            "ms_dx_m": {"x": 3 * 350e-9, "y": 3* 350e-9},
             "radius_m": None,
             "sensor_distance_m": 1e-3,
             "initial_sensor_dx_m": {"x": 2e-6, "y": 2e-6},
@@ -150,8 +156,8 @@ def run_achromatic_metalens(try_gpu=False):
         }
     )
     gridshape = propagation_parameters["grid_shape"]
-
-    rcwa_settings = {
+    
+    rcwa_settings = df_struct.rcwa_params({
         "wavelength_set_m": wavelength_list,
         "thetas": [0.0 for i in wavelength_list],
         "phis": [0.0 for i in wavelength_list],
@@ -165,18 +171,13 @@ def run_achromatic_metalens(try_gpu=False):
         "L": [1e-3, 600.0e-9, 1e-3],
         "Lay_mat": ["SiO2", "Vacuum", "Vacuum"],
         "material_dielectric": "TiO2",
-        "er1": "Vacuum",
+        "er1": "SiO2",
         "er2": "Vacuum",
         "Nx": 256,
         "Ny": 256,
         "parameterization_type": "coupled_rectangular_resonators",
-        "batch_wavelength_dim": True,
-    }
-
-    # Define save path
-    savepath = "examples/output/achromatic_metalens_example/"
-    if not os.path.exists(savepath):
-        os.makedirs(savepath)
+        "batch_wavelength_dim": False,
+    })
 
     ## Call optimization pipeline
     pipeline = pipeline_metalens_rcwa(
@@ -202,4 +203,5 @@ def run_achromatic_metalens(try_gpu=False):
 if __name__ == "__main__":
     # Play around with settings inside the function call to explore different cell models, lr, etc.
     run_achromatic_metalens(try_gpu=False)
+
  
