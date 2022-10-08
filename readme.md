@@ -2,8 +2,9 @@
 ![TensorFlow](https://img.shields.io/badge/TensorFlow-%23FF6F00.svg?style=for-the-badge&logo=TensorFlow&logoColor=white)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-# DFlat - V1.1.5
+# DFlat - V2.0.0 
 <img src=/docs/imgs/DFlat_Long.png alt="Dflat" width="500"/>
+Note: code on v1 may not run without small tweaks to match v2 structure. 
 
 # An End-to-End Design Framework for Metasurface-Based Visual Sensors (Python Tensorflow)
 `D-Flat` is a forward and inverse design framework for flat optics, specially geared to the design of dielectric metasurfaces for imaging and sensing. This package is reviewed in paper https://arxiv.org/abs/2207.14780. D-Flat provides users with: 
@@ -15,12 +16,12 @@
 For usage and documentation, a readthedocs page is in active development. Examples for inverse design are provided in `DFlat/examples/`. Additional examples will be provided in the future (we welcome community made examples).
 
 For developers and researchers, 
-- a script to train neural models can be found in `DFlat/dflat/neural_optical_layer/core/runtraining_neural_models.py`
-- a script to build a cell library using RCWA_TF can be found in `DFlat/dflat/cell_library_generation/generate_cell_library.py`
+- a script to train neural models can be found in `DFlat/dflat/neural_optical_layer/core/trainer_models.py`
+- a script to build a cell library using RCWA_TF can be found in `DFlat/dflat/cell_library_generation/generate_cell_library.py`.
 
 ### (a) install and run DFlat in Google collab:
 DFlat can be easily installed in used in the cloud on Google Collab. This is ideal for mac os users as tensorflow_gpu is not supported by mac. 
-Google collab notebooks for the two current examples can be accessed at the links:
+Google collab notebooks for the two current examples can be found in the examples folder and online at the links:
  - <a href="https://colab.research.google.com/drive/1CVZnfwPmyd6V2qdYSXI5vShGgJecMENX?usp=sharing" target="_blank">achromatic_metalens_rcwa.py</a>
  - <a href="https://colab.research.google.com/drive/1cOeSNBQ4vS6xNZlOPBQhMdcViHQHclyi?usp=sharing" target="_blank">metalens_neural.py</a>
 
@@ -33,18 +34,13 @@ Note that git LFS should be installed if not already via `git lfs install` at th
 ```
 python setup.py develop
 ```
-or (above the root)
-```
-pip install -e DFlat
-```
-Install additional dependencies via
+You can then install additional dependencies via
 ```
 pip install -r requirements.txt
 ```
 
-
 ## Contact:
-This repository is intended to be accessible and community driven. It may not be fully error-proof and will be continually updated.
+This repository is intended to be accessible and community driven. It may not be fully error-proof and will be continually updated. 
 If you have improvements, fixes, or contributions, please branch and initiate a merge request to master (or email me)!
 
 For any questions, functionality requests, or other concerns, don't hesitate to contact me at dhazineh@g.harvard.edu. 
