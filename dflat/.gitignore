@@ -4,6 +4,7 @@
 TRASH/*
 
 **__pycache__
+**.pdf
 
 datasets_image/Arad1k*
 datasets_image/COCO_2017_train*
