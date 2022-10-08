@@ -2,9 +2,8 @@
 ![TensorFlow](https://img.shields.io/badge/TensorFlow-%23FF6F00.svg?style=for-the-badge&logo=TensorFlow&logoColor=white)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-# DFlat - V2.0.0 
+# DFlat - V2.0.0 (Updated 10/08/22)
 <img src=/docs/imgs/DFlat_Long.png alt="Dflat" width="500"/>
-Note: code on v1 may not run without small tweaks to match v2 structure. 
 
 # An End-to-End Design Framework for Metasurface-Based Visual Sensors (Python Tensorflow)
 `D-Flat` is a forward and inverse design framework for flat optics, specially geared to the design of dielectric metasurfaces for imaging and sensing. This package is reviewed in paper https://arxiv.org/abs/2207.14780. D-Flat provides users with: 
@@ -18,6 +17,8 @@ For usage and documentation, a readthedocs page is in active development. Exampl
 For developers and researchers, 
 - a script to train neural models can be found in `DFlat/dflat/neural_optical_layer/core/trainer_models.py`
 - a script to build a cell library using RCWA_TF can be found in `DFlat/dflat/cell_library_generation/generate_cell_library.py`.
+
+Note: Code from V1.x may not run without small tweaks to match changes in v2. 
 
 ### (a) install and run DFlat in Google collab:
 DFlat can be easily installed in used in the cloud on Google Collab. This is ideal for mac os users as tensorflow_gpu is not supported by mac. 
