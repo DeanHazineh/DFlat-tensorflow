@@ -105,8 +105,8 @@ def train_caller(train=True, verb=False):
     
     run_training_neural_model(
         model_caller=MLP_models.MLP_Nanofins_Dense1024_U350_H600,
-        epochs=1,
-        miniEpoch=1,
+        epochs=10000,
+        miniEpoch=250,
         lr=1e-3,
         train=train,
         verbose=verb,
