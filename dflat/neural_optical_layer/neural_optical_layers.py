@@ -144,7 +144,7 @@ class MLP_Latent_Layer(MLP_Layer):
             polarization sensitive optics)
     """
 
-    def __init__(self, model_name, dtype=tf.float32):
+    def __init__(self, model_name, dtype=tf.float64):
         """Initialize the mlp_latent_layer.
 
         Args:
