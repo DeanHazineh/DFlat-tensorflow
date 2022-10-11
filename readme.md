@@ -23,9 +23,7 @@ For developers and researchers,
 DFlat can be easily installed in used in the cloud on Google Collab. This is ideal for mac os users as tensorflow_gpu is not supported by mac. 
 Google collab notebooks for the two current examples can be found in the examples folder and online at the links:
  - <a href="https://colab.research.google.com/drive/1cOeSNBQ4vS6xNZlOPBQhMdcViHQHclyi?usp=sharing" target="_blank">metalens_neural.py</a>
- - <a href="https://colab.research.google.com/drive/1CVZnfwPmyd6V2qdYSXI5vShGgJecMENX?usp=sharing" target="_blank">achromatic_metalens_rcwa.py</a>
-
-Note: Code from V1.x may not run without small tweaks to match changes in v2. These example scripts will be updated shortly.  
+ - <a href="https://colab.research.google.com/drive/1CVZnfwPmyd6V2qdYSXI5vShGgJecMENX?usp=sharing" target="_blank">broadband_metalens_rcwa.py</a>
 
 
 ### (b) install and run locally:
