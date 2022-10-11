@@ -40,8 +40,6 @@ def build_rectangle_resonator(norm_param, span_limits, Lx, Ly, x_mesh, y_mesh, s
     # ## Generate Rectangle fin shape
     r1 = 1 - tf.math.pow((x_mesh * 2 / r_x), 10) - tf.math.pow((y_mesh * 2 / r_y), 10)
     r1 = tf.complex(tf.math.sigmoid(sigmoid_coeff * r1), TF_ZERO)
-    # r1 = 1 - tf.abs((x_mesh / r_x) - (y_mesh / r_y)) - tf.abs((x_mesh / r_x) + (y_mesh / r_y))
-    # r1 = tf.complex(tf.math.sigmoid(sigmoid_coeff * r1), TF_ZERO)
 
     struct_binaries = []
     for i in range(Nlay):

@@ -46,7 +46,16 @@ def batched_broadband_MLP(norm_param, mlp_model, wavelength_m_asList, gridShape,
     idx = tf.constant(0, dtype=tf.int32)
     hold_trans = tf.zeros([1, output_stack_dim] + gridShape[1:], dtype=dtype)
     hold_phase = tf.zeros([1, output_stack_dim] + gridShape[1:], dtype=dtype)
-    loopData = tf.while_loop(lambda_loopCond, lambda_loopBody, loop_vars=[idx, hold_trans, hold_phase])
+    loopData = tf.while_loop(
+        lambda_loopCond,
+        lambda_loopBody,
+        loop_vars=[idx, hold_trans, hold_phase],
+        shape_invariants=[
+            idx.get_shape(),
+            tf.TensorShape([None, output_stack_dim] + gridShape[1:]),
+            tf.TensorShape([None, output_stack_dim] + gridShape[1:]),
+        ],
+    )
 
     return (
         tf.math.sqrt(tf.stack(loopData[1][1:])),

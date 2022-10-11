@@ -101,15 +101,14 @@ class pipeline_metalens_rcwa(df_optimizer.Pipeline_Object):
         norm_shape_param = df_tools.latent_to_param(latent_tensor_state)
         # We want to assemble the cell's dielectric profile so we can plot it
         ER, _ = generate_cell_perm(norm_shape_param, self.rcwa_parameters)
-        num_cells = phase.shape[3]
+        
         disp_num = 5
-        cell_idx = np.linspace(0, num_cells - 1, disp_num).astype(int)
-
+        cell_idx = np.linspace(0, ER.shape[1] - 1, disp_num).astype(int)
         fig = plt.figure(figsize=(35, 7))
         ax = df_tools.addAxis(fig, 1, disp_num)
         for i, idx in enumerate(cell_idx):
             ax[i].imshow(
-                np.abs(ER[1, idx, 0, 1, :, :]), extent=(np.min(0), np.max(Lx) * 1e9, np.min(0), np.max(Ly) * 1e9)
+                np.abs(ER[0, idx, 0, 0, :, :]), extent=(np.min(0), np.max(Lx) * 1e9, np.min(0), np.max(Ly) * 1e9)
             )
             df_tools.formatPlots(
                 fig,
@@ -132,9 +131,9 @@ def run_achromatic_metalens(try_gpu=False):
         os.makedirs(savepath)
 
     ## Define simulation parameters
-    wavelength_list = [400e-9, 500e-9, 600e-9]
+    wavelength_list = [400e-9, 500e-9, 600e-9, 700e-9]
     point_source_locs = np.array([[0, 0, 1e6]])
-    fourier_modes = 3
+    fourier_modes = 5
     # This is set to a low value just so the demo runs fast
     # Really one should use 7+ but then the backpropagation becomes quite slow. 
     # As noted in the paper, coupling a physical field solver quickly becomes intractable for 
@@ -168,14 +167,14 @@ def run_achromatic_metalens(try_gpu=False):
         "PQ": [fourier_modes, fourier_modes],
         "Lx": 350e-9,
         "Ly": 350e-9,
-        "L": [1e-3, 600.0e-9, 1e-3],
-        "Lay_mat": ["SiO2", "Vacuum", "Vacuum"],
+        "L": [600.0e-9],
+        "Lay_mat": ["Vacuum"],
         "material_dielectric": "TiO2",
         "er1": "SiO2",
         "er2": "Vacuum",
         "Nx": 256,
         "Ny": 256,
-        "parameterization_type": "coupled_rectangular_resonators",
+        "parameterization_type": "rectangular_resonators",
         "batch_wavelength_dim": False,
     })
 
@@ -184,7 +183,7 @@ def run_achromatic_metalens(try_gpu=False):
         rcwa_settings, propagation_parameters, point_source_locs, savepath, saveAtEpochs=5
     )
     #pipeline.customLoad()  # restore previous checkpoint if it exists
-
+   
     ## Define custom Loss function (Should always have pipeline_output as the function input)
     sensor_pixel_number = propagation_parameters["sensor_pixel_number"]
     cidx_y = sensor_pixel_number["y"] // 2

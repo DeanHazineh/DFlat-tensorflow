@@ -167,16 +167,15 @@ class MLP_Latent_Layer(MLP_Layer):
             `list`: List containing transmittance in the first argument and phase in the second, of shape
                 (len(wavelength_m_asList), p, PixelsY, PixelsX), where p = 1 or 2 depending on the model.
         """
-
         tf.debugging.assert_equal(
-            tf.shape(latent_tensor).shape,
-            3,
+            tf.rank(latent_tensor),
+            tf.TensorShape(3),
             message="latent_tensor should be a rank 3 tensor: (D, PixelsY, PixelsX",
             name="latent_tensor_rank_assertion",
         )
 
         tf.debugging.assert_equal(
-            tf.shape(latent_tensor)[0],
+            latent_tensor.shape[0],
             self.mlp_input_shape - 1,
             message="",
             summarize="latent_tensor has incorrect number of parameters per cell (shape parameters D)",
