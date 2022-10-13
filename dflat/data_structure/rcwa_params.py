@@ -42,12 +42,9 @@ ADDED_KEYS_PASS = ["shape_vect_size", "span_limits"]
 
 DEFAULT_SPAN_LIMITS = {
     "None": {},
-    "rectangular_resonators": {"min": 0.1, "max": 0.9},
-    "coupled_rectangular_resonators": {"min": 0.05, "max": 0.20},
-    "nine_rectangle_pattern": {"min": 0.05, "max": 0.24},
-    "elliptical_resonators": {"min": 0.10, "max": 0.80},
-    "coupled_elliptical_resonators": {"min": 0.05, "max": 0.20},
-    "cylindrical_nanoposts": {"min": 0.10, "max": 0.80},
+    "rectangular_resonators": {"min": 0.00, "max": 1.0},
+    "coupled_rectangular_resonators": {"min": 0.00, "max": 0.25},
+    "cylindrical_nanoposts": {"min": 0.0, "max": 1.0},
 }
 
 

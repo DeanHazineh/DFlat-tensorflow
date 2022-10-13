@@ -26,3 +26,5 @@ neural_optical_layer/core/baseline_regression/fitted_regression_models/*
 neural_optical_layer/core/trained_erbf_models/*
 neural_optical_layer/core/trained_MLP_models/MLP_Nanofins_Dense256_U350_H600*
 neural_optical_layer/core/trained_MLP_models/MLP_Nanofins_GFFDense*
+
+physical_optical_layer/core/dev_ms_parameterization.py
