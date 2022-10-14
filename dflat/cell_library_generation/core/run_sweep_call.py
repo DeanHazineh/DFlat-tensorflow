@@ -92,7 +92,6 @@ def run_zeroOrder_library_gen(
                 for j in range(Nlay):
                     images[j].set_data(np.abs(ER[0, 0, 0, j, :, :]))
             plt.pause(1e-1)
-            plt.show()
 
         ### Call Simulation
         outputs = simulate(ER, UR, rcwa_parameters)
