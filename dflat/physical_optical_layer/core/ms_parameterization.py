@@ -1,5 +1,5 @@
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 
 
 def get_cartesian_grid(Lx, Nx, Ly, Ny):
@@ -24,7 +24,6 @@ def build_rectangle_resonator(norm_param, span_limits, Lx, Ly, x_mesh, y_mesh, s
     # Binary like (batchSize, pixelsX, pixelsY, Nlayer, Nx, Ny)
 
     TF_ZERO = tf.constant(0.0, dtype=tf.float32)
-    TF_ONE = tf.constant(1.0, dtype=tf.float32)
 
     # unpack inputs
     norm_px = norm_param[0, :, :, 0]
@@ -37,7 +36,7 @@ def build_rectangle_resonator(norm_param, span_limits, Lx, Ly, x_mesh, y_mesh, s
     r_x = r_x[tf.newaxis, :, :, tf.newaxis, tf.newaxis, tf.newaxis]
     r_y = r_y[tf.newaxis, :, :, tf.newaxis, tf.newaxis, tf.newaxis]
 
-    # ## Generate Rectangle fin shape
+    ## Generate Rectangle fin shape
     r1 = 1 - tf.math.abs(x_mesh * 2 / r_x) ** 15 - tf.math.abs(y_mesh * 2 / r_y) ** 15
     r1 = tf.complex(tf.math.sigmoid(sigmoid_coeff * r1), TF_ZERO)
 
@@ -52,7 +51,7 @@ def build_rectangle_resonator(norm_param, span_limits, Lx, Ly, x_mesh, y_mesh, s
 def build_coupled_rectangular_resonators(norm_param, span_limits, Lx, Ly, x_mesh, y_mesh, sigmoid_coeff, Nlay):
     # norm_param: A 'tf.Tensor' of shape (2, pixelsX, pixelsY, 4)
 
-    POWER_EXP = 10
+    POWER_EXP = 15
     TF_ZERO = tf.constant(0.0, dtype=tf.float32)
 
     # unpack inputs
@@ -176,8 +175,6 @@ def generate_cell_perm(norm_param, rcwa_parameters):
             ER.append(lay_eps_list[i] * tf.ones(materials_shape_lay, dtype=cdtype))
 
     ER = tf.concat(ER, axis=3)
-
-    # ER = lay_eps_list[0] + (rcwa_parameters["erd"] - lay_eps_list[0]) * tf.cast(struct_binary[0], cdtype)
 
     return ER, UR
 

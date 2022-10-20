@@ -1,5 +1,6 @@
-from scipy.special import j1  # used to compute airy profile
 import numpy as np
+from scipy.special import j1
+
 from dflat.fourier_layer.core.ops_hankel import radial_2d_transform
 
 

@@ -1,7 +1,7 @@
-import h5py
-from scipy.interpolate import interp1d
-import numpy as np
 from pathlib import Path
+import h5py
+import numpy as np
+from scipy.interpolate import interp1d
 
 MATERIAL_DICT = {
     "TiO2": "TiO2_Index.mat",

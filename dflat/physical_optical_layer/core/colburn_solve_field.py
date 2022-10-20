@@ -1,5 +1,5 @@
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 
 from . import colburn_rcwa_utils as rcwa_utils
 from . import colburn_tensor_utils as tensor_utils

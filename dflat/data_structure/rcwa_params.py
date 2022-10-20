@@ -35,7 +35,7 @@ ALL_OPTIONAL_KEYS = {
     "urs": 1.0,
     "dtype": tf.float32,
     "cdtype": tf.complex64,
-    "layer_dielectric": 0,
+    "layer_dielectric": 1,
 }
 
 ADDED_KEYS_PASS = ["shape_vect_size", "span_limits"]

@@ -69,7 +69,6 @@ class MLP_Layer(tf.keras.layers.Layer):
             tf.shape(norm_param)[0],
             self.mlp_input_shape - 1,
             message="",
-            summarize="norm_param has incorrect number of columns (shape parameters D)",
             name="norm_param_degree_assertion",
         )
 

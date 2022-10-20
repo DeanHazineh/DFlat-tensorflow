@@ -52,9 +52,9 @@ def train_loop(pipeline, optimizer, loss_fn, num_epochs):
 
         # After every N steps, save a figure with useful information
         if mini_ckpt:
-            if np.mod(epoch, mini_ckpt) == 0 and epoch > 0:
+            if np.mod(start_iter + epoch, mini_ckpt) == 0:
                 print("Log Training at step: " + str(start_iter + epoch))
-                pipeline.visualizeTrainingCheckpoint(str(epoch))
+                pipeline.visualizeTrainingCheckpoint(str(start_iter + epoch))
                 pipeline.customSaveCheckpoint(lossVec)
                 lossVec = []
 

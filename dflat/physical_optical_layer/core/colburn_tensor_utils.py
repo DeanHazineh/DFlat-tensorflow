@@ -1,5 +1,5 @@
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 
 
 def expand_and_tile_np(array, batchSize, pixelsX, pixelsY):

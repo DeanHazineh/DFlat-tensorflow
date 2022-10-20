@@ -1,7 +1,8 @@
 import tensorflow as tf
-from .ms_parameterization import generate_cell_perm
-from .colburn_solve_field import simulate
+
 import dflat.data_structure as datstruc
+from .colburn_solve_field import simulate
+from .ms_parameterization import generate_cell_perm
 
 reset_keys = ["wavelength_set_m", "thetas", "phis", "pte", "ptm", "batch_wavelength_dim"]
 
@@ -47,7 +48,6 @@ def full_rcwa_shape(norm_param, rcwa_parameters):
     return tf.transpose(tf.stack([tx, ty]), [1, 0, 3, 2])
 
 
-# Deprecated since it is so inneficient
 def batched_wavelength_rcwa_shape(norm_param, rcwa_parameters):
 
     rcwa_parameters_list = generate_simParam_set(rcwa_parameters)

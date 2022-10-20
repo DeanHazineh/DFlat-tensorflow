@@ -337,12 +337,14 @@ class MLP_Object(tf.keras.Model):
         return outParams
 
     def normalizeWavelength(self, wavelength_m):
-        tf.debugging.assert_equal(
-            self.__dataBoundsLabel[-1],
-            "wavelength_m",
-            message="wavelength should have been the last listed parameter",
-            name="preprocessDataBound format assertion",
-        )
+
+        # print(self.__dataBoundsLabel[-1])
+        # tf.debugging.assert_equal(
+        #     self.__dataBoundsLabel[-1],
+        #     "wavelength_m",
+        #     message="wavelength should have been the last listed parameter",
+        #     name="preprocessDataBound format assertion",
+        # )
 
         wavelength_preprocessBounds = self.__preprocessDataBounds[-1]
         wavelength_mlp = (wavelength_m - wavelength_preprocessBounds[0]) / (

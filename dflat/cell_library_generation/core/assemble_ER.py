@@ -3,6 +3,37 @@ import tensorflow as tf
 import numpy as np
 
 
+def assemble_ER_rectangular_resonator(rcwa_parameters, lay_eps, args):
+    # args[0] = len_x
+    # args[1] = len_y
+    # args[2] = rotation
+    arg_len = len(args)
+    exp_power = 20
+    sigmoid_coefficient = 1000.0
+
+    if arg_len not in [2, 3]:
+        raise ValueError("Rectangular fin assembly function expects shape parameters with 2 or 3 arguments")
+
+    x_mesh, y_mesh = get_cartesian_grid(
+        rcwa_parameters["Lx"], rcwa_parameters["Nx"], rcwa_parameters["Ly"], rcwa_parameters["Ny"]
+    )
+
+    if arg_len == 3:  # If shape rotation is included, then rotate the coordinates
+        theta = args[2]
+        x_meshr = x_mesh * np.cos(theta) + y_mesh * np.sin(theta)
+        y_meshr = -x_mesh * np.sin(theta) + y_mesh * np.cos(theta)
+        x_mesh = x_meshr
+        y_mesh = y_meshr
+
+    ## Generate Rectangle fin shape
+    val = 1 - np.math.abs(x_mesh * 2 / args[0]) ** exp_power - np.math.abs(y_mesh * 2 / args[1]) ** exp_power
+    val = 1 / (1 + np.exp(-1 * sigmoid_coefficient * val))
+
+    ER_meta = lay_eps + (rcwa_parameters["erd"] - lay_eps) * val
+
+    return ER_meta
+
+
 def assemble_ER_superEllipse(rcwa_parameters, lay_eps, args):
     # args[0] = len_x
     # args[1] = len_y

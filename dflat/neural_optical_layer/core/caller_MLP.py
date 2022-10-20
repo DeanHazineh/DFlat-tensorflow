@@ -109,7 +109,6 @@ def append_wavelength(p_param, normalized_wavelength_m, dtype):
 
     # rather than normalizing wavelength here, we pulled out the function and mlp input and
     # require normalized wavelength to be passed in instead
-
     wavelength_mlp = tf.ones((p_param.shape[0], 1), dtype=dtype) * normalized_wavelength_m
     return tf.concat((p_param, wavelength_mlp), axis=-1)
 
