@@ -54,7 +54,7 @@ def run_nanofin_Sweep(FM=9):
         paramlist,
         cell_fun=lib_gen.assemble_ER_rectangular_fin,
         showDebugPlot=False,
-        savepath=None,
+        savepath=savepath,
         checkpoint_num=100,
     )
 
