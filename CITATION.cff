@@ -16,7 +16,7 @@ authors:
   given-names: "Qi"
 
 title: "D-Flat: A Differentiable Flat-Optics Framework for End-to-End Metasurface Visual Sensor Design"
-version: 1.0.0
+version: 2.0.0
 doi: 10.48550/ARXIV.2207.14780
 date-released: 2022-07-29
 url: "https://github.com/DeanHazineh/DFlat"

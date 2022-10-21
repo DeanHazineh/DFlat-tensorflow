@@ -109,20 +109,15 @@ def run_zeroOrder_library_gen(
         # Save checkpoint in case of early termination
         # This is important for long runs where one might stop the code prematurely
         if savepath and (np.mod(i, checkpoint_num) == 0):
-            ### Save the data as a checkpoint that can be used to resume later
             print("saving checkpoint at step: ", i)
-            data = {
-                "hold_field_zero_order": hold_field_zero_order.numpy(),
-                "i": i,
-            }
-            save_data_path = savepath + "Checkpoint.pickle"
-            with open(save_data_path, "wb") as handle:
+            data = {"hold_field_zero_order": hold_field_zero_order.numpy(), "i": i}
+            with open(savepath + "Checkpoint.pickle", "wb") as handle:
                 pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    # # If a checkpoint file was made, delete it
-    # if savepath:
-    #     if os.path.exists(savepath + "Checkpoint.pickle"):
-    #         shutil.rmtree(savepath + "Checkpoint.pickle")
+    # If a checkpoint file was made, delete it
+    if savepath:
+        if os.path.exists(savepath + "Checkpoint.pickle"):
+            shutil.rmtree(savepath + "Checkpoint.pickle")
 
     transmission = tf.abs(hold_field_zero_order) ** 2 / tf.abs(ref_field) ** 2
     phase = tf.math.angle(ref_field) - tf.math.angle(hold_field_zero_order)

@@ -15,3 +15,8 @@ V 2.0.0 -- Recoded Fourier Optics propagation
     large tensors instead of for loops
     - General package structures and names are reintroduced
     - Fixed bug in Neural optical models where sqrt(transmission) would return NaN for some cells
+
+V 2.1.0 -- Fix the library generation code so it directly calibrates to the reference field and returns transmission and phase
+    - Reference field is needed to make the output meaningful. Instead of returning the field and the reference field, 
+    we just make it easier by doing that internally since it will always be needed. 
+    
