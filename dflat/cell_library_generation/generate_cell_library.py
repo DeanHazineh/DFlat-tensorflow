@@ -8,7 +8,7 @@ import dflat.data_structure as df_struct
 import dflat.tools as df_tools
 
 
-def run_nanofin_Sweep(FM=9):
+def run_nanofin_Sweep(FM, shape_function):
 
     ### Specify RCWA Solver parameters
     wavelength_set_m = np.arange(400e-9, 705e-9, 10e-9)
@@ -51,8 +51,8 @@ def run_nanofin_Sweep(FM=9):
     transmission, phase = lib_gen.run_zeroOrder_library_gen(
         rcwa_parameters,
         paramlist,
-        cell_fun=lib_gen.assemble_ER_rectangular_fin,
-        showDebugPlot=False,
+        cell_fun=shape_function,
+        showDebugPlot=True,
         savepath=savepath,
         checkpoint_num=250,
     )
@@ -75,7 +75,5 @@ def run_nanofin_Sweep(FM=9):
 
 
 if __name__ == "__main__":
-    
-    # with tf.device("/cpu:0"):  # you should find gpu speedups for many wavelength simulations
-    run_nanofin_Sweep(FM=9)
-    
+    # run_nanofin_Sweep(FM=9, shape_function=lib_gen.assemble_ER_rectangular_fin)
+    run_nanofin_Sweep(FM=9, shape_function=lib_gen.assemble_ER_inverse_rectangular_resonator)

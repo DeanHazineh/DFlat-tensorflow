@@ -31,6 +31,8 @@ def run_zeroOrder_library_gen(
     cdtype = rcwa_parameters["cdtype"]
     layer_dielectric = rcwa_parameters["layer_dielectric"]
 
+    paramlist = tf.convert_to_tensor(paramlist, dtype=dtype)
+
     materials_shape = (batchSize, pixelsX, pixelsY, Nlay, Nx, Ny)
     materials_shape_lay = (batchSize, pixelsX, pixelsY, 1, Nx, Ny)
     PQ_zero = tf.math.reduce_prod(rcwa_parameters["PQ"]) // 2
@@ -121,5 +123,6 @@ def run_zeroOrder_library_gen(
 
     transmission = tf.abs(hold_field_zero_order) ** 2 / tf.abs(ref_field) ** 2
     phase = tf.math.angle(ref_field) - tf.math.angle(hold_field_zero_order)
+    plt.close()
 
     return transmission[1:].numpy(), phase[1:].numpy()
