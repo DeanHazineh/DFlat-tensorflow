@@ -55,6 +55,7 @@ def run_zeroOrder_library_gen(
             checkpoint = pickle.load(handle)
             hold_field_zero_order = tf.convert_to_tensor(checkpoint["hold_field_zero_order"], cdtype)
             i_start = checkpoint["i"]
+            print(i_start)
     else:
         hold_field_zero_order = tf.zeros(shape=(1, batchSize, 2), dtype=cdtype)
         i_start = -1
@@ -118,9 +119,10 @@ def run_zeroOrder_library_gen(
             with open(save_data_path, "wb") as handle:
                 pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    # If a checkpoint file was made, delete it
-    if os.path.exists(savepath + "Checkpoint.pickle"):
-        shutil.rmtree(savepath + "Checkpoint.pickle")
+    # # If a checkpoint file was made, delete it
+    # if savepath:
+    #     if os.path.exists(savepath + "Checkpoint.pickle"):
+    #         shutil.rmtree(savepath + "Checkpoint.pickle")
 
     transmission = tf.abs(hold_field_zero_order) ** 2 / tf.abs(ref_field) ** 2
     phase = tf.math.angle(ref_field) - tf.math.angle(hold_field_zero_order)

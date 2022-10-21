@@ -48,14 +48,13 @@ def run_nanofin_Sweep(FM=9):
 
     ### Run library Sweep
     savepath = "dflat/cell_library_generation/output/test_lib_gen"
-
     transmission, phase = lib_gen.run_zeroOrder_library_gen(
         rcwa_parameters,
         paramlist,
         cell_fun=lib_gen.assemble_ER_rectangular_fin,
         showDebugPlot=False,
         savepath=savepath,
-        checkpoint_num=100,
+        checkpoint_num=250,
     )
 
     ### Save the data
