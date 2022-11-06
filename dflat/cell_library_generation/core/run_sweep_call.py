@@ -119,7 +119,7 @@ def run_zeroOrder_library_gen(
     # If a checkpoint file was made, delete it
     if savepath:
         if os.path.exists(savepath + "Checkpoint.pickle"):
-            shutil.rmtree(savepath + "Checkpoint.pickle")
+            os.remove(savepath + "Checkpoint.pickle")
 
     transmission = tf.abs(hold_field_zero_order) ** 2 / tf.abs(ref_field) ** 2
     phase = tf.math.angle(ref_field) - tf.math.angle(hold_field_zero_order)

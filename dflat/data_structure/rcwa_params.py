@@ -88,6 +88,7 @@ class rcwa_params(dict):
             (optional) `urd`: Magnetic permeability of the dielectric structures; Defaults to 1.0\\
             (optional) `urs`: Magnetic permeability of the substrate; Defaults to 1.0\\
         """
+
         # Check input conditions
         self.__dict__ = deepcopy(input_dict)
         self.__check_mandatory_keys()
