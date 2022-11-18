@@ -1,1 +1,1 @@
-from .Arad_generator import Arad1k_Generator
+from .Arad_generator import Arad1k_Generator, Arad1k_Generator_randomized

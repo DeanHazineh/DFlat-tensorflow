@@ -6,3 +6,7 @@ examples/output*
 DEAN_TEST_STUDIES/**
 DEAN_EXCLUDE_WORK/**
 
+docs/**
+docs/build/**
+
+

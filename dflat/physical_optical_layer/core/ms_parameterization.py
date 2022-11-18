@@ -33,11 +33,12 @@ def build_rectangle_resonator(norm_param, span_limits, Lx, Ly, x_mesh, y_mesh, s
 
     r_x = (norm_px * (span_max - span_min) + span_min) * Lx
     r_y = (norm_py * (span_max - span_min) + span_min) * Ly
+
     r_x = r_x[tf.newaxis, :, :, tf.newaxis, tf.newaxis, tf.newaxis]
     r_y = r_y[tf.newaxis, :, :, tf.newaxis, tf.newaxis, tf.newaxis]
 
     ## Generate Rectangle fin shape
-    r1 = 1 - tf.math.abs(x_mesh * 2 / r_x) ** 15 - tf.math.abs(y_mesh * 2 / r_y) ** 15
+    r1 = 1 - tf.math.abs(x_mesh * 2 / r_x) ** 50 - tf.math.abs(y_mesh * 2 / r_y) ** 50
     r1 = tf.complex(tf.math.sigmoid(sigmoid_coeff * r1), TF_ZERO)
 
     struct_binaries = []

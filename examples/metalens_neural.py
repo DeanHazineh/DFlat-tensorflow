@@ -178,7 +178,11 @@ def optimize_metalens_mlp(radial_symmetry, try_gpu=True):
             "radial_symmetry": radial_symmetry,
             "diffractionEngine": "fresnel_fourier",
             "accurate_measurement": True,  # Flag ensures output grid is exact but is expensive
-        }
+            ### Optional keys
+            "automatic_upsample": True,  # If you set this to false, then you can tune the below parameter for convergence
+            "manual_upsample_factor": 1,
+        },
+        verbose=True,
     )
 
     # Point_source locs we want to compute the psf for
@@ -186,7 +190,7 @@ def optimize_metalens_mlp(radial_symmetry, try_gpu=True):
 
     # Call the pipeline
     pipeline = pipeline_Metalens_MLP(propagation_parameters, point_source_locs, savepath, saveAtEpochs=5)
-    pipeline.customLoad()  # restore previous training checkpoint if it exists
+    # pipeline.customLoad()  # restore previous training checkpoint if it exists
 
     pipeline()
     pipeline.visualizeTrainingCheckpoint("0")
@@ -210,4 +214,5 @@ def optimize_metalens_mlp(radial_symmetry, try_gpu=True):
 
 if __name__ == "__main__":
     # Play around with the settings in the function call to compare gpu vs no gpu, different propagators, lr, etc.
-    optimize_metalens_mlp(radial_symmetry=False, try_gpu=True)
+    # optimize_metalens_mlp(radial_symmetry=False, try_gpu=True)
+    optimize_metalens_mlp(radial_symmetry=True, try_gpu=True)

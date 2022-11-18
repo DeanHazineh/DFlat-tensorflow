@@ -152,6 +152,9 @@ def run_achromatic_metalens(try_gpu=False):
             "radial_symmetry": True,
             "diffractionEngine": "fresnel_fourier",
             "accurate_measurement": True,
+            ### Optional keys
+            "automatic_upsample": True,  # If you set this to false, then you can tune the lens/initial field upsample manually
+            "manual_upsample_factor": 1,
         }
     )
     gridshape = propagation_parameters["grid_shape"]

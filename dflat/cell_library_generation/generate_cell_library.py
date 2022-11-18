@@ -11,7 +11,7 @@ import dflat.tools as df_tools
 def run_nanofin_Sweep(FM, shape_function):
 
     ### Specify RCWA Solver parameters
-    wavelength_set_m = np.arange(400e-9, 705e-9, 10e-9)
+    wavelength_set_m = np.arange(310e-9, 750e-9, 1e-9)
     rcwa_settings = {
         "wavelength_set_m": wavelength_set_m,
         "thetas": [0.0 for i in wavelength_set_m],
@@ -47,12 +47,12 @@ def run_nanofin_Sweep(FM, shape_function):
     paramlist = np.transpose(np.vstack((Len_x.flatten(), Len_y.flatten(), Theta.flatten())))
 
     ### Run library Sweep
-    savepath = "dflat/cell_library_generation/output/test_lib_gen"
+    savepath = "dflat/cell_library_generation/output/nanofin_holes"
     transmission, phase = lib_gen.run_zeroOrder_library_gen(
         rcwa_parameters,
         paramlist,
         cell_fun=shape_function,
-        showDebugPlot=True,
+        showDebugPlot=False,
         savepath=savepath,
         checkpoint_num=250,
     )

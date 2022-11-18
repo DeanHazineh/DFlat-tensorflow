@@ -1,4 +1,4 @@
-Projects that have used DFlat!
+Projects Built on D-Flat
 ==============================
 
 in development
