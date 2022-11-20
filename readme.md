@@ -3,7 +3,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Documentation Status](https://readthedocs.org/projects/dflat-master/badge/?version=latest)](https://dflat-master.readthedocs.io/en/latest/?badge=latest)
 
-# DFlat - V2.2.0
+# DFlat - V2.1.2
 <img src=/docs/imgs/DFlat_Long.png alt="Dflat" width="500"/>
 (Last updated v2.1 11/20/22)
 
