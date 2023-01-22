@@ -7,7 +7,7 @@ matplotlib.rcParams["ps.fonttype"] = 42
 
 from dflat.neural_optical_layer.core.models_DNN import *
 from dflat.neural_optical_layer.core.models_eRBF import *
-import dflat.tools.graphFunc as graphFunc
+import dflat.plot_utilities.graphFunc as graphFunc
 
 
 def plot_MLP_Nanocylinders(mlp_object):

@@ -127,13 +127,9 @@ class PSF_Layer(tf.keras.layers.Layer):
             ms_trans = ms_trans * tf.expand_dims(self.aperture_trans, 0)
 
         if batch_loop:
-            out = batch_loopWavelength_psf_measured(
-                ms_trans, ms_phase, self.__sqrt_energy_illum, point_source_locs, self.parameters_list
-            )
+            out = batch_loopWavelength_psf_measured(ms_trans, ms_phase, self.__sqrt_energy_illum, point_source_locs, self.parameters_list)
         else:
-            out = loopWavelength_psf_measured(
-                ms_trans, ms_phase, self.__sqrt_energy_illum, point_source_locs, self.parameters_list
-            )
+            out = loopWavelength_psf_measured(ms_trans, ms_phase, self.__sqrt_energy_illum, point_source_locs, self.parameters_list)
 
         return out
 
@@ -187,9 +183,7 @@ class PSF_Layer_MatrixBroadband(tf.keras.layers.Layer):
 
         # Verify that the user selected ASM_fourier engine as that is the only option for this accelerated routine
         if parameters["diffractionEngine"] != "ASM_fourier":
-            raise ValueError(
-                "This PSF Layer is only valid for ASM_fourier diffraction engine. Fresnel cannot be used here!"
-            )
+            raise ValueError("This PSF Layer is only valid for ASM_fourier diffraction engine. Fresnel cannot be used here!")
 
         # generate the modified parameters object suitable for the ASM broadband matrix version
         self.modified_parameters = self.__generate_new_parameters()
@@ -374,7 +368,7 @@ class PSF_Layer_Mono(tf.keras.layers.Layer):
 
         Returns:
             `list`: List containing the detector measured PSF intensity in the first argument and the phase in the
-                second argument, of shape (batch_size, Nps, sensor_pixel_number["y"], sensor_pixel_number["x"]).
+                second argument, of shape (profile_batch, num_point_sources, sensor_pixel_number["y"], sensor_pixel_number["x"]).
         """
         use_dtype = self.parameters["dtype"]
         ms_trans = inputs[0]
@@ -406,9 +400,7 @@ class PSF_Layer_Mono(tf.keras.layers.Layer):
         ms_trans = ms_trans * self.aperture_trans
 
         if batch_loop:
-            out = loopBatch_psf_measured(
-                point_source_locs, ms_trans, ms_phase, self.parameters, self.__sqrt_energy_illum
-            )
+            out = loopBatch_psf_measured(point_source_locs, ms_trans, ms_phase, self.parameters, self.__sqrt_energy_illum)
         else:
             out = psf_measured(
                 point_source_locs,
@@ -565,9 +557,7 @@ class Propagate_Planes_Layer_MatrixBroadband(tf.keras.layers.Layer):
 
         # Verify that the user selected ASM_fourier engine as that is the only option for this accelerated routine
         if parameters["diffractionEngine"] != "ASM_fourier":
-            raise ValueError(
-                "This Propagation Layer is only valid for ASM_fourier diffraction engine. Fresnel cannot be used here!"
-            )
+            raise ValueError("This Propagation Layer is only valid for ASM_fourier diffraction engine. Fresnel cannot be used here!")
 
         # generate the modified parameters object suitable for the ASM broadband matrix version
         self.modified_parameters = self.__generate_new_parameters()
@@ -632,13 +622,9 @@ class Propagate_Planes_Layer_MatrixBroadband(tf.keras.layers.Layer):
             field_phase = tf.expand_dims(field_phase, 0)
 
         if batch_loop:
-            out = batch_field_propagation_MatrixASM(
-                field_amplitude, field_phase, sim_wavelengths_m, self.modified_parameters
-            )
+            out = batch_field_propagation_MatrixASM(field_amplitude, field_phase, sim_wavelengths_m, self.modified_parameters)
         else:
-            out = field_propagation_MatrixASM(
-                field_amplitude, field_phase, sim_wavelengths_m, self.modified_parameters
-            )
+            out = field_propagation_MatrixASM(field_amplitude, field_phase, sim_wavelengths_m, self.modified_parameters)
 
         return out
 
@@ -732,6 +718,12 @@ class Propagate_Planes_Layer_Mono(tf.keras.layers.Layer):
         else:
             if not field_phase.dtype == use_dtype:
                 field_phase = tf.cast(field_phase, use_dtype)
+
+        # Check if convenient input rank is used (Rank 4 with size 1 extra dimension)
+        input_rank = tf.rank(field_amplitude)
+        if input_rank == tf.TensorShape(4):
+            field_amplitude = tf.squeeze(field_amplitude, 0)
+            field_phase = tf.squeeze(field_phase, 0)
 
         if batch_loop:
             out = loopBatch_field_propagation(field_amplitude, field_phase, self.parameters)

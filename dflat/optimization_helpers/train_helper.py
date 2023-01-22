@@ -3,7 +3,7 @@ import time
 import numpy as np
 
 
-def run_pipeline_optimization(pipeline, optimizer, num_epochs, loss_fn, allow_gpu=True):
+def run_pipeline_optimization(pipeline, optimizer, num_epochs, loss_fn=None, allow_gpu=True):
     """Runs the training for DFlat's custom pipelines.
 
     Args:
@@ -12,34 +12,42 @@ def run_pipeline_optimization(pipeline, optimizer, num_epochs, loss_fn, allow_gp
         `optimizer` (tf.keras.optimizers): Keras optimizer used during training.
         `num_epochs` (int): Number of training epochs.
         `loss_fn` (tf.function or function handle): Loss function to use. The input to the function must be the
-            pipeline's __call__ function output only.
+            pipeline's __call__ function output only. If none, the pipeline output value will be the loss by default.
         `allow_gpu` (bool, optional): Boolean flag indicating if training should be done on the discovered gpu device.
             Defaults to True. If memory of gpu is found to be insufficient, the trainer will automatically catch and
             switch to cpu.
     """
+    if loss_fn is None:
+
+        def loss_fn(pipeline_output):
+            return pipeline_output
+
+    # train_loop(pipeline, optimizer, loss_fn, num_epochs)
+
     if not allow_gpu:
         with tf.device("/cpu:0"):
-            train_loop(pipeline, optimizer, tf.function(loss_fn), num_epochs)
+            train_loop(pipeline, optimizer, loss_fn, num_epochs)
     else:
         try:
             with tf.device("/gpu:0"):
-                train_loop(pipeline, optimizer, tf.function(loss_fn), num_epochs)
+                train_loop(pipeline, optimizer, loss_fn, num_epochs)
         except:
             with tf.device("/cpu:0"):
-                train_loop(pipeline, optimizer, tf.function(loss_fn), num_epochs)
+                train_loop(pipeline, optimizer, loss_fn, num_epochs)
 
     return
 
 
 def train_loop(pipeline, optimizer, loss_fn, num_epochs):
+    # Create default loss function if none was provided
     lossVec = []
     mini_ckpt = pipeline.saveAtEpochs  # Checkpoint epoch number
     pipeline_loss = pipeline.loss_vector
-
     start_iter = len(pipeline_loss) if len(pipeline_loss) else 0
 
-    # Call the pipeline once before training
+    # Call once before starting training and save initial state visualization
     pipeline()
+    pipeline.visualizeTrainingCheckpoint(str(start_iter))
 
     # Run All Training Steps
     for epoch in range(num_epochs):
@@ -52,9 +60,11 @@ def train_loop(pipeline, optimizer, loss_fn, num_epochs):
 
         # After every N steps, save a figure with useful information
         if mini_ckpt:
-            if np.mod(start_iter + epoch, mini_ckpt) == 0:
-                print("Log Training at step: " + str(start_iter + epoch))
-                pipeline.visualizeTrainingCheckpoint(str(start_iter + epoch))
+            if np.mod(start_iter + epoch + 1, mini_ckpt) == 0:
+                print("Log Training at step: " + str(start_iter + epoch + 1))
+                pipeline.visualizeTrainingCheckpoint(str(start_iter + epoch + 1))
+
+                print("Save Checkpoint Model:")
                 pipeline.customSaveCheckpoint(lossVec)
                 lossVec = []
 

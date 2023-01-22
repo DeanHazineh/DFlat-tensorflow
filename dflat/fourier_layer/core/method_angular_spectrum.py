@@ -64,9 +64,7 @@ def transfer_function_Broadband(
     y = y * input_pixel_size_m["y"]
 
     ### Get the angular decomposition of the input field
-    fourier_transform_term = tf.complex(padded_wavefront_ampl, TF_ZERO) * tf.exp(
-        tf.complex(TF_ZERO, padded_wavefront_phase)
-    )
+    fourier_transform_term = tf.complex(padded_wavefront_ampl, TF_ZERO) * tf.exp(tf.complex(TF_ZERO, padded_wavefront_phase))
     if radial_symmetry:
         # Need resizing since qdht expects batchsize, 1, N
         kr, angular_spectrum = qdht(tf.squeeze(x), fourier_transform_term)
@@ -192,9 +190,7 @@ def transfer_function_diffraction(
     y = y * input_pixel_size_m["y"]
 
     ### Get the angular decomposition of the input field
-    fourier_transform_term = tf.complex(padded_wavefront_ampl, TF_ZERO) * tf.exp(
-        tf.complex(TF_ZERO, padded_wavefront_phase)
-    )
+    fourier_transform_term = tf.complex(padded_wavefront_ampl, TF_ZERO) * tf.exp(tf.complex(TF_ZERO, padded_wavefront_phase))
     if radial_symmetry:
         kr, angular_spectrum = qdht(tf.squeeze(x), fourier_transform_term)
     else:

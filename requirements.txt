@@ -8,3 +8,6 @@ sklearn
 mat73
 opencv-python
 pandas
+gdspy
+imageio
+tqdm

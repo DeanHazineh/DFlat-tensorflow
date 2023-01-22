@@ -35,10 +35,10 @@ def generate_simParam_set(rcwa_parameters):
     return rcwa_parameters_list
 
 
-def full_rcwa_shape(norm_param, rcwa_parameters):
+def full_rcwa_shape(norm_param, rcwa_parameters, cell_parameterization):
     ### Returns the complex field
 
-    Er, Ur = generate_cell_perm(norm_param, rcwa_parameters)
+    Er, Ur = generate_cell_perm(norm_param, rcwa_parameters, cell_parameterization)
 
     PQ_zero = tf.math.reduce_prod(rcwa_parameters["PQ"]) // 2
     outputs = simulate(Er, Ur, rcwa_parameters)
@@ -48,7 +48,7 @@ def full_rcwa_shape(norm_param, rcwa_parameters):
     return tf.transpose(tf.stack([tx, ty]), [1, 0, 3, 2])
 
 
-def batched_wavelength_rcwa_shape(norm_param, rcwa_parameters):
+def batched_wavelength_rcwa_shape(norm_param, rcwa_parameters, cell_parameterization):
 
     rcwa_parameters_list = generate_simParam_set(rcwa_parameters)
     num_wavelengths = len(rcwa_parameters_list)
@@ -57,7 +57,7 @@ def batched_wavelength_rcwa_shape(norm_param, rcwa_parameters):
         return tf.less(idx_, num_wavelengths)
 
     def lambda_loopBody(idx_, hold_field_):
-        field = full_rcwa_shape(norm_param, rcwa_parameters_list[idx_])
+        field = full_rcwa_shape(norm_param, rcwa_parameters_list[idx_], cell_parameterization)
         hold_field_ = tf.concat([hold_field_, field], axis=0)
         idx_ += 1
 

@@ -4,17 +4,14 @@ import matplotlib.pyplot as plt
 import time
 import pickle
 import os
-import shutil
 
 from dflat.physical_optical_layer.core.ms_parameterization import get_cartesian_grid
 from dflat.physical_optical_layer.core.colburn_solve_field import simulate
-import dflat.tools.graphFunc as gF
+import dflat.plot_utilities.graphFunc as gF
 
 
-def run_zeroOrder_library_gen(
-    rcwa_parameters, paramlist, cell_fun, showDebugPlot=False, savepath=None, checkpoint_num=500
-):
-
+def run_zeroOrder_library_gen(rcwa_parameters, paramlist, cell_fun, showDebugPlot=False, savepath=None, checkpoint_num=500):
+    # Enforce that the batch_wavelength dim is false since it is slow if done this way
     if rcwa_parameters["batch_wavelength_dim"] == True:
         raise ValueError("For library generation, dont batch wavelengths! Run in CPU instead of GPU of out of Memory")
 
@@ -29,8 +26,7 @@ def run_zeroOrder_library_gen(
     Nlay = rcwa_parameters["Nlay"]
     dtype = rcwa_parameters["dtype"]
     cdtype = rcwa_parameters["cdtype"]
-    layer_dielectric = rcwa_parameters["layer_dielectric"]
-
+    layer_dielectric = 1  # in old version, this was utilized differently
     paramlist = tf.convert_to_tensor(paramlist, dtype=dtype)
 
     materials_shape = (batchSize, pixelsX, pixelsY, Nlay, Nx, Ny)
@@ -38,12 +34,13 @@ def run_zeroOrder_library_gen(
     PQ_zero = tf.math.reduce_prod(rcwa_parameters["PQ"]) // 2
     lay_eps_list = rcwa_parameters["lay_eps_list"]
 
+    # Assume unity magnetic permeability
     UR = rcwa_parameters["urd"] * tf.ones(materials_shape, dtype=cdtype)
     ER_list = []
     for lay_eps in lay_eps_list:
         ER_list.append(lay_eps * tf.ones(materials_shape_lay, dtype=cdtype))
 
-    ### Get a reference field (reference field is crucial to interpret output I find)
+    ### Get a reference field (reference field is crucial to interpret outputs I find)
     outputs = simulate(tf.concat(values=ER_list, axis=3), UR, rcwa_parameters)
     tx_ref = outputs["tx"][:, 0, 0, PQ_zero, 0]
     ty_ref = outputs["ty"][:, 0, 0, PQ_zero, 0]
@@ -116,7 +113,7 @@ def run_zeroOrder_library_gen(
             with open(savepath + "Checkpoint.pickle", "wb") as handle:
                 pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    # If a checkpoint file was made, delete it
+    # If a checkpoint file was made and the full run is finished, delete it
     if savepath:
         if os.path.exists(savepath + "Checkpoint.pickle"):
             os.remove(savepath + "Checkpoint.pickle")

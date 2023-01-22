@@ -1,5 +1,5 @@
 # The QDHT code included here is a tensorflow port/implementation inspired by pyhank (https://github.com/etfrogers/pyhank Edward
-# Rogers) MIT License - Copyright (c) 2020 Edward Rogers
+# Rogers)
 
 
 import tensorflow as tf
@@ -49,9 +49,7 @@ def radial_conditional_resize_with_crop_or_pad(image, radial_symmetry, output_si
     image = tf.cond(
         radial_symmetry,
         lambda: radial_crop_or_pad(image, output_size),
-        lambda: tf.squeeze(
-            tf.image.resize_with_crop_or_pad(tf.expand_dims(image, -1), output_size["y"], output_size["x"]), -1
-        ),
+        lambda: tf.squeeze(tf.image.resize_with_crop_or_pad(tf.expand_dims(image, -1), output_size["y"], output_size["x"]), -1),
     )
 
     return image
@@ -130,9 +128,7 @@ def helper_spline_complex(r_ref_min, r_ref_max, r, fr):
         usetype = tf.float64
     TF_ZERO = tf.cast(0.0, dtype=usetype)
 
-    return tf.complex(f_transform_abs, TF_ZERO) * tf.exp(
-        tf.complex(TF_ZERO, tf.math.atan2(f_transform_imag, f_transform_real))
-    )
+    return tf.complex(f_transform_abs, TF_ZERO) * tf.exp(tf.complex(TF_ZERO, tf.math.atan2(f_transform_imag, f_transform_real)))
 
 
 def helper_spline_real(r_ref_min, r_ref_max, r, fr):
@@ -236,9 +232,7 @@ def qdht(radial_grid, fr, order=0):
     S = alpha_n1
 
     # Calculate hankel matrix and vectors
-    jp = tf.cast(
-        scipy_bessel.jv(order, tf.linalg.matmul(tf.expand_dims(alpha, -1), tf.expand_dims(alpha, 0)) / S), sdtype
-    )
+    jp = tf.cast(scipy_bessel.jv(order, tf.linalg.matmul(tf.expand_dims(alpha, -1), tf.expand_dims(alpha, 0)) / S), sdtype)
     jp1 = tf.cast(np.abs(scipy_bessel.jv(order + 1, alpha)), dtype=sdtype)
     T = 2 * jp / tf.linalg.matmul(tf.expand_dims(jp1, -1), tf.expand_dims(jp1, 0)) / S
     JR = jp1 / max_radius

@@ -1,10 +1,11 @@
 .vscode
-examples/output*
 *DS_Store
 **.egg-info
 
 DEAN_TEST_STUDIES/**
 DEAN_EXCLUDE_WORK/**
+#examples/output/*
+tests/*
 
 docs/**
 docs/build/**

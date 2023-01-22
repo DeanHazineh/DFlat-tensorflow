@@ -1,4 +1,4 @@
-from dflat.unit_tests import *
+from dflat.tests_unit import *
 
 testlist = [
     test_rcwa_layers,

@@ -7,10 +7,10 @@ from keras_flops import get_flops
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-import dflat.tools.graphFunc as graphFunc
+import dflat.plot_utilities.graphFunc as graphFunc
 from .util_neural import get_flops_alternate
 
-## BASE FOR NEURAL BASIS FUNCTION MODELS (PARENT - DO NOT ALTER THIS UNLESS YOU KNOW THE DETAILS)
+## BASE FOR NEURAL MODELS (PARENT - DO NOT ALTER THIS UNLESS YOU KNOW THE DETAILS)
 
 
 def get_path_to_data(folder_name: str):
@@ -75,9 +75,7 @@ class RBFLayer(tf.keras.layers.Layer):
 
     def build(self, input_shape):
 
-        self.centers = self.add_weight(
-            name="centers", shape=(self.output_dim, input_shape[1]), initializer=self.initializer, trainable=True
-        )
+        self.centers = self.add_weight(name="centers", shape=(self.output_dim, input_shape[1]), initializer=self.initializer, trainable=True)
         self.betas = self.add_weight(
             name="betas",
             shape=(1, self.output_dim),
@@ -143,9 +141,7 @@ class EBFLayer(tf.keras.layers.Layer):
 
     def build(self, input_shape):
 
-        self.centers = self.add_weight(
-            name="centers", shape=(self.output_dim, input_shape[1]), initializer=self.initializer, trainable=True
-        )
+        self.centers = self.add_weight(name="centers", shape=(self.output_dim, input_shape[1]), initializer=self.initializer, trainable=True)
         self.betas = self.add_weight(
             name="betas",
             shape=(input_shape[1], self.output_dim),
@@ -338,18 +334,15 @@ class MLP_Object(tf.keras.Model):
 
     def normalizeWavelength(self, wavelength_m):
 
-        # print(self.__dataBoundsLabel[-1])
-        # tf.debugging.assert_equal(
-        #     self.__dataBoundsLabel[-1],
-        #     "wavelength_m",
-        #     message="wavelength should have been the last listed parameter",
-        #     name="preprocessDataBound format assertion",
-        # )
-
-        wavelength_preprocessBounds = self.__preprocessDataBounds[-1]
-        wavelength_mlp = (wavelength_m - wavelength_preprocessBounds[0]) / (
-            wavelength_preprocessBounds[1] - wavelength_preprocessBounds[0]
+        tf.debugging.assert_equal(
+            self.__dataBoundsLabel[-1],
+            "wavelength_m",
+            message="wavelength should have been the last listed parameter",
+            name="preprocessDataBound format assertion",
         )
+        wavelength_preprocessBounds = self.__preprocessDataBounds[-1]
+
+        wavelength_mlp = (wavelength_m - wavelength_preprocessBounds[0]) / (wavelength_preprocessBounds[1] - wavelength_preprocessBounds[0])
 
         return wavelength_mlp
 
@@ -430,7 +423,7 @@ class MLP_Object(tf.keras.Model):
         print("FLOPs Analysis 1: Keras_Flops: ", estFLOPs)
         print("\n ======================================= \n ")
 
-        # Use second function
-        print("The v2 FLOPs is:{}".format(get_flops_alternate(tempModel)), flush=True)
+        ## Use second function
+        # print("The v2 FLOPs is:{}".format(get_flops_alternate(tempModel)), flush=True)
 
         return estFLOPs

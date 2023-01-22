@@ -62,9 +62,7 @@ def fresnel_diffraction_fft(
 
     fourier_transform_trans = wavefront_ampl
     fourier_transform_phase = wavefront_phase + tf.expand_dims(quadratic_term, 0)
-    fourier_transform_term = tf.complex(fourier_transform_trans, TF_ZERO) * tf.exp(
-        tf.complex(TF_ZERO, fourier_transform_phase)
-    )
+    fourier_transform_term = tf.complex(fourier_transform_trans, TF_ZERO) * tf.exp(tf.complex(TF_ZERO, fourier_transform_phase))
 
     # If radialy symmetric input, then use the hankel transform otherwise use 2D DFT
     if radial_symmetry:
@@ -85,9 +83,7 @@ def fresnel_diffraction_fft(
             TF_ZERO,
         )
 
-        ang_fx = tf.range(
-            0, 1 / 2 / input_pixel_size_m["x"], 1 / input_pixel_size_m["x"] / input_pixel_number["x"], dtype=dtype
-        )
+        ang_fx = tf.range(0, 1 / 2 / input_pixel_size_m["x"], 1 / input_pixel_size_m["x"] / input_pixel_number["x"], dtype=dtype)
         wavefront_outPlane = tf_generalSpline_regular1DGrid(kr / 2 / np.pi, ang_fx, wavefront_outPlane) * normterm
     else:
         normterm = tf.complex(
@@ -104,9 +100,7 @@ def fresnel_diffraction_fft(
             ),
             TF_ZERO,
         )
-        wavefront_outPlane = (
-            tf.signal.fftshift(tf.signal.fft2d(tf.signal.ifftshift(fourier_transform_term))) * normterm
-        )
+        wavefront_outPlane = tf.signal.fftshift(tf.signal.fft2d(tf.signal.ifftshift(fourier_transform_term))) * normterm
 
     return tf.abs(wavefront_outPlane), tf.math.angle(wavefront_outPlane)
 
@@ -174,8 +168,6 @@ def fresnel_diffraction_coeffs(
     #     * tf.complex(TF_ZERO, tf.cast(1.0 / wavelength_m / distance_m, dtype))
     #     * tf.exp(tf.complex(TF_ZERO, wavefront_phase + angular_wave_number * quadterm))
     # )
-    wavefront = tf.complex(out_wavefront_ampl, TF_ZERO) * tf.exp(
-        tf.complex(TF_ZERO, out_wavefront_phase + angular_wave_number * quadterm)
-    )
+    wavefront = tf.complex(out_wavefront_ampl, TF_ZERO) * tf.exp(tf.complex(TF_ZERO, out_wavefront_phase + angular_wave_number * quadterm))
 
     return tf.math.abs(wavefront), tf.math.angle(wavefront)

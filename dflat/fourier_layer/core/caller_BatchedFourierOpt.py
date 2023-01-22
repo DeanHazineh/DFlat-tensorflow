@@ -34,9 +34,7 @@ def loopBatch_field_propagation(field_amplitude, field_phase, parameters):
 
     # The loop body
     def lambda_loopBody(idx_, holdField_ampl_, holdField_phase_):
-        fields_ampl, fields_phase = field_propagation(
-            field_amplitude[idx_ : idx_ + 1], field_phase[idx_ : idx_ + 1], parameters
-        )
+        fields_ampl, fields_phase = field_propagation(field_amplitude[idx_ : idx_ + 1], field_phase[idx_ : idx_ + 1], parameters)
         holdField_ampl_ = tf.concat([holdField_ampl_, fields_ampl], axis=0)
         holdField_phase_ = tf.concat([holdField_phase_, fields_phase], axis=0)
 
@@ -129,9 +127,7 @@ def loopWavelength_field_propagation(field_amplitude, field_phase, parameters_li
             return [idx_, holdField_ampl_, holdField_phase_]
 
     else:
-        raise ValueError(
-            "broadband field propagation: rank of ms_trans and/or ms_phase is incorrect. must be rank 3 or rank 4 tensor."
-        )
+        raise ValueError("broadband field propagation: rank of ms_trans and/or ms_phase is incorrect. must be rank 3 or rank 4 tensor.")
 
     # Run batched loop with manual conditional overloading on function
     sensor_pixel_number = parameters_list[0]["sensor_pixel_number"]
@@ -198,9 +194,7 @@ def batch_loopWavelength_field_propagation(field_amplitude, field_phase, paramet
         num_ms = field_amplitude.shape[0]
 
         def lambda_loopBody(idx_, holdField_ampl_, holdField_phase_, num_ms_):
-            ampl, phase = loopWavelength_field_propagation(
-                field_amplitude[idx_ : idx_ + 1], field_phase[idx_ : idx_ + 1], parameters_list
-            )
+            ampl, phase = loopWavelength_field_propagation(field_amplitude[idx_ : idx_ + 1], field_phase[idx_ : idx_ + 1], parameters_list)
 
             holdField_ampl_ = tf.concat([holdField_ampl_, ampl], axis=1)
             holdField_phase_ = tf.concat([holdField_phase_, phase], axis=1)
@@ -226,9 +220,7 @@ def batch_loopWavelength_field_propagation(field_amplitude, field_phase, paramet
             return [idx_, holdField_ampl_, holdField_phase_, num_ms_]
 
     else:
-        raise ValueError(
-            "broadband field propagation: rank of ms_trans and/or ms_phase is incorrect. must be rank 3 or rank 4 tensor."
-        )
+        raise ValueError("broadband field propagation: rank of ms_trans and/or ms_phase is incorrect. must be rank 3 or rank 4 tensor.")
 
     # Run batched loop with manual conditional overloading on function
     sensor_pixel_number = parameters_list[0]["sensor_pixel_number"]
@@ -240,9 +232,7 @@ def batch_loopWavelength_field_propagation(field_amplitude, field_phase, paramet
 
     holdField_ampl = tf.zeros((num_wavelengths, 1, num_pts_y, num_pts_x), dtype=dtype)
     holdField_phase = tf.zeros((num_wavelengths, 1, num_pts_y, num_pts_x), dtype=dtype)
-    loopData = tf.while_loop(
-        lambda_loopCond, lambda_loopBody, loop_vars=[idx, holdField_ampl, holdField_phase, num_ms]
-    )
+    loopData = tf.while_loop(lambda_loopCond, lambda_loopBody, loop_vars=[idx, holdField_ampl, holdField_phase, num_ms])
 
     return (
         tf.stack(loopData[1][:, 1:, :, :]),
@@ -336,9 +326,7 @@ def loopBatch_psf_measured(point_source_locs, ms_trans, ms_phase, parameters, no
 
     # The loop body
     def lambda_loopBody(idx_, holdPSF_int_, holdPSF_phase_):
-        psfs_int, psfs_phase = psf_measured(
-            point_source_locs, ms_trans[idx_ : idx_ + 1], ms_phase[idx_ : idx_ + 1], parameters, normby
-        )
+        psfs_int, psfs_phase = psf_measured(point_source_locs, ms_trans[idx_ : idx_ + 1], ms_phase[idx_ : idx_ + 1], parameters, normby)
 
         holdPSF_int_ = tf.concat([holdPSF_int_, psfs_int], axis=0)
         holdPSF_phase_ = tf.concat([holdPSF_phase_, psfs_phase], axis=0)
@@ -439,9 +427,7 @@ def loopWavelength_psf_measured(ms_trans, ms_phase, normby, point_source_locs, p
             return [idx_, holdPSF_int_, holdPSF_phase_]
 
     else:
-        raise ValueError(
-            "broadband_batched_psf_measured: rank of ms_trans and/or ms_phase is incorrect. must be rank 3 or rank 4 tensor."
-        )
+        raise ValueError("broadband_batched_psf_measured: rank of ms_trans and/or ms_phase is incorrect. must be rank 3 or rank 4 tensor.")
 
     # Run batched loop with manual conditional overloading on function
     sensor_pixel_number = parameters_list[0]["sensor_pixel_number"]  # wavelength invariant quantity so grab from any
@@ -536,9 +522,7 @@ def batch_loopWavelength_psf_measured(ms_trans, ms_phase, normby, point_source_l
             return [idx_, holdPSF_int_, holdPSF_phase_, num_ms_]
 
     else:
-        raise ValueError(
-            "broadband_batched_psf_measured: rank of ms_trans and/or ms_phase is incorrect. must be rank 3 or rank 4 tensor."
-        )
+        raise ValueError("broadband_batched_psf_measured: rank of ms_trans and/or ms_phase is incorrect. must be rank 3 or rank 4 tensor.")
 
     # Run batched loop with manual conditional overloading on function
     sensor_pixel_number = parameters_list[0]["sensor_pixel_number"]  # wavelength invariant quantity so grab from any
@@ -546,12 +530,8 @@ def batch_loopWavelength_psf_measured(ms_trans, ms_phase, normby, point_source_l
     num_ps = point_source_locs.shape[0]
     idx = tf.constant(0, dtype=tf.int32)
 
-    holdPSF_int = tf.zeros(
-        (num_wavelengths, 1, num_ps, sensor_pixel_number["y"], sensor_pixel_number["x"]), dtype=dtype
-    )
-    holdPSF_phase = tf.zeros(
-        (num_wavelengths, 1, num_ps, sensor_pixel_number["y"], sensor_pixel_number["x"]), dtype=dtype
-    )
+    holdPSF_int = tf.zeros((num_wavelengths, 1, num_ps, sensor_pixel_number["y"], sensor_pixel_number["x"]), dtype=dtype)
+    holdPSF_phase = tf.zeros((num_wavelengths, 1, num_ps, sensor_pixel_number["y"], sensor_pixel_number["x"]), dtype=dtype)
     loopData = tf.while_loop(lambda_loopCond, lambda_loopBody, loop_vars=[idx, holdPSF_int, holdPSF_phase, num_ms])
 
     return (

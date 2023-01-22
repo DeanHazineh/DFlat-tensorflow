@@ -1,31 +1,5 @@
 from .core.ops_field_aperture import sqrt_energy_illumination, gen_aperture_disk
 import numpy as np
-from scipy.ndimage import zoom
-import tensorflow as tf
-
-
-def getCoordinates_vector(pixel_number_dict, dx_dict, radial_symmetry, dtype):
-    if radial_symmetry:
-        grid_x = tf.range(pixel_number_dict["r"], dtype=dtype)
-        grid_y = tf.range(1, dtype=dtype)
-    else:
-        grid_x = tf.range(pixel_number_dict["x"], dtype=dtype)
-        grid_y = tf.range(pixel_number_dict["y"], dtype=dtype)
-        grid_x = grid_x - (len(grid_x) - 1) / 2
-        grid_y = grid_y - (len(grid_y) - 1) / 2
-
-    grid_x = grid_x * dx_dict["x"]
-    grid_y = grid_y * dx_dict["y"]
-    grid_x = tf.expand_dims(grid_x, 0)
-    grid_y = tf.expand_dims(grid_y, 0)
-
-    return grid_x, grid_y
-
-
-def getCoordinates_mesh(pixel_number_dict, dx_dict, radial_symmetry, dtype):
-    grid_x, grid_y = getCoordinates_vector(pixel_number_dict, dx_dict, radial_symmetry, dtype)
-    grid_x, grid_y = tf.meshgrid(grid_x, grid_y)
-    return grid_x, grid_y
 
 
 def focus_lens_init(parameters, wavelength_m_aslist, focal_distance_m_aslist, focus_offset_m_aslist):
@@ -67,24 +41,13 @@ def focus_lens_init(parameters, wavelength_m_aslist, focal_distance_m_aslist, fo
     radius_m = parameters["radius_m"]
 
     # Handle exception if focus_distance, wavelength, or offset are not passed as lists
-    if (
-        (type(focal_distance_m_aslist) is not list)
-        or (type(focus_offset_m_aslist) is not list)
-        or (type(wavelength_m_aslist) is not list)
-    ):
+    if (type(focal_distance_m_aslist) is not list) or (type(focus_offset_m_aslist) is not list) or (type(wavelength_m_aslist) is not list):
         raise TypeError("focus_lens_init: focal_distance_m_aslist and focus_offset_m_aslist must be passed as list")
 
     # Handle exception if list lengths are not all the same
     length = len(wavelength_m_aslist)
     if not all(len(lst) == length for lst in [focal_distance_m_aslist, focus_offset_m_aslist]):
         raise ValueError("focus_lens_init: All inputted lists must have the same length")
-
-    # Handle exception if focusing lens radius exceeds the radius of the unpadded lens space
-    maxradx = ms_dx_m["x"] * ((ms_samplesM["x"] - 1) / 2)
-    maxrady = ms_dx_m["y"] * ((ms_samplesM["y"] - 1) / 2)
-    if radius_m:
-        if radius_m > np.min([maxradx, maxrady]):
-            raise ValueError("focus_lens_init: lens radius exceeds the minimum radius of the initialzed lens-grid")
 
     # Loop over focusing lenses and generate metasurfaces profiles
     lens_transmittanceStack = []
@@ -102,9 +65,8 @@ def focus_lens_init(parameters, wavelength_m_aslist, focal_distance_m_aslist, fo
             radial_symmetry,
         )
 
-        complexLens = lens_transmittance * np.exp(1j * lens_phase)
-        lens_transmittanceStack.append(np.abs(complexLens))
-        lens_phaseStack.append(np.angle(complexLens))
+        lens_transmittanceStack.append(lens_transmittance)
+        lens_phaseStack.append(lens_phase)
         aperture_transmittanceStack.append(aperture_transmittance)
 
     lens_transmittanceStack = np.stack(lens_transmittanceStack)
@@ -120,9 +82,7 @@ def focus_lens_init(parameters, wavelength_m_aslist, focal_distance_m_aslist, fo
     )
 
 
-def gen_focusing_profile(
-    ms_samplesM, ms_dx_m, wavelength_m, focal_distance_m, focus_offset_m, sensor_distance_m, radius_m, radial_symmetry
-):
+def gen_focusing_profile(ms_samplesM, ms_dx_m, wavelength_m, focal_distance_m, focus_offset_m, sensor_distance_m, radius_m, radial_symmetry):
     """Generate the metasurface phase and transmittance profile for ideal focusing of light. Focusing is designed for a
     single, input wavelength, object plane distance/depth, and sensor distance. The lens may also be specified to focus
     light with an off-axis focal shift.
@@ -172,7 +132,6 @@ def gen_focusing_profile(
     # Wrap to 2pi
     complex_lens = lens_transmittance * np.exp(1j * lens_phase)
     lens_phase = np.angle(complex_lens)
-    # lens_transmittance = np.abs(lens_transmittance)
 
     # Define the lens aperture
     # Add a small transmittance to the block portion to avoid nan gradients downstream!
@@ -181,7 +140,8 @@ def gen_focusing_profile(
         flg = ((np.sqrt(xx**2 + yy**2) <= radius_m)).astype(np.float32) + 1e-6
         aperture_transmittance *= flg
 
-    # Get measure of total radiance passed through the aperture onto the metasurface
+    # Get measure of total radiance passed through the aperture onto the metasurface which is useful for
+    # field normalizations
     sqrt_energy_illum = sqrt_energy_illumination(np.expand_dims(aperture_transmittance, 0), ms_dx_m, False)
 
     # Handle return case if radial_symmetry flag is active

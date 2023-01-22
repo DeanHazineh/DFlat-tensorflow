@@ -23,18 +23,13 @@ class customLoss(tf.keras.losses.Loss):
 
         # MAE of Complex phasors
         return tf.math.reduce_mean(
-            tf.math.sqrt(
-                tf.math.square(tf.math.real(field_true - field_pred))
-                + tf.math.square(tf.math.imag(field_true - field_pred))
-            )
+            tf.math.sqrt(tf.math.square(tf.math.real(field_true - field_pred)) + tf.math.square(tf.math.imag(field_true - field_pred)))
         )
 
 
 def get_flops_alternate(keras_sequential_model):
     concrete = tf.function(lambda inputs: keras_sequential_model(inputs))
-    concrete_func = concrete.get_concrete_function(
-        [tf.TensorSpec([1, *inputs.shape[1:]]) for inputs in keras_sequential_model.inputs]
-    )
+    concrete_func = concrete.get_concrete_function([tf.TensorSpec([1, *inputs.shape[1:]]) for inputs in keras_sequential_model.inputs])
     frozen_func, graph_def = convert_variables_to_constants_v2_as_graph(concrete_func)
     with tf.Graph().as_default() as graph:
         tf.graph_util.import_graph_def(graph_def, name="")

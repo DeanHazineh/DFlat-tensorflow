@@ -4,3 +4,5 @@ from .libraryClass import (
     Nanoellipse_U350nm_H600nm,
     listLibraryNames,
 )
+
+from .initialization_utilities import optical_response_to_param

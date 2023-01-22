@@ -5,10 +5,10 @@ import math
 
 ALL_MANDATORY_KEYS = [
     ["wavelength_m", "wavelength_set_m"],  # Simulation wavelengths
-    "ms_length_m",  # Initial Field/DOE length (m)
+    "ms_samplesM",  # number of samples in the input field, as dictionary {"x": Mx, "y": My}
     "ms_dx_m",  # Initial Field/DOE discretization (m)
     "sensor_distance_m",  # Distance from first plane to output plane (normal to input field)
-    "initial_sensor_dx_m",  # Requested output/sensor grid discretization
+    "initial_sensor_dx_m",  # Requested output/sensor grid discretization for field calculations
     "sensor_pixel_size_m",  # Requested output/sensor "pixel size" to downsample field by area integration to (if different)
     "sensor_pixel_number",  # Number of output/sensor "pixels" along x and y
     "radial_symmetry",  # Flag whether the input has radial symmetry and is given by a radial vector
@@ -18,19 +18,19 @@ ALL_MANDATORY_KEYS = [
 diffractionEngines = ["fresnel_fourier", "ASM_fourier"]
 
 ALL_OPTIONAL_KEYS = {
-    "automatic_upsample": True,
-    "manual_upsample_factor": 1,
-    "radius_m": None,
+    "manual_upsample_factor": 1,  # Factor to upsample the input fields when conducting calculations
+    "automatic_upsample": False,  # Flag to indicate if DFlat should estimate and apply its own upsample factor
+    "radius_m": None,  # Radius of a circular field aperture to consider against the square input field array
     "dtype": tf.float64,
-    "accurate_measurement": True,
-    "ASM_Pad_opt": 1,
+    "accurate_measurement": True,  # Development flag to control field resize correction at the output plane (Should be True when deploy)
+    "ASM_Pad_opt": 1,  # Development flag to control field padding for ASM Field transformations
 }
 
 HIDDEN_KEYS = ["_prop_params__verbose"]
 
-## These keys get added to the dictionary after initialization and processing of the user-provided inputs
+## These keys get automatically added to the dictionary after initialization and processing of the user-provided inputs
 ADDED_KEYS = [
-    "ms_samplesM",
+    "ms_length_m",
     "calc_ms_dx_m",
     "padms_half",
     "calc_samplesN",
@@ -105,21 +105,22 @@ class prop_params(dict):
         self.__check_optional_keys()
         self.__check_unknown_keys()
         self.__check_diffractionEngine_selection()
+        self.__check_number_samples_int()
         self.__check_radial_symmetry()
         self.__check_detector_pixel_size()
 
         self.__add_implied_keys()
         self.__verbose = verbose
-        self.__enforce_odd_sensor_pixel_number()
+        # self.__enforce_odd_sensor_pixel_number()
 
         # If wavelength_m is given, this is a usable prop_instance keys
         # so generate the additional keys required for function calls.
         # If wavelength_set_m is given instead, this is a parent object and
-        # additional keys should not be added to avoid confusion.
+        # additional keys given how the fourier class is coded -->
 
         # The reason is two-fold:
         # - First, we allow users to use the Fresnel FFT method and get a user-specified output grid!
-        # - This output grid requires zero-padding the initial field by an amount dependent on wavelength
+        # - This output grid requires zero-padding the initial field by an amount dependent on wavelength.
         # - Second, we have implemented an optional approach to determine automatically an estimate of upsampling
         # - which is dependent on the simulation wavelength!
         if "wavelength_m" in self.__dict__.keys():
@@ -127,23 +128,22 @@ class prop_params(dict):
 
         return
 
+    ### Check/Enforce proper inputs
     def __check_mandatory_keys(self):
+        # Verify all mandatory keys are included
         for exclusive_key in ALL_MANDATORY_KEYS:
-
             if isinstance(exclusive_key, list):
                 if not any(check_key in self.__dict__.keys() for check_key in exclusive_key):
                     print(exclusive_key)
                     raise KeyError("\n params: one of the above keys must be included")
             else:
                 if not (exclusive_key in self.__dict__.keys()):
-                    raise KeyError(
-                        "params: Missing mandatory parameter option for simulation settings: " + exclusive_key
-                    )
+                    raise KeyError("params: Missing mandatory parameter option for simulation settings: " + exclusive_key)
 
         return
 
     def __check_wavelength_key(self):
-        # only one of wavelength_m or wavelength_set_m should be provided.
+        # only one of wavelength_m or wavelength_set_m should be provided in current version of dflat
         if ("wavelength_set_m" in self.__dict__.keys()) and ("wavelength_m" in self.__dict__.keys()):
             raise KeyError("params: wavelength_m and wavelength_set_m cannot both be given. Choose one or the other.")
 
@@ -160,6 +160,7 @@ class prop_params(dict):
 
     def __check_optional_keys(self):
         for optional_key in ALL_OPTIONAL_KEYS.keys():
+            # If an optional key was not provided, add and assign to default optional value
             if not (optional_key in self.__dict__.keys()):
                 self.__dict__[optional_key] = ALL_OPTIONAL_KEYS[optional_key]
 
@@ -176,9 +177,7 @@ class prop_params(dict):
 
         # Check unknown keys against all possible keys
         for providedKey in self.__dict__.keys():
-            if not providedKey in (
-                flattened_all_mandatory_keys + list(ALL_OPTIONAL_KEYS.keys()) + HIDDEN_KEYS + ADDED_KEYS
-            ):
+            if not providedKey in (flattened_all_mandatory_keys + list(ALL_OPTIONAL_KEYS.keys()) + HIDDEN_KEYS + ADDED_KEYS):
                 raise KeyError("params: unknown parameter key/setting inputed: " + providedKey)
 
         return
@@ -189,70 +188,70 @@ class prop_params(dict):
 
         return
 
+    def __check_number_samples_int(self):
+        # To be safe and not have to cast later, lets ensure that ms_samplesM is passed in as an integer dictionary
+        ms_samplesM = self.__dict__["ms_samplesM"]
+        if not (isinstance(ms_samplesM["x"], int) and isinstance(ms_samplesM["y"], int)):
+            print("Warning on params initialization: ms_samplesM should be an int. Int casting used")
+            self.__dict__["ms_samplesM"] = {"x": int(ms_samplesM["x"]), "y": int(ms_samplesM["y"])}
+
+        return
+
     def __check_radial_symmetry(self):
         # If radial_symmetry flag is activated, ensure initial lens space is square and uniformly sampled
+        # also, ms_samplesM must have an odd number of samples otherwise radial vector is poorly defined at zero
         if self.__dict__["radial_symmetry"]:
-            ms_length_m = self.__dict__["ms_length_m"]
+            ms_samplesM = self.__dict__["ms_samplesM"]
             ms_dx_m = self.__dict__["ms_dx_m"]
 
-            if not (ms_length_m["x"] == ms_length_m["y"]):
+            if not (ms_samplesM["x"] == ms_samplesM["y"]):
                 raise ValueError("params: initial_lens_length_m must be square when radial_symmetry flag is used")
 
             if not (ms_dx_m["x"] == ms_dx_m["y"]):
-                raise ValueError(
-                    "params: iniital_lens_dx_m must be same along x and y when radial_symmetry flag is used"
-                )
+                raise ValueError("params: iniital_lens_dx_m must be same along x and y when radial_symmetry flag is used")
+
+            if np.mod(ms_samplesM["x"], 2) == 0:
+                raise ValueError("params: ms_samplesM must have an odd number of samples to use radial flag")
 
         return
 
     def __check_detector_pixel_size(self):
+        # The initial sensor-side calculation grid should always be equal to or smaller than the sensor "pixel" size
         initial_sensor_dx_m = self.__dict__["initial_sensor_dx_m"]
         sensor_pixel_size_m = self.__dict__["sensor_pixel_size_m"]
-        if (initial_sensor_dx_m["x"] > sensor_pixel_size_m["x"]) or (
-            initial_sensor_dx_m["y"] > sensor_pixel_size_m["y"]
-        ):
+        if (initial_sensor_dx_m["x"] > sensor_pixel_size_m["x"]) or (initial_sensor_dx_m["y"] > sensor_pixel_size_m["y"]):
             raise ValueError(
                 "params: requested output/sensor plane field grid cannot be discretized larger than the requested resampled output/detector 'pixel' size!"
             )
 
         return
 
+    ### Add useful Keys for downstream calculations
     def __add_implied_keys(self):
-        # add key for number samples in user's optic/field
-        # For convenience lets enforce odd number of samples
-        ms_length_m = self.__dict__["ms_length_m"]
+        # add key for the length of the user-passed metasurface
         ms_dx_m = self.__dict__["ms_dx_m"]
-        ms_samplesM_x = int(math.ceil(ms_length_m["x"] / ms_dx_m["x"]))
-        ms_samplesM_y = int(math.ceil(ms_length_m["y"] / ms_dx_m["y"]))
-        # ms_samplesM_x = int(round(ms_length_m["x"] / ms_dx_m["x"]))
-        # ms_samplesM_y = int(round(ms_length_m["y"] / ms_dx_m["y"]))
+        ms_samplesM = self.__dict__["ms_samplesM"]
+        ms_length_m = {"x": ms_dx_m["x"] * ms_samplesM["x"], "y": ms_dx_m["y"] * ms_samplesM["y"]}
+        self.__dict__["ms_length_m"] = ms_length_m
 
-        if np.mod(ms_samplesM_x, 2) == 0:
-            ms_samplesM_x += 1
-        if np.mod(ms_samplesM_y, 2) == 0:
-            ms_samplesM_y += 1
+        # Add a radial length into the ms_samplesM key
+        ms_samplesM_r = int((ms_samplesM["x"] - 1) / 2 + 1)
+        self.__dict__["ms_samplesM"] = {"x": ms_samplesM["x"], "y": ms_samplesM["y"], "r": ms_samplesM_r}
 
-        ms_samplesM_r = int((ms_samplesM_x - 1) / 2 + 1)
-
-        self.__dict__["ms_samplesM"] = {
-            "x": ms_samplesM_x,
-            "y": ms_samplesM_y,
-            "r": ms_samplesM_r,
-        }
-
-        # It is handy downstream to add a grid_shape key:
+        # It is convenient to add the lens shapes to a grid_shape parameter
         if self.__dict__["radial_symmetry"]:
-            self.__dict__["grid_shape"] = [1, 1, ms_samplesM_r]
+            grid_shape = [1, 1, ms_samplesM_r]
         else:
-            self.__dict__["grid_shape"] = [1, ms_samplesM_y, ms_samplesM_x]
+            grid_shape = [1, ms_samplesM["y"], ms_samplesM["x"]]
+        self.__dict__["grid_shape"] = grid_shape
 
         return
 
     def __enforce_odd_sensor_pixel_number(self):
+        # Note: Need to go back and see if this is actually needed
         sensor_pixel_number = self.__dict__["sensor_pixel_number"]
         sensor_num_x = sensor_pixel_number["x"]
         sensor_num_y = sensor_pixel_number["y"]
-
         if np.mod(sensor_num_x, 2) == 0:
             sensor_num_x += 1
         if np.mod(sensor_num_y, 2) == 0:
@@ -264,6 +263,7 @@ class prop_params(dict):
 
         return
 
+    ### Run regularization on input output space for proper calculations
     def __regularizeInputOutputSpace(self):
         # Call to update lens sampling rate and number of samples representing the upadded lens
         self.__regularizeLensPlaneSampling()
@@ -273,6 +273,7 @@ class prop_params(dict):
 
         # Print statement to show if samples have changed relative to what the user requested
         if self.__verbose:
+            ms_length_m = self.__dict__["ms_length_m"]
             ms_dx_m = self.__dict__["ms_dx_m"]
             calc_ms_dx_m = self.__dict__["calc_ms_dx_m"]
             ms_samplesM = self.__dict__["ms_samplesM"]
@@ -284,6 +285,7 @@ class prop_params(dict):
             sensor_pixel_number = self.__dict__["sensor_pixel_number"]
 
             print("\n OVERVIEW OF PARAMETERS \n")
+            print("\n", "ms_length_m: ", ms_length_m)
             print("\n", "ms_dx_m: ", ms_dx_m)
             print("\n", "calc_ms_dx_m: ", calc_ms_dx_m)
             print("\n", "ms_samplesM: ", ms_samplesM)
@@ -291,19 +293,19 @@ class prop_params(dict):
             print("\n", "calc_samplesN: ", calc_samplesN)
             print("\n", "initial_sensor_dx_m: ", initial_sensor_dx_m)
             print("\n", "calc_sensor_dx_m: ", calc_sensor_dx_m)
-            print("\n", "detector pixel size: ", sensor_pixel_size_m)
-            print("\n", "detector pixel number: ", sensor_pixel_number)
+            print("\n", "sensor_pixel_size_m: ", sensor_pixel_size_m)
+            print("\n", "sensor_pixel_number: ", sensor_pixel_number)
             print("\n")
         return
 
     def __regularizeLensPlaneSampling(self):
-        ### Setup values fro calc_ms_dx and calc_ms_dy which is the initial grid size that will be used during calculations!
+        ### Setup values for calc_ms_dx and calc_ms_dy which is the initial field grid size that will be used during calculations!
         ### which may be smaller than the user specified grid in order to try and get more accurate field caluclations
-        diffractionEngine = self.__dict__["diffractionEngine"]
 
-        # Obtain the max estimated bandwidth required to compute metasurface sampling rate cutoff
+        # Obtain the max estimated bandwidth required to compute a metasurface sampling rate cutoff
         # For the fresnel case, just get estBandwidth from quadratic phase profile
         # For the exact transfer function, we should consider the estBandwidth vs the H bandwidth
+        diffractionEngine = self.__dict__["diffractionEngine"]
         if diffractionEngine == "fresnel_fourier":
             estBandwidth = estimateBandwidth(self.__dict__)
         elif diffractionEngine == "ASM_fourier":
@@ -311,24 +313,20 @@ class prop_params(dict):
             tf_bandwidth = np.array([1 / wavelength_m, 1 / wavelength_m])
             quad_bandwidth = estimateBandwidth(self.__dict__)
             estBandwidth = np.maximum(tf_bandwidth, quad_bandwidth)
-
         samplingCutoff = 1 / 2 / estBandwidth
-        ms_dx_m = self.__dict__["ms_dx_m"]
 
         # define calculation sampling of initial field/lens space (consistent to nyquist rule)
         # automatic_upsample determines if we use our estimate calculation for sampling requirement or just use the user
         # specified number of samples with some manual upsample factor
+        ms_dx_m = self.__dict__["ms_dx_m"]
         automatic_upsample = self.__dict__["automatic_upsample"]
-        manual_upsample_factor = self.__dict__["manual_upsample_factor"]
-        calc_ms_dx = ms_dx_m["x"]
-        calc_ms_dy = ms_dx_m["y"]
-
+        manual_upsample_factor = int(self.__dict__["manual_upsample_factor"])
         if automatic_upsample:
-            calc_ms_dx = samplingCutoff[0] if ms_dx_m["x"] > samplingCutoff[0] else calc_ms_dx
-            calc_ms_dy = samplingCutoff[1] if ms_dx_m["y"] > samplingCutoff[1] else calc_ms_dy
+            calc_ms_dx = samplingCutoff[0] if ms_dx_m["x"] > samplingCutoff[0] else ms_dx_m["x"]
+            calc_ms_dy = samplingCutoff[1] if ms_dx_m["y"] > samplingCutoff[1] else ms_dx_m["y"]
         else:
-            calc_ms_dx = calc_ms_dx / manual_upsample_factor
-            calc_ms_dy = calc_ms_dy / manual_upsample_factor
+            calc_ms_dx = ms_dx_m["x"] / manual_upsample_factor
+            calc_ms_dy = ms_dx_m["y"] / manual_upsample_factor
 
         # If we are using the transferFunction engine, we should also verify that calc_ms_dx is
         # smaller than the initial_sensor_dx_m requested by the user. This is because the lens sampling will
@@ -339,16 +337,12 @@ class prop_params(dict):
             calc_ms_dx = initial_sensor_dx_m["x"] if calc_ms_dx > initial_sensor_dx_m["x"] else calc_ms_dx
             calc_ms_dy = initial_sensor_dx_m["y"] if calc_ms_dy > initial_sensor_dx_m["y"] else calc_ms_dy
 
-        self.__dict__["calc_ms_dx_m"] = {"x": calc_ms_dx, "y": calc_ms_dy}
-
-        ### Given the possibly new calculation grid size, we should change the number of samples taken at the input grid
-        ### (e.g. after upsampling) so that the originally data is correctly represented
+        ### Given the new calculation grid size, we should change the number of samples taken at the input grid
+        ### (e.g. after upsampling) so that the originally data is correctly represented.
         # add a parameter to reperesent the corresponding number of samples to be used for unpadded, upsampled lens ("M")
-        ms_length_m_x = self.__dict__["ms_length_m"]
-        calc_samplesM_x = int(math.ceil(ms_length_m_x["x"] / calc_ms_dx))
-        calc_samplesM_y = int(math.ceil(ms_length_m_x["y"] / calc_ms_dy))
-        # calc_samplesM_x = int(round(ms_length_m_x["x"] / calc_ms_dx))
-        # calc_samplesM_y = int(round(ms_length_m_x["y"] / calc_ms_dy))
+        ms_length_m = self.__dict__["ms_length_m"]
+        calc_samplesM_x = int(round(ms_length_m["x"] / calc_ms_dx))
+        calc_samplesM_y = int(round(ms_length_m["y"] / calc_ms_dy))
 
         # Ensure number of samples for unpadded lens is odd
         calc_samplesM_x = calc_samplesM_x + 1 if np.mod(calc_samplesM_x, 2) == 0 else calc_samplesM_x
@@ -362,20 +356,24 @@ class prop_params(dict):
             "r": calc_samplesM_r,
         }
 
+        # update the calculated grid that will result af resizing
+        calc_ms_dx = ms_length_m["x"] / calc_samplesM_x
+        calc_ms_dy = ms_length_m["y"] / calc_samplesM_y
+        self.__dict__["calc_ms_dx_m"] = {"x": calc_ms_dx, "y": calc_ms_dy}
+
         return
 
     def __regularizeSensorPlaneSampling(self):
+        diffractionEngine = self.__dict__["diffractionEngine"]
         initial_sensor_dx_m = self.__dict__["initial_sensor_dx_m"]
         calc_samplesM = self.__dict__["calc_samplesM"]
-        diffractionEngine = self.__dict__["diffractionEngine"]
         calc_ms_dx_m = self.__dict__["calc_ms_dx_m"]
         padms_halfx = 0
         padms_halfy = 0
 
-        ### For the Fresnel Engine, Define output grid size by padding
+        ### For the Fresnel Engine, the output field grid size is tuned by zero-padding the input field
         # Based on new ms sampling rate used during calculations, define required padding for the fresnel fourier engine
-        # to achieve a target sensor sampling. Remember that the output grid has a different discretization than the input grid
-        # and we need to use zero-padding of the initial field for the fresnel case to get the desired value
+        # to achieve a target sensor sampling.
         # Also note, we always allow the output grid to be finer than that requested but it should be padded if it is larger!
         # Reinterpolation and area-integrated downsampling is used later to put back to defined grid
         # samplesN corresponds to the length of the lens space after padding
@@ -389,7 +387,8 @@ class prop_params(dict):
             padms_halfx = int(math.ceil((estN_x - calc_samplesM["x"]) / 2)) if estN_x > calc_samplesM["x"] else 0
             padms_halfy = int(math.ceil((estN_y - calc_samplesM["y"]) / 2)) if estN_y > calc_samplesM["y"] else 0
 
-        ### For the ASM case, we pad to ensure that fields are calculated on the entire sensing space requested by user
+        ### For the ASM case, we already checked that the ms grid size is smaller or equal to the sensor grid size
+        # Now we should pad to ensure that fields are calculated on the entire sensing space requested by user
         if diffractionEngine == "ASM_fourier":
             sensor_pixel_size_m = self.__dict__["sensor_pixel_size_m"]
             sensor_pixel_number = self.__dict__["sensor_pixel_number"]
@@ -399,9 +398,10 @@ class prop_params(dict):
             desired_span_y = sensor_pixel_size_m["y"] * sensor_pixel_number["y"]
 
             if current_span_x < desired_span_x:
-                padms_halfx = int(math.ceil((desired_span_x - current_span_x) / 2))
+                padms_halfx = int(round((desired_span_x - current_span_x) / 2 / calc_ms_dx_m["x"]))
+
             if current_span_y < desired_span_y:
-                padms_halfy = int(math.ceil((desired_span_y - current_span_y) / 2))
+                padms_halfy = int(round((desired_span_y - current_span_y) / 2 / calc_ms_dx_m["y"]))
 
         # Update the parameter settings based on new padding settings
         self.__dict__["padms_half"] = {"x": padms_halfx, "y": padms_halfy}
@@ -424,10 +424,7 @@ class prop_params(dict):
             calc_sensor_dy_m = calc_ms_dx_m["y"]
 
         # Update the parameter setting with the new sensor plane calculation
-        self.__dict__["calc_sensor_dx_m"] = {
-            "x": calc_sensor_dx_m,
-            "y": calc_sensor_dy_m,
-        }
+        self.__dict__["calc_sensor_dx_m"] = {"x": calc_sensor_dx_m, "y": calc_sensor_dy_m}
 
         return
 
@@ -467,9 +464,6 @@ class prop_params(dict):
 
     def __iter__(self):
         return iter(self.__dict__)
-
-    def __unicode__(self):
-        return unicode(repr(self.__dict__))
 
     def keys(self):
         return self.__dict__.keys()

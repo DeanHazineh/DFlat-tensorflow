@@ -3,14 +3,15 @@ import tensorflow as tf
 
 def condResizeFn_true(ms_modulation_trans, ms_modulation_phase, parameters):
     method = "nearest"  # Do NOT change; This is a meaningful choice over interp methods!
+    # Note that antialias has no effect when doing nearest neighbor upsampling
 
-    # Unpack variables and expand the channel dimension of input matrices
-    calc_samplesM = parameters["calc_samplesM"]
+    # Expand the channel dimension of input matrices
     ms_modulation_trans = tf.expand_dims(ms_modulation_trans, -1)
     ms_modulation_phase = tf.expand_dims(ms_modulation_phase, -1)
 
     # handle radial flag conditional
     # tf v2 supports nested conditionals
+    calc_samplesM = parameters["calc_samplesM"]
     radial_flag = parameters["radial_symmetry"]
     resizeTo = tf.cond(
         radial_flag,
@@ -52,7 +53,6 @@ def condResizeFn_false(ms_modulation_trans, ms_modulation_phase, parameters):
 
 
 def condPad_true(calc_modulation_trans, calc_modulation_phase, parameters):
-
     # Get paddings from parameters
     padms_half = parameters["padms_half"]
     padhalfx = padms_half["x"]
@@ -82,7 +82,7 @@ def regularize_ms_calc_tf(
     parameters,
 ):
     """Given an input amplitude and phase profile defined on the grid specified in the parameters object, upsample the
-    field and pad according to the computed requirements (see prop_params object for more details).
+    field and pad according to the computed dimensions in prop_params object.
 
     Args:
         `ms_modulation_trans` (tf.float64): Metasurface transmittance on the user specified grid of shape
@@ -97,10 +97,10 @@ def regularize_ms_calc_tf(
         `tf.float64`: Upsampled and padded metasurface phase of shape (..., calc_samplesN['y'], calc_samplesN['x'])
             or (..., 1, calc_samplesN['r'])
     """
-    # Handle multi-dimension input
     if not (ms_modulation_trans.shape == ms_modulation_phase.shape):
         raise ValueError("transmittance and phase must be the same shape")
 
+    ### Handle multi-dimension input for different downstream use cases
     input_rank = tf.rank(ms_modulation_phase)
     init_shape = ms_modulation_phase.shape
     if tf.math.equal(input_rank, tf.TensorShape(2)):
@@ -111,15 +111,15 @@ def regularize_ms_calc_tf(
         ms_modulation_phase = tf.reshape(ms_modulation_phase, [-1, init_shape[-2], init_shape[-1]])
         ms_modulation_trans = tf.reshape(ms_modulation_trans, [-1, init_shape[-2], init_shape[-1]])
 
-    # unpack parameters and handle radial flag appropriately
+    ### unpack parameters and handle radial flag appropriately
     dtype = parameters["dtype"]
     calc_samplesM = parameters["calc_samplesM"]
     ms_samplesM = parameters["ms_samplesM"]
 
-    calc_modulation_trans = tf.identity(ms_modulation_trans)
-    calc_modulation_phase = tf.identity(ms_modulation_phase)
+    # calc_modulation_trans = tf.identity(ms_modulation_trans)
+    # calc_modulation_phase = tf.identity(ms_modulation_phase)
 
-    # Resample the metasurface via nearest neighbors if required
+    ### Resample the metasurface via nearest neighbors if required
     resizeCondition = tf.math.logical_or(
         tf.greater(calc_samplesM["x"], ms_samplesM["x"]),
         tf.greater(calc_samplesM["y"], ms_samplesM["y"]),
@@ -130,7 +130,7 @@ def regularize_ms_calc_tf(
         lambda: condResizeFn_false(ms_modulation_trans, ms_modulation_phase, parameters),
     )
 
-    # Pad the array if samplesN (padded) is larger than samplesM (unpadded)
+    ### Pad the array if samplesN (padded) is larger than samplesM (unpadded)
     calc_samplesN = parameters["calc_samplesN"]
     padCondition = tf.math.logical_or(
         tf.greater(calc_samplesN["x"], calc_samplesM["x"]),

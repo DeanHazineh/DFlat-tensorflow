@@ -2,8 +2,8 @@ from copy import deepcopy
 import numpy as np
 import tensorflow as tf
 
-from dflat.physical_optical_layer.core.ms_parameterization import ALLOWED_PARAMETERIZATION_TYPE, CELL_SHAPE_DEGREE
 from dflat.physical_optical_layer.core.material_utils import MATERIAL_DICT, get_material_index
+
 
 ALL_MANDATORY_KEYS = [
     "wavelength_set_m",
@@ -23,29 +23,19 @@ ALL_MANDATORY_KEYS = [
     "er2",
     "Nx",
     "Ny",
-    "parameterization_type",
     "batch_wavelength_dim",
 ]
 
 ALL_OPTIONAL_KEYS = {
-    "force_span_limits": None,
     "ur1": 1.0,
     "ur2": 1.0,
     "urd": 1.0,
     "urs": 1.0,
     "dtype": tf.float32,
     "cdtype": tf.complex64,
-    "layer_dielectric": 1,
 }
 
-ADDED_KEYS_PASS = ["shape_vect_size", "span_limits"]
-
-DEFAULT_SPAN_LIMITS = {
-    "None": {},
-    "rectangular_resonators": {"min": 0.00, "max": 1.0},
-    "coupled_rectangular_resonators": {"min": 0.00, "max": 0.25},
-    "cylindrical_nanoposts": {"min": 0.0, "max": 1.0},
-}
+ADDED_KEYS_PASS = []
 
 
 class rcwa_params(dict):
@@ -96,12 +86,7 @@ class rcwa_params(dict):
         self.__check_unknown_keys()
         self.__check_material_entry()
 
-        if not bare:
-            self.__check_parameterization_type()
-            self.__get_param_shape()  # add shape vect size to dictionary keys
-            self.__regularize_span_limits()
-
-        # Add required simulation keys
+        # Add required simulation keys if we are not in batch mode
         if not input_dict["batch_wavelength_dim"]:
             self.__add_sim_keys(self.__dict__)
 
@@ -115,9 +100,7 @@ class rcwa_params(dict):
                     raise KeyError("\n rcwa_params: one of the above must be included")
             else:
                 if not (exclusive_key in self.__dict__.keys()):
-                    raise KeyError(
-                        "rcwa_params: Missing mandatory parameter option for simulation settings: " + exclusive_key
-                    )
+                    raise KeyError("rcwa_params: Missing mandatory parameter option for simulation settings: " + exclusive_key)
         return
 
     def __check_optional_keys(self):
@@ -147,29 +130,25 @@ class rcwa_params(dict):
         # User must have passed in both Lay_mat and material_dielectric
 
         ### process Lay_mat
+        # Lay_mat should be a list of the materials in each layer
         Lay_mat = self.__dict__["Lay_mat"]
-
         if not isinstance(Lay_mat, list):
             raise TypeError("Error in rcwa_params: Lay_mat must be a list of strings")
 
+        # lay_mat list should be the same length as the L vector (length of each layer)
         if len(Lay_mat) != len(self.__dict__["L"]):
             raise ValueError("Error in rcwa_param: list of layer materials must be same length as L")
 
         # Check validity of each layers entry
         for lay_entry in Lay_mat:
-
             if isinstance(lay_entry, str):
                 if not (lay_entry in MATERIAL_DICT.keys()):
                     print(MATERIAL_DICT.keys())
                     raise ValueError("Error in rcwa_params: 'material_dielectric must be one from the above")
-
             elif isinstance(lay_entry, complex):
                 continue
-
             else:
-                raise TypeError(
-                    "Layer Material entries must be either string containing the material name or a complex value"
-                )
+                raise TypeError("Layer Material entries must be either string containing the material name or a complex value")
 
         ### Check dielectric specifier
         material_dielectric = self.__dict__["material_dielectric"]
@@ -196,37 +175,6 @@ class rcwa_params(dict):
                 raise ValueError("Error in rcwa_params: 'er2 must be string from the above")
         elif not isinstance(er2, complex):
             raise TypeError("er2 must be either string containing the material name or a complex value")
-
-        return
-
-    def __check_parameterization_type(self):
-        if not (self.__dict__["parameterization_type"] in ALLOWED_PARAMETERIZATION_TYPE.keys()):
-            raise ValueError("Error in rcwa_params: parameterization_type not one of the allowed options")
-
-        return
-
-    def __get_param_shape(self):
-        parameterization_type = self.__dict__["parameterization_type"]
-        cell_shape_degree = CELL_SHAPE_DEGREE[parameterization_type]
-        pixelsX = self.__dict__["pixelsX"]
-        pixelsY = self.__dict__["pixelsY"]
-
-        if parameterization_type != "None":
-            shape_vect_size = [cell_shape_degree[0], pixelsX, pixelsY, cell_shape_degree[1]]
-            self.__dict__["shape_vect_size"] = shape_vect_size
-
-        return
-
-    def __regularize_span_limits(self):
-
-        if self.__dict__["force_span_limits"] == None:
-            # set latent limits to the default values
-            self.__dict__["span_limits"] = DEFAULT_SPAN_LIMITS[self.__dict__["parameterization_type"]]
-        else:
-            # set latent limits to the users
-            force_span = self.__dict__["force_span_limits"]
-            self.__check_force_span_simple(force_span)
-            self.__dict__["span_limits"] = force_span
 
         return
 
@@ -310,9 +258,7 @@ class rcwa_params(dict):
             else:
                 eps_rel = np.ones_like(wavelength_set_m) * lay_entry
 
-            eps_rel = tf.convert_to_tensor(
-                eps_rel[:, tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis], dtype=cdtype
-            )
+            eps_rel = tf.convert_to_tensor(eps_rel[:, tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis], dtype=cdtype)
             lay_eps_list.append(eps_rel)
         self.__dict__["lay_eps_list"] = lay_eps_list
 
@@ -323,9 +269,7 @@ class rcwa_params(dict):
         else:
             eps_d = np.ones_like(wavelength_set_m) * material_dielectric
 
-        self.__dict__["erd"] = tf.convert_to_tensor(
-            eps_d[:, tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis], dtype=cdtype
-        )
+        self.__dict__["erd"] = tf.convert_to_tensor(eps_d[:, tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis], dtype=cdtype)
 
         return
 
@@ -339,9 +283,7 @@ class rcwa_params(dict):
         else:
             eps_rel = np.ones_like(wavelength_set_m) * er1
 
-        eps_rel = tf.convert_to_tensor(
-            eps_rel[:, tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis], dtype=cdtype
-        )
+        eps_rel = tf.convert_to_tensor(eps_rel[:, tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis], dtype=cdtype)
         self.__dict__["er1"] = eps_rel
 
         er2 = self.__dict__["er2"]
@@ -350,9 +292,7 @@ class rcwa_params(dict):
         else:
             eps_rel = np.ones_like(wavelength_set_m) * er2
 
-        eps_rel = tf.convert_to_tensor(
-            eps_rel[:, tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis], dtype=cdtype
-        )
+        eps_rel = tf.convert_to_tensor(eps_rel[:, tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis], dtype=cdtype)
         self.__dict__["er2"] = eps_rel
 
         ur1 = np.ones_like(wavelength_set_m) * self.__dict__["ur1"]
@@ -362,11 +302,6 @@ class rcwa_params(dict):
         ur2 = np.ones_like(wavelength_set_m) * self.__dict__["ur2"]
         ur2 = tf.convert_to_tensor(ur2[:, tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis], dtype=cdtype)
         self.__dict__["ur2"] = ur2
-        return
-
-    def __check_force_span_simple(self, span_limits):
-        if not ("min" in span_limits.keys() and "max" in span_limits.keys()):
-            raise ValueError("rcwa_params: 'force_span_limits' must have keys 'min' and 'max'")
         return
 
     def __setitem__(self, key, item):

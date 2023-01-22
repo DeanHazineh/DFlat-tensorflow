@@ -68,19 +68,11 @@ def build_coupled_rectangular_resonators(norm_param, span_limits, Lx, Ly, x_mesh
     r_x = r_x[:, tf.newaxis, :, :, tf.newaxis, tf.newaxis, tf.newaxis]
     r_y = r_y[:, tf.newaxis, :, :, tf.newaxis, tf.newaxis, tf.newaxis]
 
-    c1 = (
-        1 - tf.math.abs((x_mesh + Lx / 4) / r_x[0]) ** POWER_EXP - tf.math.abs((y_mesh + Ly / 4) / r_y[0]) ** POWER_EXP
-    )
+    c1 = 1 - tf.math.abs((x_mesh + Lx / 4) / r_x[0]) ** POWER_EXP - tf.math.abs((y_mesh + Ly / 4) / r_y[0]) ** POWER_EXP
 
-    c2 = (
-        1 - tf.math.abs((x_mesh + Lx / 4) / r_x[1]) ** POWER_EXP - tf.math.abs((y_mesh - Ly / 4) / r_y[1]) ** POWER_EXP
-    )
-    c3 = (
-        1 - tf.math.abs((x_mesh - Lx / 4) / r_x[2]) ** POWER_EXP - tf.math.abs((y_mesh + Ly / 4) / r_y[2]) ** POWER_EXP
-    )
-    c4 = (
-        1 - tf.math.abs((x_mesh - Lx / 4) / r_x[3]) ** POWER_EXP - tf.math.abs((y_mesh - Ly / 4) / r_y[3]) ** POWER_EXP
-    )
+    c2 = 1 - tf.math.abs((x_mesh + Lx / 4) / r_x[1]) ** POWER_EXP - tf.math.abs((y_mesh - Ly / 4) / r_y[1]) ** POWER_EXP
+    c3 = 1 - tf.math.abs((x_mesh - Lx / 4) / r_x[2]) ** POWER_EXP - tf.math.abs((y_mesh + Ly / 4) / r_y[2]) ** POWER_EXP
+    c4 = 1 - tf.math.abs((x_mesh - Lx / 4) / r_x[3]) ** POWER_EXP - tf.math.abs((y_mesh - Ly / 4) / r_y[3]) ** POWER_EXP
 
     c1 = tf.complex(tf.math.sigmoid(sigmoid_coeff * c1), TF_ZERO)
     c2 = tf.complex(tf.math.sigmoid(sigmoid_coeff * c2), TF_ZERO)
@@ -117,7 +109,7 @@ def build_cylindrical_nanoposts(norm_param, span_limits, Lx, Ly, x_mesh, y_mesh,
     return struct_binaries
 
 
-def generate_cell_perm(norm_param, rcwa_parameters):
+def generate_cell_perm(norm_param, rcwa_parameters, parameterization_type):
     """
     Generates permittivity and permeability for a unit cell comprising of structures according to "parameterization_type"
     set in the rcwa_parameters setting dict.
@@ -135,7 +127,6 @@ def generate_cell_perm(norm_param, rcwa_parameters):
     """
 
     # Retrieve simulation size parameters
-    parameterization_type = rcwa_parameters["parameterization_type"]
     batchSize = rcwa_parameters["batchSize"]
     pixelsX = rcwa_parameters["pixelsX"]
     pixelsY = rcwa_parameters["pixelsY"]
@@ -163,7 +154,7 @@ def generate_cell_perm(norm_param, rcwa_parameters):
 
     # Initialize the relative permittivity
     init_function = ALLOWED_PARAMETERIZATION_TYPE[parameterization_type]
-    span_limits = rcwa_parameters["span_limits"]
+    span_limits = DEFAULT_SPAN_LIMITS[parameterization_type]
     sigmoid_coeff = rcwa_parameters["sigmoid_coeff"]
     lay_eps_list = rcwa_parameters["lay_eps_list"]
 
@@ -184,12 +175,16 @@ ALLOWED_PARAMETERIZATION_TYPE = {
     "rectangular_resonators": build_rectangle_resonator,
     "coupled_rectangular_resonators": build_coupled_rectangular_resonators,
     "cylindrical_nanoposts": build_cylindrical_nanoposts,
-    "None": None,
 }
 
-CELL_SHAPE_DEGREE = {  # See rcwa_params.__get_param_shape()
+CELL_SHAPE_DEGREE = {
     "rectangular_resonators": [2, 1],
     "coupled_rectangular_resonators": [2, 4],
     "cylindrical_nanoposts": [1, 1],
-    "None": None,
+}
+
+DEFAULT_SPAN_LIMITS = {
+    "rectangular_resonators": {"min": 0.00, "max": 1.0},
+    "coupled_rectangular_resonators": {"min": 0.00, "max": 0.25},
+    "cylindrical_nanoposts": {"min": 0.0, "max": 1.0},
 }
