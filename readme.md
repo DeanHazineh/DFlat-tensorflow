@@ -10,8 +10,9 @@
 `D-Flat` is a forward and inverse design framework for flat optics, specially geared to the design of dielectric metasurfaces for imaging and sensing. This package is reviewed in paper https://arxiv.org/abs/2207.14780. D-Flat provides users with: 
 - A validated, auto-differentiable (AD) framework for optical field propagation built on TF Keras
 - Pre-trained, efficient neural models to describe the optical response of metasurface cells
-- AD field solver (RCWA) packaged as TF Keras layer automatically set to optimize pre-defined cell types
+- An AD field solver (RCWA) packaged as a TF-Keras layer that is automatically set to optimize pre-defined cell types
 - A community driven, maintained framework for rendering and end-to-end design
+
 By treating optical layers in the same fashion as standard, TF neural layers, deep learning pipelines can be built to simultaneously optimize optical hardware and ML computational back-ends. 
 
 ## Usage and Documentation: 
