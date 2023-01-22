@@ -27,7 +27,7 @@ DFlat can be easily installed in used in the cloud on Google Collab. This is ide
 Google collab versions of current examples can be found in the examples folder and online at the links:
  - <a href="https://colab.research.google.com/drive/1cOeSNBQ4vS6xNZlOPBQhMdcViHQHclyi?usp=sharing" target="_blank">neural_metalens_optimization.ipynb</a>
  - <a href="https://colab.research.google.com/drive/1CVZnfwPmyd6V2qdYSXI5vShGgJecMENX?usp=sharing" target="_blank">multi_wavelength_rcwa_metalens.ipynb</a>
-
+ - <a href="https://colab.research.google.com/drive/1an1HWkMf0ynw0F1YZx5s82pKVwxw2E0X?usp=sharing" target="_blank">dual_polarization_hologram.ipynb</a>
 
 ### (b) install and run locally:
 To use DFlat on your own machine, first download the repository:
