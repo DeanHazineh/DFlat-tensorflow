@@ -19,4 +19,9 @@ V 2.0.0 -- Recoded Fourier Optics propagation
 V 2.1.0 -- Fix the library generation code so it directly calibrates to the reference field and returns transmission and phase
     - Reference field is needed to make the output meaningful. Instead of returning the field and the reference field, 
     we just make it easier by doing that internally since it will always be needed. 
-    
+
+V 2.3.0 -- Implemented general software re-organization and changes for ease of use and more intuitive flow
+    - fourier layer prop_params initialization with ms_length key caused errors of calculation accuracy and was confusing. This is replaced with flow based on ms_samples. 
+        o pass in number of samples in the corresponding field array which is more logical and leads to more accurate calculations
+    - RCWA params had all cell_parameterization details removed completely. RCWA_layer now handles details of cell parameterization selection
+    - General reorganization of function locations and clean-up
