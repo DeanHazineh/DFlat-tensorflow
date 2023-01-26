@@ -1,5 +1,5 @@
 numpy
-tensorflow_gpu>=2.9.1
+tensorflow_gpu=2.9.1
 tensorflow_probability
 matplotlib
 scipy
