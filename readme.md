@@ -6,11 +6,14 @@
 <img src=/docs/imgs/DFlat_Long.png alt="Dflat" width="500"/>
 <img src=/docs/imgs/autoGDS_metalens.png alt="Dflat" width="500"/>
 
-# An End-to-End Design Framework for Metasurface-Based Visual Sensors (Python Tensorflow)
+# An End-to-End Design Framework for Metasurface-Based Visual Sensors V2.3.0
 `D-Flat` is a forward and inverse design framework for flat optics, specially geared to the design of dielectric metasurfaces for imaging and sensing. This package is reviewed in paper https://arxiv.org/abs/2207.14780. D-Flat provides users with: 
-- A validated, autodifferentiable framework for optical field propagation
+- A validated, auto-differentiable (AD) framework for optical field propagation built on TF Keras
 - Pre-trained, efficient neural models to describe the optical response of metasurface cells
+- An AD field solver (RCWA) packaged as a TF-Keras layer that is automatically set to optimize pre-defined cell types
 - A community driven, maintained framework for rendering and end-to-end design
+
+By treating optical layers in the same fashion as standard, TF neural layers, deep learning pipelines can be built to simultaneously optimize optical hardware and ML computational back-ends. 
 
 ## Usage and Documentation: 
 For usage and documentation, a readthedocs page is in active development. Examples for inverse design are provided in `DFlat/examples/`. Additional examples will be provided in the future (we welcome community made examples).
@@ -21,10 +24,10 @@ For developers and researchers,
 
 ### (a) install and run DFlat in Google collab:
 DFlat can be easily installed in used in the cloud on Google Collab. This is ideal for mac os users as tensorflow_gpu is not supported by mac. 
-Google collab notebooks for the two current examples can be found in the examples folder and online at the links:
- - <a href="https://colab.research.google.com/drive/1cOeSNBQ4vS6xNZlOPBQhMdcViHQHclyi?usp=sharing" target="_blank">metalens_neural.ipynb</a>
- - <a href="https://colab.research.google.com/drive/1CVZnfwPmyd6V2qdYSXI5vShGgJecMENX?usp=sharing" target="_blank">broadband_metalens_rcwa.ipynb</a>
-
+Google collab versions of current examples can be found in the examples folder and online at the links:
+ - <a href="https://colab.research.google.com/drive/1cOeSNBQ4vS6xNZlOPBQhMdcViHQHclyi?usp=sharing" target="_blank">neural_metalens_optimization.ipynb</a>
+ - <a href="https://colab.research.google.com/drive/1CVZnfwPmyd6V2qdYSXI5vShGgJecMENX?usp=sharing" target="_blank">multi_wavelength_rcwa_metalens.ipynb</a>
+ - <a href="https://colab.research.google.com/drive/1an1HWkMf0ynw0F1YZx5s82pKVwxw2E0X?usp=sharing" target="_blank">dual_polarization_hologram.ipynb</a>
 
 ### (b) install and run locally:
 To use DFlat on your own machine, first download the repository:
