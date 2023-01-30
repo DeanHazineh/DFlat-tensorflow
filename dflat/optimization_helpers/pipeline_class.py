@@ -16,6 +16,7 @@ class Pipeline_Object(tf.keras.Model):
 
     Attributes:
         `loss_vector` (list): List storing the loss at each epoch after training
+        `test_loss_vector` (list): List storing the test loss at each epoch
         `savepath` (str): Pipeline savepath to store model checkpoints, data, and figures.
         `saveAtEpochs` (int): Number of training epochs between intermediate saves.
     """
@@ -31,6 +32,7 @@ class Pipeline_Object(tf.keras.Model):
 
         # Define class variables
         self.loss_vector = []
+        self.test_loss_vector = []
         self.savepath = savepath
         self.saveAtEpochs = saveAtEpochs
 
@@ -51,23 +53,31 @@ class Pipeline_Object(tf.keras.Model):
 
         return
 
-    def customSaveCheckpoint(self, loss_vector=[]):
+    def customSaveCheckpoint(self, loss_vector=[], test_loss_vector=[]):
         # Save Weights
         self.save_weights(self.savepath)
         print("\n Model Saved Succesfully \n")
-
         if loss_vector:
             self.loss_vector = np.concatenate((self.loss_vector, loss_vector))
             data = {"trainingLoss": self.loss_vector}
+
+            if test_loss_vector:
+                self.test_loss_vector = np.concatenate((self.test_loss_vector, test_loss_vector))
+                data["testLoss"] = self.test_loss_vector
+
             pickle.dump(data, open(self.savepath + "trainingHistory.pickle", "wb"))
 
         # Make and save a plot of the training history
         fig = plt.figure(figsize=(30, 15))
         ax = gF.addAxis(fig, 1, 2)
-        ax[0].plot(self.loss_vector)
-        ax[1].plot(np.log10(self.loss_vector))
+        ax[0].plot(self.loss_vector, "k-")
+        ax[0].plot(self.test_loss_vector, "b-")
+
+        ax[1].plot(np.log10(self.loss_vector), "k-")
+        ax[1].plot(np.log10(self.test_loss_vector), "b-")
         gF.formatPlots(fig, ax[0], None, "epoch", "Loss", "Traning Loss")
         gF.formatPlots(fig, ax[1], None, "epoch", "Log10(Loss)", "Log Loss")
+
         plt.savefig(self.savepath + "trainingOutput/png_images/trainingHistory.png")
         plt.savefig(self.savepath + "trainingOutput/pdf_images/trainingHistory.pdf")
         plt.close()
@@ -84,6 +94,7 @@ class Pipeline_Object(tf.keras.Model):
             with open(self.savepath + "trainingHistory.pickle", "rb") as handle:
                 trackHistory = pickle.load(handle)
                 self.loss_vector = trackHistory["trainingLoss"]
+                self.test_loss_vector = trackHistory["testLoss"]
 
     def visualizeTrainingCheckpoint(self, epoch_str):
         # It is expected that this function is overloaded by child class

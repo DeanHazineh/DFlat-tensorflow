@@ -3,11 +3,11 @@ import h5py
 import numpy as np
 from scipy.interpolate import interp1d
 
-MATERIAL_DICT = {
-    "TiO2": "TiO2_Index.mat",
-    "SiO2": "SiO2_Index.mat",
-    "Vacuum": None,
-}
+MATERIAL_DICT = {"TiO2": "TiO2_Index.mat", "SiO2": "SiO2_Index.mat", "Vacuum": None, "Si": "Si_Index.mat", "Si3N4": "Si3N4_Index.mat"}
+
+
+def list_materials():
+    return list(MATERIAL_DICT.keys())
 
 
 def get_material_index(material_name, wavelength_list):

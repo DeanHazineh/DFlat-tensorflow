@@ -23,17 +23,9 @@ ALL_MANDATORY_KEYS = [
     "er2",
     "Nx",
     "Ny",
-    "batch_wavelength_dim",
 ]
 
-ALL_OPTIONAL_KEYS = {
-    "ur1": 1.0,
-    "ur2": 1.0,
-    "urd": 1.0,
-    "urs": 1.0,
-    "dtype": tf.float32,
-    "cdtype": tf.complex64,
-}
+ALL_OPTIONAL_KEYS = {"ur1": 1.0, "ur2": 1.0, "urd": 1.0, "urs": 1.0, "dtype": tf.float32, "cdtype": tf.complex64, "batch_wavelength_dim": False}
 
 ADDED_KEYS_PASS = []
 
@@ -87,7 +79,7 @@ class rcwa_params(dict):
         self.__check_material_entry()
 
         # Add required simulation keys if we are not in batch mode
-        if not input_dict["batch_wavelength_dim"]:
+        if not self.__dict__["batch_wavelength_dim"]:
             self.__add_sim_keys(self.__dict__)
 
         return
