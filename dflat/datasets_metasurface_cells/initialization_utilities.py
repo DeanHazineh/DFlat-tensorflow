@@ -47,3 +47,9 @@ def loadLibrary(libraryName):
         library = library()
 
     return library
+
+
+def list_libraries():
+    print(listLibraryNames)
+    return
+

@@ -5,4 +5,4 @@ from .libraryClass import (
     listLibraryNames,
 )
 
-from .initialization_utilities import optical_response_to_param
+from .initialization_utilities import optical_response_to_param, loadLibrary, list_libraries
