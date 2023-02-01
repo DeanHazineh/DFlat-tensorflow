@@ -21,10 +21,6 @@ def get_path_to_data(file_name: str):
 
 class Nanofins_U350nm_H600nm:
     def __init__(self):
-        ## Raw paths must be redefined for packaging
-        # __rawPath = (
-        #     "dflat/datasets_metasurface_cells/raw_meta_libraries/data_Nanofins_Unit350nm_Height600nm_EngineFDTD.mat"
-        # )
         __rawPath = get_path_to_data("data_Nanofins_Unit350nm_Height600nm_EngineFDTD.mat")
         data = scipy.io.loadmat(__rawPath)
 
@@ -60,7 +56,7 @@ class Nanofins_U350nm_H600nm:
 
         num_plt = 5
         wl_idx_set = np.linspace(0, len(wavelength) - 1, num_plt).astype(int)
-        fig = plt.figure(figsize=(40, 30))
+        fig = plt.figure(figsize=(40*.75, 30*.75))
         axisList = graphFunc.addAxis(fig, 4, num_plt)
 
         for iter, idx in enumerate(wl_idx_set):
@@ -314,3 +310,4 @@ class Nanoellipse_U350nm_H600nm(Nanofins_U350nm_H600nm):
         self.__param1Limits = [60e-9, 300e-9]
         self.__param2Limits = [60e-9, 300e-9]
         self.__param3Limits = [310e-9, 750e-9]
+
