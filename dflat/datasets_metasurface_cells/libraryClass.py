@@ -31,10 +31,10 @@ class Nanofins_U350nm_H600nm:
         # the input parameters (lenx, leny, wavelength) are loaded in here
         # all parameters must be converted to meshgrid format for compatibility with model class
         # param1, param2, and param3 all have units of m
-        param1 = data["lenx"]
-        param2 = data["leny"]
-        param3 = data["wavelength_m"].flatten()
-        param1, param2, param3 = np.meshgrid(param1, param2, param3)
+        self.param1 = data["lenx"]
+        self.param2 = data["leny"]
+        self.param3 = data["wavelength_m"].flatten()
+        param1, param2, param3 = np.meshgrid(self.param1, self.param2, self.param3)
         self.params = [param1, param2, param3]
 
         # These are the min-max for the FDTD gridsweep
@@ -56,9 +56,8 @@ class Nanofins_U350nm_H600nm:
 
         num_plt = 5
         wl_idx_set = np.linspace(0, len(wavelength) - 1, num_plt).astype(int)
-        fig = plt.figure(figsize=(40*.75, 30*.75))
+        fig = plt.figure()
         axisList = graphFunc.addAxis(fig, 4, num_plt)
-
         for iter, idx in enumerate(wl_idx_set):
             tx = axisList[iter].imshow(self.transmission[0, :, :, idx], extent=(min(lx), max(lx), max(ly), min(ly)), vmin=0, vmax=1)
             phix = axisList[num_plt + iter].imshow(
@@ -195,8 +194,6 @@ class Nanofins_U350nm_H600nm:
 
 class Nanocylinders_U180nm_H600nm:
     def __init__(self):
-
-        # __rawPath = "dflat/datasets_metasurface_cells/raw_meta_libraries/data_Nanocylinders_Unit180nm_Height600nm_EngineFDTD.mat"
         __rawPath = get_path_to_data("data_Nanocylinders_Unit180nm_Height600nm_EngineFDTD.mat")
         data = scipy.io.loadmat(__rawPath)
 
@@ -207,7 +204,9 @@ class Nanocylinders_U180nm_H600nm:
         # the input parameters (lenr, wavelength) are loaded in here
         # all parameters must be converted to meshgrid format for compatibility with model class
         # param1, param2, all have units of m
-        param1, param2 = np.meshgrid(data["radius_m"], data["wavelength_m"])
+        self.param1 = data["radius_m"]
+        self.param2 = data["wavelength_m"]
+        param1, param2 = np.meshgrid(self.param1, self.param2)
         self.params = [param1, param2]
 
         # These are the min-max for the FDTD gridsweep
@@ -224,8 +223,8 @@ class Nanocylinders_U180nm_H600nm:
         axisList = graphFunc.addAxis(fig, 1, 2)
         tt = axisList[0].imshow(self.transmission[:, :], extent=(min(lr), max(lr), max(wl), min(wl)), vmin=0, vmax=1)
         phi = axisList[1].imshow(self.phase[:, :], extent=(min(lr), max(lr), max(wl), min(wl)), cmap="hsv")
-        graphFunc.formatPlots(fig, axisList[0], tt, "len r (nm)", "wavelength (nm)", "phase", addcolorbar=True)
-        graphFunc.formatPlots(fig, axisList[1], phi, "len r (nm)", "wavelength (nm)", "transmission", addcolorbar=True)
+        graphFunc.formatPlots(fig, axisList[0], tt, "len r (nm)", "wavelength (nm)", "transmission", addcolorbar=True)
+        graphFunc.formatPlots(fig, axisList[1], phi, "len r (nm)", "wavelength (nm)", "phase", addcolorbar=True)
 
         if savepath:
             plt.savefig(savepath + ".png")
@@ -287,10 +286,6 @@ class Nanocylinders_U180nm_H600nm:
 class Nanoellipse_U350nm_H600nm(Nanofins_U350nm_H600nm):
     def __init__(self):
         super(Nanoellipse_U350nm_H600nm, self).__init__()
-
-        # __rawPath = (
-        #    "dflat/datasets_metasurface_cells/raw_meta_libraries/data_NanoEllipse_Unit350nm_Height600nm_EngineFDTD.mat"
-        # )
         __rawPath = get_path_to_data("data_NanoEllipse_Unit350nm_Height600nm_EngineFDTD.mat")
         data = scipy.io.loadmat(__rawPath)
 
@@ -300,10 +295,10 @@ class Nanoellipse_U350nm_H600nm(Nanofins_U350nm_H600nm):
 
         # the input parameters (lenx, leny, wavelength) are loaded here
         # all parameters must be converted to meshgrid format for compatibility with model class
-        param1 = data["lenx"]
-        param2 = data["leny"]
-        param3 = data["wavelength_m"].flatten()
-        param1, param2, param3 = np.meshgrid(param1, param2, param3)
+        self.param1 = data["lenx"]
+        self.param2 = data["leny"]
+        self.param3 = data["wavelength_m"].flatten()
+        param1, param2, param3 = np.meshgrid(self.param1, self.param2, self.param3)
         self.params = [param1, param2, param3]
 
         # These are the min-max for the FDTD gridsweep
