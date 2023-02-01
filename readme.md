@@ -26,6 +26,7 @@ For developers and researchers,
 DFlat can be easily installed in used in the cloud on Google Collab. This is ideal for mac os users as tensorflow_gpu is not supported by mac. 
 Google collab versions of current examples can be found in the examples folder and online at the links:
  - <a href="https://colab.research.google.com/drive/1r3IxDN6vhhJSKbuKVFaPYFmdNgGWcpFM?usp=sharing" target="_blank">Intro_rcwa_simulate_differentiate_tutorial.ipynb</a>
+ - <a href="https://colab.research.google.com/drive/1L83Kshutnozh9gqUgs3Je7Xb9fCd4I4V?usp=sharing" target="_blank">Intro_Dflat_Library_and_Neural_Models_tutorial.ipynb</a>
  - <a href="https://colab.research.google.com/drive/1cOeSNBQ4vS6xNZlOPBQhMdcViHQHclyi?usp=sharing" target="_blank">Optimize_neural_metalens.ipynb</a>
  - <a href="https://colab.research.google.com/drive/1CVZnfwPmyd6V2qdYSXI5vShGgJecMENX?usp=sharing" target="_blank">Optimize_multi_wavelength_rcwa_metalens.ipynb</a>
  - <a href="https://colab.research.google.com/drive/1an1HWkMf0ynw0F1YZx5s82pKVwxw2E0X?usp=sharing" target="_blank">Optimize_dual_polarization_hologram.ipynb</a>
