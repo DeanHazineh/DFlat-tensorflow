@@ -4,7 +4,7 @@
 
 DEAN_TEST_STUDIES/**
 DEAN_EXCLUDE_WORK/**
-#examples/output/*
+examples/*
 tests/*
 
 docs/**

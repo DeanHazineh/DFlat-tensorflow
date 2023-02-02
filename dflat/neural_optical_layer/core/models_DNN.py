@@ -5,12 +5,12 @@ from .arch_Core_class import GFF_Projection_layer
 
 mlp_model_names = [
     "MLP_Nanocylinders_Dense256_U180_H600",
-    "MLP_Nanocylinders_Dense128_U180_H600",
-    "MLP_Nanocylinders_Dense64_U180_H600",
+    #"MLP_Nanocylinders_Dense128_U180_H600",
+    #"MLP_Nanocylinders_Dense64_U180_H600",
     "MLP_Nanofins_Dense1024_U350_H600",
     "MLP_Nanofins_Dense512_U350_H600",
-    "MLP_Nanofins_Dense256_U350_H600",
-    "MLP_Nanofins_Dense64_U350_H600",
+    #"MLP_Nanofins_Dense256_U350_H600",
+    #"MLP_Nanofins_Dense64_U350_H600",
 ]
 
 
@@ -88,7 +88,6 @@ class MLP_Nanocylinders_Dense64_U180_H600(MLP_Nanocylinders_U180_H600):
 class MLP_Nanofins_Dense1024_U350_H600(MLP_Nanofins_U350_H600):
     def __init__(self, dtype=tf.float64):
         super(MLP_Nanofins_Dense1024_U350_H600, self).__init__(dtype)
-
         self.set_model_name("MLP_Nanofins_Dense1024_U350_H600")
         self.set_modelSavePath("trained_MLP_models/MLP_Nanofins_Dense1024_U350_H600/")
 

@@ -9,7 +9,6 @@ reset_keys = ["wavelength_set_m", "thetas", "phis", "pte", "ptm", "batch_wavelen
 
 def generate_simParam_set(rcwa_parameters):
     # rcwa_parameters["batch_wavelength_dim"] must be True to use this
-
     # Unpack the input parameters
     wavelength_set_m = rcwa_parameters["wavelength_set_m"]
     num_wavelengths = len(wavelength_set_m)
@@ -35,10 +34,9 @@ def generate_simParam_set(rcwa_parameters):
     return rcwa_parameters_list
 
 
-def full_rcwa_shape(norm_param, rcwa_parameters, cell_parameterization):
+def full_rcwa_shape(norm_param, rcwa_parameters, cell_parameterization, feature_layer):
     ### Returns the complex field
-
-    Er, Ur = generate_cell_perm(norm_param, rcwa_parameters, cell_parameterization)
+    Er, Ur = generate_cell_perm(norm_param, rcwa_parameters, cell_parameterization, feature_layer)
 
     PQ_zero = tf.math.reduce_prod(rcwa_parameters["PQ"]) // 2
     outputs = simulate(Er, Ur, rcwa_parameters)
@@ -48,8 +46,7 @@ def full_rcwa_shape(norm_param, rcwa_parameters, cell_parameterization):
     return tf.transpose(tf.stack([tx, ty]), [1, 0, 3, 2])
 
 
-def batched_wavelength_rcwa_shape(norm_param, rcwa_parameters, cell_parameterization):
-
+def batched_wavelength_rcwa_shape(norm_param, rcwa_parameters, cell_parameterization, feature_layer):
     rcwa_parameters_list = generate_simParam_set(rcwa_parameters)
     num_wavelengths = len(rcwa_parameters_list)
 
@@ -57,7 +54,7 @@ def batched_wavelength_rcwa_shape(norm_param, rcwa_parameters, cell_parameteriza
         return tf.less(idx_, num_wavelengths)
 
     def lambda_loopBody(idx_, hold_field_):
-        field = full_rcwa_shape(norm_param, rcwa_parameters_list[idx_], cell_parameterization)
+        field = full_rcwa_shape(norm_param, rcwa_parameters_list[idx_], cell_parameterization, feature_layer)
         hold_field_ = tf.concat([hold_field_, field], axis=0)
         idx_ += 1
 
@@ -105,4 +102,4 @@ def compute_ref_field(rcwa_parameters):
     tx = outputs["tx"][:, :, :, PQ_zero, 0]
     ty = outputs["ty"][:, :, :, PQ_zero, 0]
 
-    return tf.transpose(tf.stack([tx, ty]), [1, 0, 3, 2])
+    return tf.transpose(tf.stack([tx, ty]), [1, 0, 3,2])
