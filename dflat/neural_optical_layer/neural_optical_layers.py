@@ -35,7 +35,7 @@ class MLP_Layer(tf.keras.layers.Layer):
 
         # Get mlp input/output sizes
         self.input_dimensionality = self.mlp.get_input_shape()[0]
-        self.param_dimensionality = input_dimensionality-1
+        self.param_dimensionality = self.input_dimensionality-1
 
 
     def __call__(self, norm_param, wavelength_m_asList):
