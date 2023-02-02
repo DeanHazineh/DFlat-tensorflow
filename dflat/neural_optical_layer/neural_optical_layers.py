@@ -35,6 +35,8 @@ class MLP_Layer(tf.keras.layers.Layer):
 
         # Get mlp input/output sizes
         self.input_dimensionality = self.mlp.get_input_shape()[0]
+        self.param_dimensionality = input_dimensionality-1
+
 
     def __call__(self, norm_param, wavelength_m_asList):
         """Call function for the mlp_layer. Given a normalized parameter vector for each
@@ -62,7 +64,7 @@ class MLP_Layer(tf.keras.layers.Layer):
 
         tf.debugging.assert_equal(
             tf.shape(norm_param)[0],
-            self.input_dimensionality - 1,
+            self.param_dimensionality,
             message="",
             name="norm_param_degree_assertion",
         )
@@ -174,7 +176,7 @@ class MLP_Latent_Layer(MLP_Layer):
 
         tf.debugging.assert_equal(
             latent_tensor.shape[0],
-            self.input_dimensionality - 1,
+            self.param_dimensionality,
             message="",
             summarize="latent_tensor has incorrect number of parameters per cell (shape parameters D)",
             name="latent_tensor_degree_assertion",
