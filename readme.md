@@ -6,7 +6,7 @@
 <img src=/docs/imgs/DFlat_Long.png alt="Dflat" width="500"/>
 <img src=/docs/imgs/autoGDS_metalens.png alt="Dflat" width="500"/>
 
-# An End-to-End Design Framework for Metasurface-Based Visual Sensors V2.3.0
+# An End-to-End Design Framework for Metasurface-Based Visual Sensors V2.3.2
 `D-Flat` is a forward and inverse design framework for flat optics, specially geared to the design of dielectric metasurfaces for imaging and sensing. This package is reviewed in paper https://arxiv.org/abs/2207.14780. D-Flat provides users with: 
 - A validated, auto-differentiable (AD) framework for optical field propagation built on TF Keras
 - Pre-trained, efficient neural models to describe the optical response of metasurface cells
@@ -16,7 +16,8 @@
 By treating optical layers in the same fashion as standard, TF neural layers, deep learning pipelines can be built to simultaneously optimize optical hardware and ML computational back-ends. 
 
 ## Usage and Documentation: 
-For usage and documentation, a readthedocs page is in active development. Examples for inverse design are provided in `DFlat/examples/`. Additional examples will be provided in the future (we welcome community made examples).
+For usage and documentation, a readthedocs page is in active development. Examples for inverse design are provided in `DFlat/examples/`. Additional examples will be provided in the future (we welcome community made examples). 
+<span style="color:red">some *(2/2/2023 Examples are being updated for modifications to the code -- they are currently down but will be updated in a day or two and put back)* text</span>.
 
 For developers and researchers, 
 - a script to train neural models can be found in `DFlat/dflat/neural_optical_layer/core/trainer_models.py`
@@ -25,11 +26,17 @@ For developers and researchers,
 ### (a) install and run DFlat in Google collab:
 DFlat can be easily installed in used in the cloud on Google Collab. This is ideal for mac os users as tensorflow_gpu is not supported by mac. 
 Google collab versions of current examples can be found in the examples folder and online at the links:
+
+![#f03c15](https://placehold.co/15x15/f03c15/f03c15.png) NOTE: (2/2/2023 Examples are being updated for modifications to the code -- they are currently down but will be updated in a day or two and put back)
+
  - <a href="https://colab.research.google.com/drive/1r3IxDN6vhhJSKbuKVFaPYFmdNgGWcpFM?usp=sharing" target="_blank">Intro_rcwa_simulate_differentiate_tutorial.ipynb</a>
  - <a href="https://colab.research.google.com/drive/1L83Kshutnozh9gqUgs3Je7Xb9fCd4I4V?usp=sharing" target="_blank">Intro_Dflat_Library_and_Neural_Models_tutorial.ipynb</a>
- - <a href="https://colab.research.google.com/drive/1cOeSNBQ4vS6xNZlOPBQhMdcViHQHclyi?usp=sharing" target="_blank">Optimize_neural_metalens.ipynb</a>
+
+<!--
+- <a href="https://colab.research.google.com/drive/1cOeSNBQ4vS6xNZlOPBQhMdcViHQHclyi?usp=sharing" target="_blank">Optimize_neural_metalens.ipynb</a>
  - <a href="https://colab.research.google.com/drive/1CVZnfwPmyd6V2qdYSXI5vShGgJecMENX?usp=sharing" target="_blank">Optimize_multi_wavelength_rcwa_metalens.ipynb</a>
  - <a href="https://colab.research.google.com/drive/1an1HWkMf0ynw0F1YZx5s82pKVwxw2E0X?usp=sharing" target="_blank">Optimize_dual_polarization_hologram.ipynb</a>
+-->
 
 ### (b) install and run locally:
 To use DFlat on your own machine, first download the repository:
