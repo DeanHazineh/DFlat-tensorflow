@@ -44,8 +44,8 @@ def train_loop(pipeline, optimizer, loss_fn, num_epochs):
     start_iter = len(pipeline_loss) if len(pipeline_loss) else 0
 
     # Call once before starting training and save initial state visualization
-    # pipeline()
-    # pipeline.visualizeTrainingCheckpoint(str(start_iter))
+    pipeline()
+    pipeline.visualizeTrainingCheckpoint(str(start_iter))
 
     # Run All Training Steps
     for epoch in range(num_epochs):
