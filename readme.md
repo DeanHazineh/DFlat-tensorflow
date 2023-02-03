@@ -17,7 +17,6 @@ By treating optical layers in the same fashion as standard, TF neural layers, de
 
 ## Usage and Documentation: 
 For usage and documentation, a readthedocs page is in active development. Examples for inverse design are provided in `DFlat/examples/`. Additional examples will be provided in the future (we welcome community made examples). 
-<span style="color:red">some *(2/2/2023 Examples are being updated for modifications to the code -- they are currently down but will be updated in a day or two and put back)* text</span>.
 
 For developers and researchers, 
 - a script to train neural models can be found in `DFlat/dflat/neural_optical_layer/core/trainer_models.py`
