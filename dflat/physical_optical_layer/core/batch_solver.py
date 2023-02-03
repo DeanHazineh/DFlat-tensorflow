@@ -81,11 +81,7 @@ def compute_ref_field(rcwa_parameters):
     ty = []
     rcwa_parameters_list = generate_simParam_set(rcwa_parameters)
     for rcwa_parameters_ in rcwa_parameters_list:
-
-        print(rcwa_parameters_["lay_eps_list"][0].numpy())
-
         Ur = rcwa_parameters_["urd"] * tf.ones(materials_shape, dtype=cdtype)
-
         Er = tf.concat([rcwa_parameters_["lay_eps_list"][i] * tf.ones(materials_shape_lay, dtype=cdtype) for i in range(Nlay)], axis=3)
         outputs = simulate(Er, Ur, rcwa_parameters_)
         tx.append(outputs["tx"][:, :, :, PQ_zero, 0])

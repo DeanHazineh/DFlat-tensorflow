@@ -1,4 +1,4 @@
-sklearn
+scikit-learn
 numpy
 tensorflow_gpu==2.11.0
 tensorflow_probability
