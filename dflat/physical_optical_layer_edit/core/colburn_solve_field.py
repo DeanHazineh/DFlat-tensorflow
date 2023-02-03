@@ -5,7 +5,7 @@ from . import colburn_rcwa_utils as rcwa_utils
 from . import colburn_tensor_utils as tensor_utils
 
 
-def simulate(ER_t, UR_t, params):
+def simulate(ER_t, UR_t, params, eps=1e-6):
     """
     Calculates the transmission/reflection coefficients for a unit cell with a
     given permittivity/permeability distribution and the batch of input conditions
@@ -123,6 +123,7 @@ def simulate(ER_t, UR_t, params):
     LAM_free_row1 = tf.concat([Z, 1j * KZ], axis=5)
     LAM_free = tf.concat([LAM_free_row0, LAM_free_row1], axis=4)
 
+    ### NOTE: I Think there is an instability with this line and possible error for calculations
     V0 = tf.linalg.matmul(Q_free, tf.linalg.inv(LAM_free))
 
     ### Step 6: Initialize Global Scattering Matrix ###
@@ -178,7 +179,7 @@ def simulate(ER_t, UR_t, params):
 
     # Compute eignmodes for the layers in each pixel for the whole batch.
     OMEGA_SQ = tf.linalg.matmul(P, Q)
-    LAM, W = tensor_utils.eig_general(OMEGA_SQ)
+    LAM, W = tensor_utils.eig_general(OMEGA_SQ, eps)
     LAM = tf.sqrt(LAM)
     LAM = tf.linalg.diag(LAM)
 

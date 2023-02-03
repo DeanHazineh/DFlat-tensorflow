@@ -238,10 +238,6 @@ class rcwa_params(dict):
         else:
             self.__dict__["Ny"] = int(np.round(Nx * Ly / Lx))  # number of point along y in real-space grid
 
-        # Coefficient for the argument of tf.math.sigmoid() when generating
-        # permittivity distributions with geometric parameters.
-        self.__dict__["sigmoid_coeff"] = 1000.0
-
         return
 
     def __get_broadband_permittivity(self):
