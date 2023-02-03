@@ -1,5 +1,0 @@
-Planned Updates
-===============
-
-in development
-
