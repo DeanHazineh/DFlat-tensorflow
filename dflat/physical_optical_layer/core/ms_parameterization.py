@@ -8,15 +8,16 @@ def get_cartesian_grid(Lx, Nx, Ly, Ny):
 
 def build_rectangle_resonator(norm_param, feature_layer, span_limits, Lx, Ly, x_mesh, y_mesh, sigmoid_coeff, Nlay):
     # Single layer metasurface
-    # norm_param: A 'tf.Tensor' of shape (pixelsX, pixelsY, 1)
+    # norm_param: A 'tf.Tensor' of shape (pixelsX, pixelsY, 2)
     # Binary like (batchSize, pixelsX, pixelsY, Nlayer, Nx, Ny)
 
     # unpack inputs
-    TF_ZERO = tf.constant(0.0, dtype=tf.float32)
+    dtype = norm_param.dtype
+    TF_ZERO = tf.constant(0.0, dtype=dtype)
     norm_px = norm_param[:, :, 0]
     norm_py = norm_param[:, :, 1]
-    span_max = tf.cast(span_limits["max"], dtype=tf.float32)
-    span_min = tf.cast(span_limits["min"], dtype=tf.float32)
+    span_max = tf.cast(span_limits["max"], dtype=dtype)
+    span_min = tf.cast(span_limits["min"], dtype=dtype)
 
     r_x = (norm_px * (span_max - span_min) + span_min) * Lx
     r_y = (norm_py * (span_max - span_min) + span_min) * Ly
@@ -24,12 +25,11 @@ def build_rectangle_resonator(norm_param, feature_layer, span_limits, Lx, Ly, x_
     r_y = r_y[tf.newaxis, :, :, tf.newaxis, tf.newaxis, tf.newaxis]
 
     ## Generate Rectangle fin shape
-    r1 = 1 - tf.math.abs(x_mesh * 2 / r_x) ** 50 - tf.math.abs(y_mesh * 2 / r_y) ** 50
+    r1 = 1 - tf.math.abs(x_mesh * 2.0 / r_x) ** 15.0 - tf.math.abs(y_mesh * 2.0 / r_y) ** 15.0
     r1 = tf.complex(tf.math.sigmoid(sigmoid_coeff * r1), TF_ZERO)
-
+    
     struct_binaries = [None for i in range(Nlay)]
     struct_binaries[feature_layer] = r1
-
     return struct_binaries
 
 
@@ -66,14 +66,17 @@ def build_coupled_rectangular_resonators(norm_param, feature_layer, span_limits,
 
 
 def build_cylindrical_nanoposts(norm_param, feature_layer, span_limits, Lx, Ly, x_mesh, y_mesh, sigmoid_coeff, Nlay):
-    TF_ZERO = tf.constant(0.0, dtype=tf.float32)
+    dtype = norm_param.dtype
+    TF_ZERO = tf.constant(0.0, dtype=dtype)
 
     # unpack inputs
     norm_pr = norm_param[:, :, 0]
-    span_max = tf.cast(span_limits["max"], dtype=tf.float32)
-    span_min = tf.cast(span_limits["min"], dtype=tf.float32)
+    span_max = tf.cast(span_limits["max"], dtype=dtype)
+    span_min = tf.cast(span_limits["min"], dtype=dtype)
 
-    radius = (norm_pr * (span_max - span_min) + span_min) * tf.math.minimum(Lx, Ly) / 2
+    print(tf.math.minimum(Lx, Ly) )    
+    print((norm_pr * (span_max - span_min) + span_min))
+    radius = (norm_pr * (span_max - span_min) + span_min) * tf.math.minimum(Lx, Ly) 
     radius = radius[tf.newaxis, :, :, tf.newaxis, tf.newaxis, tf.newaxis]
 
     r1 = 1 - (x_mesh / radius) ** 2 - (y_mesh / radius) ** 2
@@ -118,9 +121,9 @@ def generate_cell_perm(norm_param, rcwa_parameters, parameterization_type, featu
     # Convert to tensors and expand and tile to match the simulation shape.
     # Permittivity and permeability like (batchSize, pixelsX, pixelsY, Nlayer, Nx, Ny)
     x_mesh, y_mesh = get_cartesian_grid(Lx, Nx, Ly, Ny)
-    y_mesh = tf.cast(y_mesh[tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis, :, :], tf.float32)
+    y_mesh = tf.cast(y_mesh[tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis, :, :], dtype)
     y_mesh = tf.tile(y_mesh, multiples=(batchSize, pixelsX, pixelsY, 1, 1, 1))
-    x_mesh = tf.cast(x_mesh[tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis, :, :], tf.float32)
+    x_mesh = tf.cast(x_mesh[tf.newaxis, tf.newaxis, tf.newaxis, tf.newaxis, :, :], dtype)
     x_mesh = tf.tile(x_mesh, multiples=(batchSize, pixelsX, pixelsY, 1, 1, 1))
 
     # Initialize relative permeability.
@@ -130,13 +133,13 @@ def generate_cell_perm(norm_param, rcwa_parameters, parameterization_type, featu
     init_function = ALLOWED_PARAMETERIZATION_TYPE[parameterization_type]
     span_limits = DEFAULT_SPAN_LIMITS[parameterization_type]
     lay_eps_list = rcwa_parameters["lay_eps_list"]
-    sigmoid_coeff = 100.0
-    struct_binary = init_function(tf.cast(norm_param, tf.float32), feature_layer, span_limits, Lx, Ly, x_mesh, y_mesh, sigmoid_coeff, Nlay)
+    sigmoid_coeff = 1000.0
+    struct_binary = init_function(norm_param, feature_layer, span_limits, Lx, Ly, x_mesh, y_mesh, sigmoid_coeff, Nlay)
 
     ER = []
     for i in range(Nlay):
         if struct_binary[i] != None:
-            ER.append(lay_eps_list[i] + (rcwa_parameters["erd"] - lay_eps_list[i]) * tf.cast(struct_binary[i], cdtype))
+            ER.append(lay_eps_list[i] + (rcwa_parameters["erd"] - lay_eps_list[i]) * struct_binary[i])
         else:
             ER.append(lay_eps_list[i] * tf.ones(materials_shape_lay, dtype=cdtype))
     ER = tf.concat(ER, axis=3)

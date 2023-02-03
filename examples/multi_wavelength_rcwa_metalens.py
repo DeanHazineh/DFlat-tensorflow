@@ -22,112 +22,111 @@ class pipeline_metalens_rcwa(df_optimizer.Pipeline_Object):
         self.point_source_locs = point_source_locs
 
         # define computational layers
-        self.cell_parameterization = "coupled_rectangular_resonator"
-        self.rcwa_latent_layer = df_physical.RCWA_Latent_Layer(self.rcwa_parameters, self.cell_parameterization)
+        self.cell_parameterization = "cylindrical_nanopost" #coupled_rectangular_resonator"
+        self.rcwa_latent_layer = df_physical.RCWA_Latent_Layer(self.rcwa_parameters, self.cell_parameterization, feature_layer=0)
         self.psf_layer = df_fourier.PSF_Layer(propagation_parameters)
 
         # Make uniform state latent tensor as initial variable for metasurface with helper function
         input_shape = self.rcwa_latent_layer.shape_vect_size
-        init_latent = tf.random.uniform(shape=input_shape) - 0.25
-        self.latent_tensor_variable = tf.Variable(init_latent, trainable=True, dtype=tf.float32)
+        init_latent = tf.cast(tf.random.uniform(shape=input_shape) - 0.25, dtype=rcwa_parameters["dtype"])
+        self.latent_tensor_variable = tf.Variable(init_latent, trainable=True)
 
     def __call__(self):
         out = self.rcwa_latent_layer(self.latent_tensor_variable)
-        psf_intensity, _ = self.psf_layer(out, self.point_source_locs, batch_loop=False)
+        # psf_intensity, _ = self.psf_layer(out, self.point_source_locs, batch_loop=False)
 
-        # sum over the two polarization basis (x and y linear)
-        psf_intensity = tf.reduce_sum(psf_intensity, axis=1)
+        # # sum over the two polarization basis (x and y linear)
+        # psf_intensity = tf.reduce_sum(psf_intensity, axis=1)
 
-        # Save the last lens and psf for plotting later
-        self.last_lens = out
-        self.last_psf = psf_intensity
+        # # Save the last lens and psf for plotting later
+        # self.last_lens = out
+        # self.last_psf = psf_intensity
 
-        return psf_intensity
+        return out[0]
 
     def visualizeTrainingCheckpoint(self, saveto):
-        # This overrides the baseclass visualization call function, called during checkpoints
-        savefigpath = self.savepath + "/trainingOutput/"
+        # # This overrides the baseclass visualization call function, called during checkpoints
+        # savefigpath = self.savepath + "/trainingOutput/"
 
-        # Get parameters for plotting
-        # Helper call that returns simple definition of cartesian axis on lens and output space (um)
-        xl, yl = plt_util.get_lens_pixel_coordinates(self.propagation_parameters)
-        xd, yd = plt_util.get_detector_pixel_coordinates(self.propagation_parameters)
-        xl, yl = xl * 1e6, yl * 1e6
-        xd, yd = xd * 1e6, yd * 1e6
+        # # Get parameters for plotting
+        # # Helper call that returns simple definition of cartesian axis on lens and output space (um)
+        # xl, yl = plt_util.get_lens_pixel_coordinates(self.propagation_parameters)
+        # xd, yd = plt_util.get_detector_pixel_coordinates(self.propagation_parameters)
+        # xl, yl = xl * 1e6, yl * 1e6
+        # xd, yd = xd * 1e6, yd * 1e6
 
-        Lx = self.rcwa_parameters["Lx"]
-        Ly = self.rcwa_parameters["Ly"]
-        sim_wavelengths = self.propagation_parameters["wavelength_set_m"]
-        num_wl = len(sim_wavelengths)
+        # Lx = self.rcwa_parameters["Lx"]
+        # Ly = self.rcwa_parameters["Ly"]
+        # sim_wavelengths = self.propagation_parameters["wavelength_set_m"]
+        # num_wl = len(sim_wavelengths)
 
-        ### Display the learned phase and transmission profile on first row
-        # and wavelength dependent PSFs on the second
-        trans = self.last_lens[0]
-        phase = self.last_lens[1]
+        # ### Display the learned phase and transmission profile on first row
+        # # and wavelength dependent PSFs on the second
+        # trans = self.last_lens[0]
+        # phase = self.last_lens[1]
 
-        fig = plt.figure(figsize=(25, 10))
-        ax = plt_util.addAxis(fig, 2, num_wl)
-        for i in range(num_wl):
-            ax[i].plot(xl, phase[i, 0, 0, :], "k-")
-            ax[i].plot(xl, phase[i, 1, 0, :], "b-")
-            # ax[i].plot(xl, trans[i, 0, 0, :], "k*")
-            # ax[i].plot(xl, trans[i, 1, 0, :], "b*")
-            plt_util.formatPlots(
-                fig,
-                ax[i],
-                None,
-                xlabel="Lens radius (um)",
-                ylabel="Phase (x and y polarized)" if i == 0 else "",
-                title=f"wavelength {sim_wavelengths[i]*1e9:3.0f} nm",
-                fontsize_text=12,
-                fontsize_title=12,
-                fontsize_ticks=12,
-            )
+        # fig = plt.figure(figsize=(25, 10))
+        # ax = plt_util.addAxis(fig, 2, num_wl)
+        # for i in range(num_wl):
+        #     ax[i].plot(xl, phase[i, 0, 0, :], "k-")
+        #     ax[i].plot(xl, phase[i, 1, 0, :], "b-")
+        #     # ax[i].plot(xl, trans[i, 0, 0, :], "k*")
+        #     # ax[i].plot(xl, trans[i, 1, 0, :], "b*")
+        #     plt_util.formatPlots(
+        #         fig,
+        #         ax[i],
+        #         None,
+        #         xlabel="Lens radius (um)",
+        #         ylabel="Phase (x and y polarized)" if i == 0 else "",
+        #         title=f"wavelength {sim_wavelengths[i]*1e9:3.0f} nm",
+        #         fontsize_text=12,
+        #         fontsize_title=12,
+        #         fontsize_ticks=12,
+        #     )
 
-            ax[i + num_wl].imshow(self.last_psf[i, 0, :, :], extent=(min(xd), max(xd), min(yd), max(yd)))
-            plt_util.formatPlots(
-                fig,
-                ax[i + num_wl],
-                None,
-                xlabel="det x (um)",
-                ylabel="det y (um)",
-                title=f"Pol. avg PSF {sim_wavelengths[i]*1e9:3.0f} nm",
-                setAspect="equal",
-                fontsize_text=12,
-                fontsize_title=12,
-                fontsize_ticks=12,
-            )
+        #     ax[i + num_wl].imshow(self.last_psf[i, 0, :, :], extent=(min(xd), max(xd), min(yd), max(yd)))
+        #     plt_util.formatPlots(
+        #         fig,
+        #         ax[i + num_wl],
+        #         None,
+        #         xlabel="det x (um)",
+        #         ylabel="det y (um)",
+        #         title=f"Pol. avg PSF {sim_wavelengths[i]*1e9:3.0f} nm",
+        #         setAspect="equal",
+        #         fontsize_text=12,
+        #         fontsize_title=12,
+        #         fontsize_ticks=12,
+        #     )
         # plt.savefig(savefigpath + "png_images/" + saveto + "epoch_Lens.png")
         # plt.savefig(savefigpath + "pdf_images/" + saveto + "epoch_Lens.pdf")
         # plt.close()
 
-        ### Display some of the learned metacells
-        # We want to assemble the cell's dielectric profile so we can plot it
-        latent_tensor_state = self.latent_tensor_variable
-        norm_shape_param = df_tools.latent_to_param(latent_tensor_state)
-        ER, _ = generate_cell_perm(norm_shape_param, self.rcwa_parameters, self.cell_parameterization, feature_layer=0)
-        disp_num = 5
-        cell_idx = np.linspace(0, ER.shape[1] - 1, disp_num).astype(int)
+        # ### Display some of the learned metacells
+        # # We want to assemble the cell's dielectric profile so we can plot it
+        # latent_tensor_state = self.latent_tensor_variable
+        # norm_shape_param = df_tools.latent_to_param(latent_tensor_state)
+        # ER, _ = generate_cell_perm(norm_shape_param, self.rcwa_parameters, self.cell_parameterization, feature_layer=0)
+        # disp_num = 5
+        # cell_idx = np.linspace(0, ER.shape[1] - 1, disp_num).astype(int)
 
-        fig = plt.figure(figsize=(25, 5))
-        ax = plt_util.addAxis(fig, 1, disp_num)
-        for i, idx in enumerate(cell_idx):
-            ax[i].imshow(np.abs(ER[0, idx, 0, 0, :, :]), extent=(0, np.max(Lx) * 1e9, 0, np.max(Ly) * 1e9))
-            plt_util.formatPlots(
-                fig,
-                ax[i],
-                None,
-                xlabel="Cell x (nm)",
-                ylabel="Cell y (nm)" if i == 0 else "",
-                title="Lens r (um): " + f"{xl[idx]:3.0f}",
-                fontsize_text=12,
-                fontsize_title=12,
-                fontsize_ticks=12,
-            )
+        # fig = plt.figure(figsize=(25, 5))
+        # ax = plt_util.addAxis(fig, 1, disp_num)
+        # for i, idx in enumerate(cell_idx):
+        #     ax[i].imshow(np.abs(ER[0, idx, 0, 0, :, :]), extent=(0, np.max(Lx) * 1e9, 0, np.max(Ly) * 1e9))
+        #     plt_util.formatPlots(
+        #         fig,
+        #         ax[i],
+        #         None,
+        #         xlabel="Cell x (nm)",
+        #         ylabel="Cell y (nm)" if i == 0 else "",
+        #         title="Lens r (um): " + f"{xl[idx]:3.0f}",
+        #         fontsize_text=12,
+        #         fontsize_title=12,
+        #         fontsize_ticks=12,
+        #     )
         # plt.savefig(savefigpath + "png_images/" + saveto + "epoch_Cells.png")
         # plt.savefig(savefigpath + "pdf_images/" + saveto + "epoch_Cells.pdf")
         # plt.close()
-        plt.show()
         return
 
 
@@ -138,12 +137,12 @@ def run_broadband_metalens(num_epochs=50, try_gpu=True):
         os.makedirs(savepath)
 
     # Define Fourier parameters
-    wavelength_list = [450e-9, 500e-9, 600e-9, 700e-9]
+    wavelength_list = [600e-9, 700e-9]
     point_source_locs = np.array([[0, 0, 1e6]])
     propagation_parameters = df_struct.prop_params(
         {
             "wavelength_set_m": wavelength_list,
-            "ms_samplesM": {"x": 201, "y": 201},
+            "ms_samplesM": {"x": 101, "y": 101},
             "ms_dx_m": {"x": 5 * 350e-9, "y": 5 * 350e-9},
             "radius_m": None,
             "sensor_distance_m": 1e-3,
@@ -161,7 +160,7 @@ def run_broadband_metalens(num_epochs=50, try_gpu=True):
     gridshape = propagation_parameters["grid_shape"]
 
     # Define RCWA parameters
-    fourier_modes = 5
+    fourier_modes = 3
     rcwa_parameters = df_struct.rcwa_params(
         {
             "wavelength_set_m": wavelength_list,
@@ -169,8 +168,8 @@ def run_broadband_metalens(num_epochs=50, try_gpu=True):
             "phis": [0.0 for i in wavelength_list],
             "pte": [1.0 for i in wavelength_list],
             "ptm": [1.0 for i in wavelength_list],
-            "pixelsX": gridshape[2],
-            "pixelsY": gridshape[1],
+            "pixelsX": 5, #gridshape[2],
+            "pixelsY": 5, #gridshape[1],
             "PQ": [fourier_modes, fourier_modes],
             "Lx": 350e-9,
             "Ly": 350e-9,
@@ -181,12 +180,17 @@ def run_broadband_metalens(num_epochs=50, try_gpu=True):
             "er2": "Vacuum",
             "Nx": 200,
             "Ny": 200,
+            "dtype": tf.float32,
+            "cdtype": tf.complex64
         }
     )
+
 
     ## Call optimization pipeline
     saveAtEpochs = 10
     pipeline = pipeline_metalens_rcwa(rcwa_parameters, propagation_parameters, point_source_locs, savepath, saveAtEpochs=saveAtEpochs)
+    out = pipeline()
+    print(out)
 
     ## Define custom Loss function (Should always have pipeline_output as the function input if use helper)
     # You can write your own training function to for more control
@@ -195,9 +199,10 @@ def run_broadband_metalens(num_epochs=50, try_gpu=True):
     cidx_x = sensor_pixel_number["x"] // 2
 
     def loss_fn(pipeline_output):
-        return -tf.reduce_sum(pipeline_output[:, 0, cidx_y, cidx_x])
+        #return -tf.reduce_sum(pipeline_output[:, 0, cidx_y, cidx_x])
+        return tf.reduce_sum(pipeline_output)
 
-    lr_sched = tf.keras.optimizers.schedules.ExponentialDecay(1e-1, 10, 0.95, staircase=False, name=None)
+    lr_sched = 1e-1#tf.keras.optimizers.schedules.ExponentialDecay(1e-1, 10, 0.95, staircase=False, name=None)
     optimizer = tf.keras.optimizers.Adam(lr_sched)
     df_optimizer.run_pipeline_optimization(pipeline, optimizer, num_epochs=num_epochs, loss_fn=loss_fn, allow_gpu=True)
 

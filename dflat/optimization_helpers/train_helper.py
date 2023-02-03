@@ -22,8 +22,6 @@ def run_pipeline_optimization(pipeline, optimizer, num_epochs, loss_fn=None, all
         def loss_fn(pipeline_output):
             return pipeline_output
 
-    # train_loop(pipeline, optimizer, loss_fn, num_epochs)
-
     if not allow_gpu:
         with tf.device("/cpu:0"):
             train_loop(pipeline, optimizer, loss_fn, num_epochs)
@@ -46,8 +44,8 @@ def train_loop(pipeline, optimizer, loss_fn, num_epochs):
     start_iter = len(pipeline_loss) if len(pipeline_loss) else 0
 
     # Call once before starting training and save initial state visualization
-    pipeline()
-    pipeline.visualizeTrainingCheckpoint(str(start_iter))
+    #pipeline()
+    #pipeline.visualizeTrainingCheckpoint(str(start_iter))
 
     # Run All Training Steps
     for epoch in range(num_epochs):
@@ -77,11 +75,7 @@ def train_loop(pipeline, optimizer, loss_fn, num_epochs):
 def train(pipeline, loss_fn, optimizer):
     with tf.GradientTape() as tape:
         current_loss = loss_fn(pipeline())
-        print(current_loss)
-
-    gradients = tape.gradient(current_loss, pipeline.trainable_variables)
-    print(gradients)
-
+        gradients = tape.gradient(current_loss, pipeline.trainable_variables)
     optimizer.apply_gradients(zip(gradients, pipeline.trainable_variables))
 
     return current_loss.numpy()

@@ -76,12 +76,12 @@ def eig_general(A, eps=1e-3):
         batchSize, pixelsX, pixelsY, Nlay, dim, _ = A.shape
 
         # Calculate intermediate matrices.
-        I = tf.eye(num_rows=dim, dtype=tf.complex64)
+        I = tf.eye(num_rows=dim, dtype=A.dtype)
         D = tf.reshape(D, shape=(batchSize, pixelsX, pixelsY, Nlay, dim, 1))
         shape_di = (batchSize, pixelsX, pixelsY, Nlay, dim, 1)
         shape_dj = (batchSize, pixelsX, pixelsY, Nlay, 1, dim)
-        E = tf.ones(shape=shape_di, dtype=tf.complex64) * tf.linalg.adjoint(D)
-        E = E - D * tf.ones(shape=shape_dj, dtype=tf.complex64)
+        E = tf.ones(shape=shape_di, dtype=A.dtype) * tf.linalg.adjoint(D)
+        E = E - D * tf.ones(shape=shape_dj, dtype=A.dtype)
         E = tf.linalg.adjoint(D) - D
 
         # Lorentzian broadening.

@@ -25,7 +25,7 @@ ALL_MANDATORY_KEYS = [
     "Ny",
 ]
 
-ALL_OPTIONAL_KEYS = {"ur1": 1.0, "ur2": 1.0, "urd": 1.0, "urs": 1.0, "dtype": tf.float32, "cdtype": tf.complex64, "batch_wavelength_dim": False}
+ALL_OPTIONAL_KEYS = {"ur1": 1.0, "ur2": 1.0, "urd": 1.0, "urs": 1.0, "dtype": tf.float64, "cdtype": tf.complex128, "batch_wavelength_dim": False}
 
 ADDED_KEYS_PASS = []
 
