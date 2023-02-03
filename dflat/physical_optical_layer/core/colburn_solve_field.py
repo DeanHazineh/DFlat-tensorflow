@@ -122,7 +122,7 @@ def simulate(ER_t, UR_t, params, eps=1e-6):
     LAM_free_row0 = tf.concat([1j * KZ, Z], axis=5)
     LAM_free_row1 = tf.concat([Z, 1j * KZ], axis=5)
     LAM_free = tf.concat([LAM_free_row0, LAM_free_row1], axis=4)
-    
+
     ### NOTE: I Think there is an instability with this line and possible error for calculations
     V0 = tf.linalg.matmul(Q_free, tf.linalg.inv(LAM_free))
 

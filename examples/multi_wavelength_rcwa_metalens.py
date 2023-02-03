@@ -22,7 +22,7 @@ class pipeline_metalens_rcwa(df_optimizer.Pipeline_Object):
         self.point_source_locs = point_source_locs
 
         # define computational layers
-        self.cell_parameterization = "coupled_rectangular_resonators"
+        self.cell_parameterization = "coupled_rectangular_resonator"
         self.rcwa_latent_layer = df_physical.RCWA_Latent_Layer(self.rcwa_parameters, self.cell_parameterization)
         self.psf_layer = df_fourier.PSF_Layer(propagation_parameters)
 
@@ -65,7 +65,7 @@ class pipeline_metalens_rcwa(df_optimizer.Pipeline_Object):
         trans = self.last_lens[0]
         phase = self.last_lens[1]
 
-        fig = plt.figure(figsize=(30, 20))
+        fig = plt.figure(figsize=(25, 10))
         ax = plt_util.addAxis(fig, 2, num_wl)
         for i in range(num_wl):
             ax[i].plot(xl, phase[i, 0, 0, :], "k-")
@@ -79,6 +79,9 @@ class pipeline_metalens_rcwa(df_optimizer.Pipeline_Object):
                 xlabel="Lens radius (um)",
                 ylabel="Phase (x and y polarized)" if i == 0 else "",
                 title=f"wavelength {sim_wavelengths[i]*1e9:3.0f} nm",
+                fontsize_text=12,
+                fontsize_title=12,
+                fontsize_ticks=12,
             )
 
             ax[i + num_wl].imshow(self.last_psf[i, 0, :, :], extent=(min(xd), max(xd), min(yd), max(yd)))
@@ -90,20 +93,23 @@ class pipeline_metalens_rcwa(df_optimizer.Pipeline_Object):
                 ylabel="det y (um)",
                 title=f"Pol. avg PSF {sim_wavelengths[i]*1e9:3.0f} nm",
                 setAspect="equal",
+                fontsize_text=12,
+                fontsize_title=12,
+                fontsize_ticks=12,
             )
-        plt.savefig(savefigpath + "png_images/" + saveto + "epoch_Lens.png")
-        plt.savefig(savefigpath + "pdf_images/" + saveto + "epoch_Lens.pdf")
-        plt.close()
+        # plt.savefig(savefigpath + "png_images/" + saveto + "epoch_Lens.png")
+        # plt.savefig(savefigpath + "pdf_images/" + saveto + "epoch_Lens.pdf")
+        # plt.close()
 
         ### Display some of the learned metacells
         # We want to assemble the cell's dielectric profile so we can plot it
         latent_tensor_state = self.latent_tensor_variable
         norm_shape_param = df_tools.latent_to_param(latent_tensor_state)
-        ER, _ = generate_cell_perm(norm_shape_param, self.rcwa_parameters, self.cell_parameterization)
+        ER, _ = generate_cell_perm(norm_shape_param, self.rcwa_parameters, self.cell_parameterization, feature_layer=0)
         disp_num = 5
         cell_idx = np.linspace(0, ER.shape[1] - 1, disp_num).astype(int)
 
-        fig = plt.figure(figsize=(35, 7))
+        fig = plt.figure(figsize=(25, 5))
         ax = plt_util.addAxis(fig, 1, disp_num)
         for i, idx in enumerate(cell_idx):
             ax[i].imshow(np.abs(ER[0, idx, 0, 0, :, :]), extent=(0, np.max(Lx) * 1e9, 0, np.max(Ly) * 1e9))
@@ -114,31 +120,35 @@ class pipeline_metalens_rcwa(df_optimizer.Pipeline_Object):
                 xlabel="Cell x (nm)",
                 ylabel="Cell y (nm)" if i == 0 else "",
                 title="Lens r (um): " + f"{xl[idx]:3.0f}",
+                fontsize_text=12,
+                fontsize_title=12,
+                fontsize_ticks=12,
             )
-        plt.savefig(savefigpath + "png_images/" + saveto + "epoch_Cells.png")
-        plt.savefig(savefigpath + "pdf_images/" + saveto + "epoch_Cells.pdf")
-        plt.close()
+        # plt.savefig(savefigpath + "png_images/" + saveto + "epoch_Cells.png")
+        # plt.savefig(savefigpath + "pdf_images/" + saveto + "epoch_Cells.pdf")
+        # plt.close()
+        plt.show()
         return
 
 
-if __name__ == "__main__":
+def run_broadband_metalens(num_epochs=50, try_gpu=True):
     # Define save path
     savepath = "examples/output/multi_wavelength_rcwa_metalens_design/"
     if not os.path.exists(savepath):
         os.makedirs(savepath)
 
     # Define Fourier parameters
-    wavelength_list = [400e-9, 500e-9, 600e-9, 700e-9]
+    wavelength_list = [450e-9, 500e-9, 600e-9, 700e-9]
     point_source_locs = np.array([[0, 0, 1e6]])
     propagation_parameters = df_struct.prop_params(
         {
             "wavelength_set_m": wavelength_list,
-            "ms_samplesM": {"x": 255, "y": 255},
+            "ms_samplesM": {"x": 201, "y": 201},
             "ms_dx_m": {"x": 5 * 350e-9, "y": 5 * 350e-9},
             "radius_m": None,
             "sensor_distance_m": 1e-3,
-            "initial_sensor_dx_m": {"x": 2e-6, "y": 2e-6},
-            "sensor_pixel_size_m": {"x": 2e-6, "y": 2e-6},
+            "initial_sensor_dx_m": {"x": 2.5e-6, "y": 2.5e-6},
+            "sensor_pixel_size_m": {"x": 2.5e-6, "y": 2.5e-6},
             "sensor_pixel_number": {"x": 256, "y": 256},
             "radial_symmetry": True,
             "diffractionEngine": "fresnel_fourier",
@@ -164,20 +174,19 @@ if __name__ == "__main__":
             "PQ": [fourier_modes, fourier_modes],
             "Lx": 350e-9,
             "Ly": 350e-9,
-            "L": [600.0e-9],
+            "L": [600e-9],
             "Lay_mat": ["Vacuum"],
             "material_dielectric": "TiO2",
             "er1": "SiO2",
             "er2": "Vacuum",
-            "Nx": 256,
-            "Ny": 256,
-            "batch_wavelength_dim": False,
+            "Nx": 200,
+            "Ny": 200,
         }
     )
 
     ## Call optimization pipeline
-    pipeline = pipeline_metalens_rcwa(rcwa_parameters, propagation_parameters, point_source_locs, savepath, saveAtEpochs=5)
-    pipeline.customLoad()  # Call to reload model checkpoint from savefile
+    saveAtEpochs = 10
+    pipeline = pipeline_metalens_rcwa(rcwa_parameters, propagation_parameters, point_source_locs, savepath, saveAtEpochs=saveAtEpochs)
 
     ## Define custom Loss function (Should always have pipeline_output as the function input if use helper)
     # You can write your own training function to for more control
@@ -188,6 +197,11 @@ if __name__ == "__main__":
     def loss_fn(pipeline_output):
         return -tf.reduce_sum(pipeline_output[:, 0, cidx_y, cidx_x])
 
-    learning_rate = 1e-1
-    optimizer = tf.keras.optimizers.Adam(learning_rate)
-    df_optimizer.run_pipeline_optimization(pipeline, optimizer, num_epochs=200, loss_fn=loss_fn, allow_gpu=True)
+    lr_sched = tf.keras.optimizers.schedules.ExponentialDecay(1e-1, 10, 0.95, staircase=False, name=None)
+    optimizer = tf.keras.optimizers.Adam(lr_sched)
+    df_optimizer.run_pipeline_optimization(pipeline, optimizer, num_epochs=num_epochs, loss_fn=loss_fn, allow_gpu=True)
+
+    return
+
+
+run_broadband_metalens()

@@ -77,8 +77,11 @@ def train_loop(pipeline, optimizer, loss_fn, num_epochs):
 def train(pipeline, loss_fn, optimizer):
     with tf.GradientTape() as tape:
         current_loss = loss_fn(pipeline())
+        print(current_loss)
 
     gradients = tape.gradient(current_loss, pipeline.trainable_variables)
+    print(gradients)
+
     optimizer.apply_gradients(zip(gradients, pipeline.trainable_variables))
 
     return current_loss.numpy()
