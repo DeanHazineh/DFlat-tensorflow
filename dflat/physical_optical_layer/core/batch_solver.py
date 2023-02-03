@@ -64,31 +64,30 @@ def batched_wavelength_rcwa_shape(norm_param, rcwa_parameters, cell_parameteriza
 
 
 def compute_ref_field(rcwa_parameters):
-    # We want to loop this calculation. I find that the input is not invertible with multiple wavelength dim
-    # I need to investigate this more
-    # NOTE: THIS IS A WEIRD BUG THAT HAPPENS. IF wavelength matches Lx or Ly, you will get invertible error
+    # Compute the reference field without batching
+    if rcwa_parameters["batch_wavelength_dim"]:
+        rcwa_settings = rcwa_parameters.get_original_dict()
+        rcwa_settings["batch_wavelength_dim"] = False
+        rcwa_parameters = datstruc.rcwa_params(rcwa_settings)
 
+    # Retrieve simulation size parameters
+    batchSize = rcwa_parameters["batchSize"]
     pixelsX = rcwa_parameters["pixelsX"]
     pixelsY = rcwa_parameters["pixelsY"]
     Nlay = rcwa_parameters["Nlay"]
     Nx = rcwa_parameters["Nx"]
     Ny = rcwa_parameters["Ny"]
     cdtype = rcwa_parameters["cdtype"]
-    materials_shape = (1, pixelsX, pixelsY, Nlay, Nx, Ny)
-    materials_shape_lay = (1, pixelsX, pixelsY, 1, Nx, Ny)
+    materials_shape = (batchSize, pixelsX, pixelsY, Nlay, Nx, Ny)
+    materials_shape_lay = (batchSize, pixelsX, pixelsY, 1, Nx, Ny)
+    lay_eps_list = rcwa_parameters["lay_eps_list"]
     PQ_zero = tf.math.reduce_prod(rcwa_parameters["PQ"]) // 2
 
-    tx = []
-    ty = []
-    rcwa_parameters_list = generate_simParam_set(rcwa_parameters)
-    for rcwa_parameters_ in rcwa_parameters_list:
-        Ur = rcwa_parameters_["urd"] * tf.ones(materials_shape, dtype=cdtype)
-        Er = tf.concat([rcwa_parameters_["lay_eps_list"][i] * tf.ones(materials_shape_lay, dtype=cdtype) for i in range(Nlay)], axis=3)
-        outputs = simulate(Er, Ur, rcwa_parameters_)
-        tx.append(outputs["tx"][:, :, :, PQ_zero, 0])
-        ty.append(outputs["ty"][:, :, :, PQ_zero, 0])
+    Ur = rcwa_parameters["urd"] * tf.ones(materials_shape, dtype=cdtype)
+    Er = tf.concat([lay_eps_list[i] * tf.ones(materials_shape_lay, dtype=cdtype) for i in range(Nlay)], axis=3)
 
-    tx = tf.concat(tx, 0)
-    ty = tf.concat(ty, 0)
+    outputs = simulate(Er, Ur, rcwa_parameters)
+    tx = outputs["tx"][:, :, :, PQ_zero, 0]
+    ty = outputs["ty"][:, :, :, PQ_zero, 0]
 
     return tf.transpose(tf.stack([tx, ty]), [1, 0, 3, 2])
