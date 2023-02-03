@@ -14,7 +14,7 @@ def get_material_index(material_name, wavelength_list):
     # Scipy interp1d function allows for complex numbers
 
     if material_name == "Vacuum":
-        return (1 + 1j * 0) * np.ones(shape=(len(wavelength_list)))
+        return (1.0 + 1j * 0.0) * np.ones(shape=(len(wavelength_list)))
     else:
         resource_path = Path(__file__).parent / "material_index"
         index_path = resource_path.joinpath(MATERIAL_DICT[material_name])
@@ -29,6 +29,7 @@ def get_material_index(material_name, wavelength_list):
         wavelength_dat = np.squeeze(data["w"])
 
         if (np.min(wavelength_list) < np.min(wavelength_dat)) or (np.max(wavelength_list) > np.max(wavelength_dat)):
+            print(np.min(wavelength_dat), np.max(wavelength_dat))
             raise ValueError("get_material_index: wavelength is outside the boundaries of the index dat file")
         else:
             interp_func = interp1d(wavelength_dat, index_dat)

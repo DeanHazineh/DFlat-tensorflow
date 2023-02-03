@@ -1,8 +1,9 @@
 import numpy as np
 import tensorflow as tf
 
+
 def get_cartesian_grid(Lx, Nx, Ly, Ny):
-    return np.meshgrid(np.linspace(-Lx/2, Lx/2, Nx), np.linspace(-Ly/2, Ly/2, Ny))
+    return np.meshgrid(np.linspace(-Lx / 2, Lx / 2, Nx), np.linspace(-Ly / 2, Ly / 2, Ny))
 
 
 def build_rectangle_resonator(norm_param, feature_layer, span_limits, Lx, Ly, x_mesh, y_mesh, sigmoid_coeff, Nlay):
@@ -22,7 +23,7 @@ def build_rectangle_resonator(norm_param, feature_layer, span_limits, Lx, Ly, x_
     r_x = r_x[tf.newaxis, :, :, tf.newaxis, tf.newaxis, tf.newaxis]
     r_y = r_y[tf.newaxis, :, :, tf.newaxis, tf.newaxis, tf.newaxis]
 
-    ## Generate Rectangle fin shape    
+    ## Generate Rectangle fin shape
     r1 = 1 - tf.math.abs(x_mesh * 2 / r_x) ** 50 - tf.math.abs(y_mesh * 2 / r_y) ** 50
     r1 = tf.complex(tf.math.sigmoid(sigmoid_coeff * r1), TF_ZERO)
 
@@ -34,7 +35,7 @@ def build_rectangle_resonator(norm_param, feature_layer, span_limits, Lx, Ly, x_
 
 def build_coupled_rectangular_resonators(norm_param, feature_layer, span_limits, Lx, Ly, x_mesh, y_mesh, sigmoid_coeff, Nlay):
     # norm_param: A 'tf.Tensor' of shape (pixelsX, pixelsY, 4, 2)
-    POWER_EXP = 50
+    POWER_EXP = 40
     TF_ZERO = tf.constant(0.0, dtype=tf.float32)
 
     # unpack inputs
@@ -129,9 +130,9 @@ def generate_cell_perm(norm_param, rcwa_parameters, parameterization_type, featu
     init_function = ALLOWED_PARAMETERIZATION_TYPE[parameterization_type]
     span_limits = DEFAULT_SPAN_LIMITS[parameterization_type]
     lay_eps_list = rcwa_parameters["lay_eps_list"]
-    sigmoid_coeff = 1000.0
+    sigmoid_coeff = 100.0
     struct_binary = init_function(tf.cast(norm_param, tf.float32), feature_layer, span_limits, Lx, Ly, x_mesh, y_mesh, sigmoid_coeff, Nlay)
-    
+
     ER = []
     for i in range(Nlay):
         if struct_binary[i] != None:
@@ -156,7 +157,7 @@ ALLOWED_PARAMETERIZATION_TYPE = {
 
 CELL_SHAPE_DEGREE = {
     "rectangular_resonator": [2],
-    "coupled_rectangular_resonator": [4,2],
+    "coupled_rectangular_resonator": [4, 2],
     "cylindrical_nanopost": [1],
 }
 

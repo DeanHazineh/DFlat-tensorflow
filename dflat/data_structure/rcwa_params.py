@@ -77,6 +77,7 @@ class rcwa_params(dict):
         self.__check_optional_keys()
         self.__check_unknown_keys()
         self.__check_material_entry()
+        self.__original_dict = self.__store_original_dict()
 
         # Add required simulation keys if we are not in batch mode
         if not self.__dict__["batch_wavelength_dim"]:
@@ -169,6 +170,12 @@ class rcwa_params(dict):
             raise TypeError("er2 must be either string containing the material name or a complex value")
 
         return
+
+    def __store_original_dict(self):
+        return deepcopy(self.__dict__)
+
+    def get_original_dict(self):
+        return self.__original_dict
 
     def __add_sim_keys(self, input_dict):
         ### unpack parameters

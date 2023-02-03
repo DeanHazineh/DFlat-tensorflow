@@ -3,33 +3,24 @@ import tensorflow as tf
 import dflat.data_structure as datstruc
 from .colburn_solve_field import simulate
 from .ms_parameterization import generate_cell_perm
-
-reset_keys = ["wavelength_set_m", "thetas", "phis", "pte", "ptm", "batch_wavelength_dim"]
+from copy import deepcopy
 
 
 def generate_simParam_set(rcwa_parameters):
-    # rcwa_parameters["batch_wavelength_dim"] must be True to use this
-    # Unpack the input parameters
-    wavelength_set_m = rcwa_parameters["wavelength_set_m"]
-    num_wavelengths = len(wavelength_set_m)
-    thetas = rcwa_parameters["thetas"]
-    phis = rcwa_parameters["phis"]
-    pte = rcwa_parameters["pte"]
-    ptm = rcwa_parameters["ptm"]
+    # In most cases "batch_wavelength_dim" would be true but i want this to work when it is false also
+    original_dict = rcwa_parameters.get_original_dict()
+    num_wavelengths = len(original_dict["wavelength_set_m"])
 
     rcwa_parameters_list = []
     for iter in range(num_wavelengths):
-        rcwa_settings = rcwa_parameters.get_dict()
-        for key in reset_keys:
-            del rcwa_settings[key]
-
-        rcwa_settings["wavelength_set_m"] = [wavelength_set_m[iter]]
-        rcwa_settings["thetas"] = [thetas[iter]]
-        rcwa_settings["phis"] = [phis[iter]]
-        rcwa_settings["pte"] = [pte[iter]]
-        rcwa_settings["ptm"] = [ptm[iter]]
-        rcwa_settings["batch_wavelength_dim"] = False
-        rcwa_parameters_list.append(datstruc.rcwa_params(rcwa_settings))
+        rcwa_dict = deepcopy(original_dict)
+        rcwa_dict["wavelength_set_m"] = [original_dict["wavelength_set_m"][iter]]
+        rcwa_dict["thetas"] = [original_dict["thetas"][iter]]
+        rcwa_dict["phis"] = [original_dict["phis"][iter]]
+        rcwa_dict["pte"] = [original_dict["pte"][iter]]
+        rcwa_dict["ptm"] = [original_dict["ptm"][iter]]
+        rcwa_dict["batch_wavelength_dim"] = False
+        rcwa_parameters_list.append(datstruc.rcwa_params(rcwa_dict))
 
     return rcwa_parameters_list
 
@@ -72,34 +63,35 @@ def batched_wavelength_rcwa_shape(norm_param, rcwa_parameters, cell_parameteriza
 
 
 def compute_ref_field(rcwa_parameters):
-    # Compute the reference field without batching
-    if rcwa_parameters["batch_wavelength_dim"]:
-        rcwa_settings = rcwa_parameters.get_dict()
-        rcwa_settings["batch_wavelength_dim"] = False
-        rcwa_parameters = datstruc.rcwa_params(rcwa_settings)
+    # We want to loop this calculation. I find that the input is not invertible with multiple wavelength dim
+    # I need to investigate this more
+    # NOTE: THIS IS A WEIRD BUG THAT HAPPENS. IF wavelength matches Lx or Ly, you will get invertible error
 
-    # Retrieve simulation size parameters
-    batchSize = rcwa_parameters["batchSize"]
     pixelsX = rcwa_parameters["pixelsX"]
     pixelsY = rcwa_parameters["pixelsY"]
     Nlay = rcwa_parameters["Nlay"]
     Nx = rcwa_parameters["Nx"]
     Ny = rcwa_parameters["Ny"]
     cdtype = rcwa_parameters["cdtype"]
-    materials_shape = (batchSize, pixelsX, pixelsY, Nlay, Nx, Ny)
-    materials_shape_lay = (batchSize, pixelsX, pixelsY, 1, Nx, Ny)
-    lay_eps_list = rcwa_parameters["lay_eps_list"]
-
-    Ur = rcwa_parameters["urd"] * tf.ones(materials_shape, dtype=cdtype)
-    Er = []
-    for i in range(Nlay):
-        Er.append(lay_eps_list[i] * tf.ones(materials_shape_lay, dtype=cdtype))
-    Er = tf.concat(Er, axis=3)
-
+    materials_shape = (1, pixelsX, pixelsY, Nlay, Nx, Ny)
+    materials_shape_lay = (1, pixelsX, pixelsY, 1, Nx, Ny)
     PQ_zero = tf.math.reduce_prod(rcwa_parameters["PQ"]) // 2
-    outputs = simulate(Er, Ur, rcwa_parameters)
 
-    tx = outputs["tx"][:, :, :, PQ_zero, 0]
-    ty = outputs["ty"][:, :, :, PQ_zero, 0]
+    tx = []
+    ty = []
+    rcwa_parameters_list = generate_simParam_set(rcwa_parameters)
+    for rcwa_parameters_ in rcwa_parameters_list:
 
-    return tf.transpose(tf.stack([tx, ty]), [1, 0, 3,2])
+        print(rcwa_parameters_["lay_eps_list"][0].numpy())
+
+        Ur = rcwa_parameters_["urd"] * tf.ones(materials_shape, dtype=cdtype)
+
+        Er = tf.concat([rcwa_parameters_["lay_eps_list"][i] * tf.ones(materials_shape_lay, dtype=cdtype) for i in range(Nlay)], axis=3)
+        outputs = simulate(Er, Ur, rcwa_parameters_)
+        tx.append(outputs["tx"][:, :, :, PQ_zero, 0])
+        ty.append(outputs["ty"][:, :, :, PQ_zero, 0])
+
+    tx = tf.concat(tx, 0)
+    ty = tf.concat(ty, 0)
+
+    return tf.transpose(tf.stack([tx, ty]), [1, 0, 3, 2])
