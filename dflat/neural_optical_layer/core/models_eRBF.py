@@ -5,11 +5,11 @@ from .arch_Parent_class import MLP_Nanofins_U350_H600, MLP_Nanocylinders_U180_H6
 
 erbf_model_names = [
     "ERBF_Nanocylinders_B1024_U180_H600",
-    "ERBF_Nanocylinders_B512_U180_H600",
-    "ERBF_Nanocylinders_B256_U180_H600",
+    #"ERBF_Nanocylinders_B512_U180_H600",
+    #"ERBF_Nanocylinders_B256_U180_H600",
     "ERBF_Nanofins_B4096_U350_H600",
-    "ERBF_Nanofins_B2048_U350_H600",
-    "ERBF_Nanofins_B1024_U350_H600",
+    #"ERBF_Nanofins_B2048_U350_H600",
+    #"ERBF_Nanofins_B1024_U350_H600",
 ]
 
 

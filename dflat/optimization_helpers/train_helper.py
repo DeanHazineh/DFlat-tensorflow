@@ -22,8 +22,6 @@ def run_pipeline_optimization(pipeline, optimizer, num_epochs, loss_fn=None, all
         def loss_fn(pipeline_output):
             return pipeline_output
 
-    # train_loop(pipeline, optimizer, loss_fn, num_epochs)
-
     if not allow_gpu:
         with tf.device("/cpu:0"):
             train_loop(pipeline, optimizer, loss_fn, num_epochs)

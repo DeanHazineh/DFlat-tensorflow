@@ -1,5 +1,0 @@
-Contributors
-============
-
-in development
-

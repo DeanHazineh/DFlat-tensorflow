@@ -77,6 +77,7 @@ class rcwa_params(dict):
         self.__check_optional_keys()
         self.__check_unknown_keys()
         self.__check_material_entry()
+        self.__original_dict = self.__store_original_dict()
 
         # Add required simulation keys if we are not in batch mode
         if not self.__dict__["batch_wavelength_dim"]:
@@ -170,6 +171,12 @@ class rcwa_params(dict):
 
         return
 
+    def __store_original_dict(self):
+        return deepcopy(self.__dict__)
+
+    def get_original_dict(self):
+        return self.__original_dict
+
     def __add_sim_keys(self, input_dict):
         ### unpack parameters
         batchSize = len(input_dict["wavelength_set_m"])
@@ -230,10 +237,6 @@ class rcwa_params(dict):
             self.__dict__["Ny"] = 1
         else:
             self.__dict__["Ny"] = int(np.round(Nx * Ly / Lx))  # number of point along y in real-space grid
-
-        # Coefficient for the argument of tf.math.sigmoid() when generating
-        # permittivity distributions with geometric parameters.
-        self.__dict__["sigmoid_coeff"] = 1000.0
 
         return
 

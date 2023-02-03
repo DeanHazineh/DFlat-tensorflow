@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 
 
-def batched_broadband_MLP(norm_param, mlp_model, wavelength_m_asList, gridShape, output_stack_dim):
+def batched_broadband_MLP(norm_param, mlp_model, wavelength_m_asList, gridShape):
     """Returns the transmittance (Not transmission although the MLP was trained on transmission). Utilizes a for-loop
     to batch over input wavelengths in order to not overload users memory
 
@@ -11,8 +11,6 @@ def batched_broadband_MLP(norm_param, mlp_model, wavelength_m_asList, gridShape,
         mlp_model (_type_): _description_
         wavelength_m_asList (_type_): _description_
         gridShape (_type_): _description_
-        output_stack_dim (_type_): _description_
-
     Returns:
         _type_: _description_
     """
@@ -20,6 +18,7 @@ def batched_broadband_MLP(norm_param, mlp_model, wavelength_m_asList, gridShape,
     ## Loop batch for wavelength
     num_wavelengths = len(wavelength_m_asList)
     dtype = mlp_model.get_model_dtype()
+    output_stack_dim = mlp_model.get_output_pol_state()
 
     def lambda_loopCond(idx_, hold_trans_, hold_phase_):
         return tf.less(idx_, num_wavelengths)
@@ -72,53 +71,3 @@ def append_wavelength(p_param, normalized_wavelength_m, dtype):
     wavelength_mlp = tf.ones((p_param.shape[0], 1), dtype=dtype) * normalized_wavelength_m
     return tf.concat((p_param, wavelength_mlp), axis=-1)
 
-
-###
-def convert_shape_to_param(shape_vector, MLP_model):
-    """(Helper function for neural optical models) Given an unormalized shape vector and an MLP model,
-    return the normalized params, in [0,1].
-
-    Args:
-        `shape_vector` (np.float): Unnormalized shape vector for a cell, of form (N, D) where D is the shape degree.
-        `MLP_model` (MLP_Object): A pre-trained neural optical model in DFlat.
-
-    Returns:
-        `np.float`: Model normalized parameter vector suitable for mlp input
-    """
-    paramList = [shape_vector[:, i : i + 1] for i in range(shape_vector.shape[1])]
-
-    return tf.concat(MLP_model.normalizeInput(paramList), axis=1)
-
-
-def convert_param_to_shape(norm_param, MLP_model):
-    """(Helper function for neural optical models) Given a model normalized parameter array, return the unnormalized
-    shape vector which corresponds to structure lengths in m.
-
-    Args:
-        `norm_param` (np.float): Normalized parameters for a cell, of form (N, D) where D is the shape degree.
-        `MLP_model` (MLP_Object): A pre-trained neural optical model in DFlat.
-
-    Returns:
-        `np.float`: The unnormalized parameter vector, where lengths are back in meaningful units of m.
-    """
-    databounds = MLP_model.get_preprocessDataBounds()
-    shapeDegree = len(databounds) - 1
-
-    return tf.concat(
-        [norm_param[:, i] * (databounds[i][1] - databounds[i][0]) + databounds[i][0] for i in range(shapeDegree)],
-        axis=0,
-    )
-
-
-def init_norm_param(init_type, dtype, gridShape, mlp_input_shape, init_args=[]):
-
-    if init_type == "uniform":
-        norm_param = 0.5 * tf.ones(shape=(mlp_input_shape - 1, gridShape[1], gridShape[2]), dtype=dtype)
-
-    elif init_type == "random":
-        norm_param = tf.random.uniform(shape=(mlp_input_shape - 1, gridShape[1], gridShape[2]), dtype=dtype)
-
-    else:
-        raise ValueError("initialize_norm_param: invalid init_type string;")
-
-    return norm_param

@@ -1,10 +1,10 @@
+scikit-learn
 numpy
 tensorflow_gpu==2.11.0
 tensorflow_probability
 matplotlib
 scipy
 keras_flops
-sklearn
 mat73
 opencv-python
 pandas

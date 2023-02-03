@@ -2,8 +2,6 @@ import tensorflow as tf
 from dflat.tools.latent_param_utils import latent_to_param, param_to_latent
 from .core.batch_solver import batched_wavelength_rcwa_shape, compute_ref_field, full_rcwa_shape
 
-## I have removed function specific shape parameterizations from rcwa_params class
-# those details will need to be moved over here
 from .core.ms_parameterization import ALLOWED_PARAMETERIZATION_TYPE, CELL_SHAPE_DEGREE
 
 
@@ -19,11 +17,12 @@ class RCWA_Layer(tf.keras.layers.Layer):
         `rcwa_parameters` (rcwa_param): Configuration dictionary object providing the rcwa solve settings
     """
 
-    def __init__(self, rcwa_parameters, cell_parameterization):
+    def __init__(self, rcwa_parameters, cell_parameterization, feature_layer=0):
         """Initialize the rcwa_layer.
         Args:
         `rcwa_parameters` (rcwa_param): Configuration dictionary object providing the rcwa solver settings
         `cell_parameterization` (string): Cell parameterization model name
+        `feature_layer` (int): Specify which layer of L the feature is to be placed in
         """
 
         super(RCWA_Layer, self).__init__()
@@ -33,6 +32,7 @@ class RCWA_Layer(tf.keras.layers.Layer):
         self.rcwa_parameters = rcwa_parameters
         self.cell_parameterization = cell_parameterization
         self.shape_vect_size = self.__get_param_shape()
+        self.feature_layer = feature_layer
 
         # Compute reference field and store it in attributes for use during call
         self.ref_field = compute_ref_field(rcwa_parameters)
@@ -65,7 +65,7 @@ class RCWA_Layer(tf.keras.layers.Layer):
             name="param_vector_shape_assertion",
         )
 
-        field = self.rcwa_caller(norm_param, self.rcwa_parameters, self.cell_parameterization)
+        field = self.rcwa_caller(norm_param, self.rcwa_parameters, self.cell_parameterization, self.feature_layer)
 
         return tf.abs(field) / tf.abs(self.ref_field), tf.math.angle(self.ref_field) - tf.math.angle(field)
 
@@ -98,7 +98,7 @@ class RCWA_Latent_Layer(RCWA_Layer):
             during layer initialization.
     """
 
-    def __init__(self, rcwa_parameters, cell_parameterization):
+    def __init__(self, rcwa_parameters, cell_parameterization, feature_layer=0):
         """Initialize the rcwa_latent_layer.
 
         Args:
@@ -130,6 +130,6 @@ class RCWA_Latent_Layer(RCWA_Layer):
 
         # Convert latent_vector to the normalized parameters
         norm_param = latent_to_param(latent_vector)
-        field = self.rcwa_caller(norm_param, self.rcwa_parameters, self.cell_parameterization)
+        field = self.rcwa_caller(norm_param, self.rcwa_parameters, self.cell_parameterization, self.feature_layer)
 
         return tf.abs(field) / tf.abs(self.ref_field), tf.math.angle(self.ref_field) - tf.math.angle(field)
