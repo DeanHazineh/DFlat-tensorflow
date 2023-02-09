@@ -26,12 +26,8 @@ def run_pipeline_optimization(pipeline, optimizer, num_epochs, loss_fn=None, all
         with tf.device("/cpu:0"):
             train_loop(pipeline, optimizer, loss_fn, num_epochs)
     else:
-        try:
-            with tf.device("/gpu:0"):
-                train_loop(pipeline, optimizer, loss_fn, num_epochs)
-        except:
-            with tf.device("/cpu:0"):
-                train_loop(pipeline, optimizer, loss_fn, num_epochs)
+        with tf.device("/gpu:0"):
+            train_loop(pipeline, optimizer, loss_fn, num_epochs)
 
     return
 

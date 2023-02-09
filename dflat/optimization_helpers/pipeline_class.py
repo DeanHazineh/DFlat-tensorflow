@@ -59,13 +59,11 @@ class Pipeline_Object(tf.keras.Model):
         print("\n Model Saved Succesfully \n")
         if loss_vector:
             self.loss_vector = np.concatenate((self.loss_vector, loss_vector))
-            data = {"trainingLoss": self.loss_vector}
+        if test_loss_vector:
+            self.test_loss_vector = np.concatenate((self.test_loss_vector, test_loss_vector))
 
-            if test_loss_vector:
-                self.test_loss_vector = np.concatenate((self.test_loss_vector, test_loss_vector))
-                data["testLoss"] = self.test_loss_vector
-
-            pickle.dump(data, open(self.savepath + "trainingHistory.pickle", "wb"))
+        data = {"trainingLoss": self.loss_vector, "testLoss": self.test_loss_vector}
+        pickle.dump(data, open(self.savepath + "trainingHistory.pickle", "wb"))
 
         # Make and save a plot of the training history
         fig = plt.figure(figsize=(30, 15))
@@ -94,7 +92,7 @@ class Pipeline_Object(tf.keras.Model):
             with open(self.savepath + "trainingHistory.pickle", "rb") as handle:
                 trackHistory = pickle.load(handle)
                 self.loss_vector = trackHistory["trainingLoss"]
-                self.test_loss_vector = trackHistory["testLoss"]
+                #self.test_loss_vector = trackHistory["testLoss"]
 
     def visualizeTrainingCheckpoint(self, epoch_str):
         # It is expected that this function is overloaded by child class

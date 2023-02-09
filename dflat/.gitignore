@@ -16,15 +16,10 @@ datasets_metasurface_cells/libraryClass_dev.py
 fourier_layer/core/compute_otf.py 
 fourier_layer/private_ms_initialization.py
 
-image_layer_inDev/core/
-image_layer_inDev/sensor_emva1288/*
-image_layer_inDev/__init__.py
-image_layer_inDev/rendering_layers.py
-
 neural_optical_layer/core/baseline_regression/fitted_regression_models/*
 neural_optical_layer/core/trained_erbf_models/*
 neural_optical_layer/core/trained_MLP_models/MLP_Nanofins_Dense256_U350_H600*
-neural_optical_layer/core/trained_MLP_models/MLP_Nanofins_GFFDense*
+
 
 physical_optical_layer/core/dev_ms_parameterization.py
 

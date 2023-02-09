@@ -55,8 +55,8 @@ def formatPlots(
     xlabel="",
     ylabel="",
     title="",
-    xgrid_vec=[],
-    ygrid_vec=[],
+    xgrid_vec=None,
+    ygrid_vec=None,
     rmvxLabel=False,
     rmvyLabel=False,
     addcolorbar=False,
@@ -76,8 +76,8 @@ def formatPlots(
     thisax.set_ylabel(ylabel, fontsize=fontsize_text)
     thisax.set_title(title, fontsize=fontsize_title)
 
-    if xgrid_vec:
-        if ygrid_vec:
+    if xgrid_vec is not None:
+        if ygrid_vec is not None:
             imhandle.set_extent([min(xgrid_vec), max(xgrid_vec), max(ygrid_vec), min(ygrid_vec)])
 
     if rmvxLabel:

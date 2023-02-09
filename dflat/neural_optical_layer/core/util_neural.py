@@ -8,6 +8,10 @@ def leakyrelu100(x):
     return x_pos + 0.01 * x_neg
 
 
+def gaussian_activation(x, a):
+    return tf.math.exp(-0.5 * x**2 / a**2)
+
+
 class customLoss(tf.keras.losses.Loss):
     def __init__(self, model):
         super().__init__()

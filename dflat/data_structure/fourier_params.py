@@ -41,6 +41,20 @@ ADDED_KEYS = [
 ]
 
 
+def print_full_settings(parameters):
+    if not "wavelength_set_m" in parameters:
+        raise KeyError("wavelength_set_m is missing from parameters dictionary")
+
+    wavelength_set_m = parameters["wavelength_set_m"]
+    for wavelength in wavelength_set_m:
+        setting_dict = parameters.get_dict()
+        del setting_dict["wavelength_set_m"]
+        setting_dict["wavelength_m"] = wavelength
+        prop_params(setting_dict, verbose=True)
+
+    return
+
+
 def estimateBandwidth(parameters):
     # Compute fresnel number to determine estimate for minimum Whittaker-Shannon lens sampling
     # Use fresnel number to define an approximate fourier bandwidth
@@ -273,6 +287,7 @@ class prop_params(dict):
 
         # Print statement to show if samples have changed relative to what the user requested
         if self.__verbose:
+            wavelength_m = self.__dict__["wavelength_m"]
             ms_length_m = self.__dict__["ms_length_m"]
             ms_dx_m = self.__dict__["ms_dx_m"]
             calc_ms_dx_m = self.__dict__["calc_ms_dx_m"]
@@ -285,6 +300,7 @@ class prop_params(dict):
             sensor_pixel_number = self.__dict__["sensor_pixel_number"]
 
             print("\n OVERVIEW OF PARAMETERS \n")
+            print("\n", "wavelength_m", wavelength_m)
             print("\n", "ms_length_m: ", ms_length_m)
             print("\n", "ms_dx_m: ", ms_dx_m)
             print("\n", "calc_ms_dx_m: ", calc_ms_dx_m)
