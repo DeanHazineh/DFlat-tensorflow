@@ -287,6 +287,7 @@ class prop_params(dict):
 
         # Print statement to show if samples have changed relative to what the user requested
         if self.__verbose:
+            wavelength_m = self.__dict__["wavelength_m"]
             ms_length_m = self.__dict__["ms_length_m"]
             ms_dx_m = self.__dict__["ms_dx_m"]
             calc_ms_dx_m = self.__dict__["calc_ms_dx_m"]
@@ -299,6 +300,7 @@ class prop_params(dict):
             sensor_pixel_number = self.__dict__["sensor_pixel_number"]
 
             print("\n OVERVIEW OF PARAMETERS \n")
+            print("\n", "wavelength_m", wavelength_m)
             print("\n", "ms_length_m: ", ms_length_m)
             print("\n", "ms_dx_m: ", ms_dx_m)
             print("\n", "calc_ms_dx_m: ", calc_ms_dx_m)
