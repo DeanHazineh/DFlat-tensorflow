@@ -163,7 +163,6 @@ class prop_params(dict):
 
         if "wavelength_m" in self.__dict__.keys():
             self.__dict__["broadband_flag"] = False
-            print("WARNING: `wavelength_m` key will be deprecated in a future version. Transition to using `wavelength_set_m`.")
 
         if "wavelength_set_m" in self.__dict__.keys():
             self.__dict__["broadband_flag"] = True
