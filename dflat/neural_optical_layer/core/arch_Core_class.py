@@ -204,14 +204,14 @@ class GFF_Projection_layer(tf.keras.layers.Layer):
 
         if self.gauss_proj <= 0:
             self.proj_kernel = tf.keras.layers.Dense(
-                input_dim, use_bias=False, trainable=False, kernel_initializer="identity", dtype=self._kernel_dtype
+                input_dim, use_bias=True, trainable=True, kernel_initializer="identity", dtype=self._kernel_dtype
             )
         else:
             initializer = tf.keras.initializers.TruncatedNormal(mean=0.0, stddev=self.gauss_scale)
             self.proj_kernel = tf.keras.layers.Dense(
                 self.gauss_proj,
-                use_bias=False,
-                trainable=False,
+                use_bias=True,
+                trainable=True,
                 kernel_initializer=initializer,
                 dtype=self._kernel_dtype,
             )
@@ -264,15 +264,15 @@ class MLP_Object(tf.keras.Model):
         self._modelSavePath = get_path_to_data(modelSavePath)
 
         if not os.path.exists(self._modelSavePath):
-            os.makedirs(modelSavePath)
-            os.makedirs(modelSavePath + "/trainingOutput/")
+            os.makedirs(modelSavePath, exist_ok=True)
+            os.makedirs(modelSavePath + "/trainingOutput/", exist_ok=True)
 
         # Make folders for images too
         if not os.path.exists(self._modelSavePath + "trainingOutput/png_images/"):
-            os.makedirs(self._modelSavePath + "trainingOutput/png_images/")
+            os.makedirs(self._modelSavePath + "trainingOutput/png_images/", exist_ok=True)
 
         if not os.path.exists(self._modelSavePath + "trainingOutput/pdf_images/"):
-            os.makedirs(self._modelSavePath + "trainingOutput/pdf_images/")
+            os.makedirs(self._modelSavePath + "trainingOutput/pdf_images/", exist_ok=True)
 
         return
 
@@ -397,7 +397,7 @@ class MLP_Object(tf.keras.Model):
             ax = graphFunc.addAxis(fig, 1, 2)
             ax[0].plot(self.trainingLoss, "b-.", label="training loss")
             ax[0].plot(self.trainingValLoss, "r-.", label="validation loss")
-            graphFunc.formatPlots(fig, ax[0], None, "epoch", "Loss", "Traning Loss", addlegend=True)
+            graphFunc.formatPlots(fig, ax[0], None, "epoch", "Loss", "Traning Loss", addLegend=True)
 
             ax[1].plot(np.log10(self.trainingLoss), "b-.")
             ax[1].plot(np.log10(self.trainingValLoss), "r-.")

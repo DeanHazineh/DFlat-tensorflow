@@ -1,0 +1,3 @@
+trained_MLP_models/comparison_retrain/*
+trained_MLP_models/fourier_features/*
+trained_MLP_models/gauss_activation/*

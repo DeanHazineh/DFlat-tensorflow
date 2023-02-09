@@ -44,40 +44,32 @@ def save_test_evaluation_data(model, xtest, ytest, savestring):
     return complex_error
 
 
-def run_training_neural_model(
-    model_caller, epochs, miniEpoch=1000, batch_size=65536, lr=1e-4, verbose=False, train=True
-):
-
+def run_training_neural_model(model, epochs, miniEpoch=1000, batch_size=None, lr=1e-4, verbose=False, train=True):
     ### Define the model to train and associated parameters
-    model = model_caller(dtype=tf.float64)
     model.customLoadCheckpoint()
 
     ### Get training and testing data:
     inputData, outputData = model.returnLibraryAsTrainingData()
-    xtrain, xtest, ytrain, ytest = train_test_split(
-        inputData, outputData, test_size=0.15, random_state=13, shuffle=True
-    )
+    xtrain, xtest, ytrain, ytest = train_test_split(inputData, outputData, test_size=0.15, random_state=13, shuffle=True)
+    
+    ### If no batch size is specified then use the full training dataset size
+    if batch_size == None:
+        batch_size = xtrain.shape[0]
 
-    # Call once then print summary
+    ### Call once then print summary
     model(xtrain[0:1, :])
     model.summary()
 
-    train = train
-    device = "GPU:0"
-    val_loss_window = 250
-
-    # Call Keras model fit api to run training epochs
     if train:
         splitNumberSessions = np.ceil(epochs / miniEpoch).astype("int")
         optimizer = tf.keras.optimizers.Adam(lr)
         model.compile(optimizer, loss=tf.keras.losses.mean_squared_error)
-
-        val_loss_vec = []
+        device = "GPU:0"
+        #val_loss_window = 250
+        #val_loss_vec = []
         for sessCounter in range(splitNumberSessions):
             with tf.device(device):
-                trackhistory = model.fit(
-                    xtrain, ytrain, batch_size=batch_size, epochs=miniEpoch, verbose=verbose, validation_split=0.15
-                )
+                trackhistory = model.fit(xtrain, ytrain, batch_size=batch_size, epochs=miniEpoch, verbose=verbose, validation_split=0.05)
             model.customSaveCheckpoint(trackhistory)
 
             # Allow for gradient based termination
@@ -99,24 +91,66 @@ def run_training_neural_model(
     return
 
 
-##
-def train_caller(train=True, verb=False):
+def train_caller(train=True, verb=True):
     # Convenient caller to train many models sequentially with one run call 
-    
+    # for a in [0.01, 0.05, 0.1, 0.2, 0.5]:
+    #     use_model = MLP_models.MLP_Nanofins_2GDense1024_U350_H600(a)
+    #     run_training_neural_model(
+    #         model=use_model,
+    #         epochs=10000,
+    #         miniEpoch=1000,
+    #         batch_size=None,
+    #         lr=1e-3,
+    #         train=train,
+    #         verbose=verb,
+    #     )
+
     run_training_neural_model(
-        model_caller=MLP_models.MLP_Nanofins_Dense1024_U350_H600,
-        epochs=10000,
-        miniEpoch=250,
-        lr=1e-3,
-        train=train,
-        verbose=verb,
-    )
+            model= MLP_models.MLP_Nanofins_Dense1024_U350_H600(),
+            epochs=2000,
+            miniEpoch=100,
+            batch_size=250000,
+            lr=1e-3,
+            train=train,
+            verbose=verb,
+        )
+    
+    
+    # run_training_neural_model(
+    #     model= MLP_models.MLP_Nanofins_GFF2Dense_1024_U350_H600_v2(emb_dim=256, gauss_scale=10.0),
+    #     epochs=2000,
+    #     miniEpoch=100,
+    #     batch_size=250000,
+    #     lr=1e-3,
+    #     train=train,
+    #     verbose=verb,
+    # )
+
+    # run_training_neural_model(
+    #     model= MLP_models.MLP_Nanofins_GFF2Dense_1024_U350_H600_v2(emb_dim=256, gauss_scale=10.0),
+    #     epochs=2000,
+    #     miniEpoch=100,
+    #     batch_size=250000,
+    #     lr=1e-3,
+    #     train=train,
+    #     verbose=verb,
+    # )
+
+    # run_training_neural_model(
+    #     model= MLP_models.MLP_Nanofins_GFF2Dense_512_U350_H600_v2(emb_dim=256, gauss_scale=100.0),
+    #     epochs=1000,
+    #     miniEpoch=100,
+    #     batch_size=None,
+    #     lr=1e-3,
+    #     train=train,
+    #     verbose=verb,
+    # )
 
 
     return
 
 
 if __name__ == "__main__":
-    train_caller()
+    train_caller(train=True, verb=True)
 
    

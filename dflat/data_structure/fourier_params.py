@@ -41,6 +41,20 @@ ADDED_KEYS = [
 ]
 
 
+def print_full_settings(parameters):
+    if not "wavelength_set_m" in parameters:
+        raise KeyError("wavelength_set_m is missing from parameters dictionary")
+
+    wavelength_set_m = parameters["wavelength_set_m"]
+    for wavelength in wavelength_set_m:
+        setting_dict = parameters.get_dict()
+        del setting_dict["wavelength_set_m"]
+        setting_dict["wavelength_m"] = wavelength
+        prop_params(setting_dict, verbose=True)
+
+    return
+
+
 def estimateBandwidth(parameters):
     # Compute fresnel number to determine estimate for minimum Whittaker-Shannon lens sampling
     # Use fresnel number to define an approximate fourier bandwidth
@@ -149,6 +163,7 @@ class prop_params(dict):
 
         if "wavelength_m" in self.__dict__.keys():
             self.__dict__["broadband_flag"] = False
+            print("WARNING: `wavelength_m` key will be deprecated in a future version. Transition to using `wavelength_set_m`.")
 
         if "wavelength_set_m" in self.__dict__.keys():
             self.__dict__["broadband_flag"] = True
