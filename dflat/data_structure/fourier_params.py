@@ -125,7 +125,8 @@ class prop_params(dict):
 
         self.__add_implied_keys()
         self.__verbose = verbose
-        # self.__enforce_odd_sensor_pixel_number()
+        if self.__dict__["radial_symmetry"]:
+            self.__enforce_odd_sensor_pixel_number()
 
         # If wavelength_m is given, this is a usable prop_instance keys
         # so generate the additional keys required for function calls.
