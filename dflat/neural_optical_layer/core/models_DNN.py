@@ -9,8 +9,7 @@ mlp_model_names = [
     # "MLP_Nanocylinders_Dense64_U180_H600",
     "MLP_Nanofins_Dense1024_U350_H600",
     "MLP_Nanofins_Dense512_U350_H600",
-    # "MLP_Nanofins_Dense256_U350_H600",
-    # "MLP_Nanofins_Dense64_U350_H600",
+    "MLP_Nanofins_Dense256_U350_H600",
 ]
 
 
