@@ -18,7 +18,6 @@ fourier_layer/private_ms_initialization.py
 
 neural_optical_layer/core/baseline_regression/fitted_regression_models/*
 neural_optical_layer/core/trained_erbf_models/*
-neural_optical_layer/core/trained_MLP_models/MLP_Nanofins_Dense256_U350_H600*
 
 
 physical_optical_layer/core/dev_ms_parameterization.py
