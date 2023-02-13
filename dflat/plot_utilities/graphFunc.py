@@ -60,7 +60,7 @@ def formatPlots(
     rmvxLabel=False,
     rmvyLabel=False,
     addcolorbar=False,
-    cbarTitle="",
+    cbartitle="",
     setxLim=[],
     setyLim=[],
     addLegend=False,
@@ -89,7 +89,7 @@ def formatPlots(
         thisax.set_ylabel("")
 
     if addcolorbar:
-        addColorbar(thisfig, thisax, imhandle, cbarTitle, fontsize_cbar=fontsize_cbar, fontsize_ticks=fontsize_ticks)
+        addColorbar(thisfig, thisax, imhandle, cbartitle, fontsize_cbar=fontsize_cbar, fontsize_ticks=fontsize_ticks)
     else:
         # This is useful to change the axis size such that the axis with and without colorbar is the same shape
         divider2 = make_axes_locatable(thisax)

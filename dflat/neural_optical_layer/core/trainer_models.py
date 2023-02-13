@@ -87,11 +87,43 @@ def run_training_neural_model(model, epochs, miniEpoch=1000, batch_size=None, lr
     test_complex_error = save_test_evaluation_data(model, xtest, ytest, "training_testDataError")
     save_test_evaluation_data(model, xtrain, ytrain, "training_trainDataError")
     print("MAE Test Set: ", np.mean(np.abs(test_complex_error)))
-
+    
     return
 
 
 def train_caller(train=True, verb=True):
+
+    run_training_neural_model(
+            model= MLP_models.MLP_Nanofins_Dense1024_U350_H600(),
+            epochs=60000,
+            miniEpoch=1000,
+            batch_size=500000,
+            lr=1e-4,
+            train=train,
+            verbose=verb
+        )
+
+    run_training_neural_model(
+            model= MLP_models.MLP_Nanofins_Dense512_U350_H600(),
+            epochs=60000,
+            miniEpoch=1000,
+            batch_size=500000,
+            lr=1e-4,
+            train=train,
+            verbose=verb
+        )
+    
+    run_training_neural_model(
+            model= MLP_models.MLP_Nanofins_Dense256_U350_H600(),
+            epochs=60000,
+            miniEpoch=1000,
+            batch_size=500000,
+            lr=1e-4,
+            train=train,
+            verbose=verb
+        )
+    
+    
     # Convenient caller to train many models sequentially with one run call 
     # for a in [0.01, 0.05, 0.1, 0.2, 0.5]:
     #     use_model = MLP_models.MLP_Nanofins_2GDense1024_U350_H600(a)
@@ -105,15 +137,15 @@ def train_caller(train=True, verb=True):
     #         verbose=verb,
     #     )
 
-    run_training_neural_model(
-            model= MLP_models.MLP_Nanofins_Dense1024_U350_H600(),
-            epochs=2000,
-            miniEpoch=100,
-            batch_size=250000,
-            lr=1e-3,
-            train=train,
-            verbose=verb,
-        )
+    # run_training_neural_model(
+    #         model= MLP_models.MLP_Nanofins_Dense1024_U350_H600(),
+    #         epochs=2000,
+    #         miniEpoch=100,
+    #         batch_size=250000,
+    #         lr=1e-3,
+    #         train=train,
+    #         verbose=verb,
+    #     )
     
     
     # run_training_neural_model(

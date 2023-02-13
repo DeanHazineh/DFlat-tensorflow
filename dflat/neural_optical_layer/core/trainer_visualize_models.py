@@ -34,9 +34,7 @@ def plot_MLP_Nanocylinders(mlp_object):
     param2_wpred = np.linspace(np.min(param2_w), np.max(param2_w), upsampleFactor * nw)
     mlpinput = mlp_object.convert_vectorParam_toMLPInput([param1_rpred, param2_wpred])
     y_model = mlp_object.predict(mlpinput)
-    trans_model, phase_model = mlp_object.convert_output_complex(
-        y_model, reshapeToSize=[len(param2_wpred), len(param1_rpred)]
-    )
+    trans_model, phase_model = mlp_object.convert_output_complex(y_model, reshapeToSize=[len(param2_wpred), len(param1_rpred)])
 
     ### make plot
     fig = plt.figure(figsize=(30, 30))
@@ -157,9 +155,7 @@ def plot_MLP_Nanofins(mlp_object):
 
         mlpinput = mlp_object.convert_vectorParam_toMLPInput([param1_xpred, param2_ypred, wavelength])
         y_model = mlp_object.predict(mlpinput)
-        trans_mlp, phase_mlp = mlp_object.convert_output_complex(
-            y_model, reshapeToSize=[1, len(param2_ypred), len(param1_xpred), 1]
-        )
+        trans_mlp, phase_mlp = mlp_object.convert_output_complex(y_model, reshapeToSize=[1, len(param2_ypred), len(param1_xpred), 1])
 
         # Get corresponding true slice
         trans_trueW = trans_true[:, :, :, w_idx_set[iter]]
@@ -171,9 +167,7 @@ def plot_MLP_Nanofins(mlp_object):
         im1 = axisList[1].imshow(trans_trueW[1, :, :], extent=extent_upsample, vmin=0, vmax=1)
         im2 = axisList[2].imshow(np.squeeze(trans_mlp[0]), extent=extent_upsample, vmin=0, vmax=1)
         im3 = axisList[3].imshow(np.squeeze(trans_mlp[1]), extent=extent_upsample, vmin=0, vmax=1)
-        graphFunc.formatPlots(
-            fig, axisList[0], im0, "Fin length x (nm)", "Fin length y (nm)", "Transmittance x-pol. (Lumerical)"
-        )
+        graphFunc.formatPlots(fig, axisList[0], im0, "Fin length x (nm)", "Fin length y (nm)", "Transmittance x-pol. (Lumerical)")
         graphFunc.formatPlots(
             fig,
             axisList[1],
@@ -185,9 +179,7 @@ def plot_MLP_Nanofins(mlp_object):
             rmvyLabel=True,
             cbartitle="Normalized power",
         )
-        graphFunc.formatPlots(
-            fig, axisList[2], im2, "Fin len. x (nm)", "Fin len. y (nm)", "Transmittance x-pol. (MLP)"
-        )
+        graphFunc.formatPlots(fig, axisList[2], im2, "Fin len. x (nm)", "Fin len. y (nm)", "Transmittance x-pol. (MLP)")
         graphFunc.formatPlots(
             fig,
             axisList[3],
@@ -209,9 +201,7 @@ def plot_MLP_Nanofins(mlp_object):
         im1 = axisList[1].imshow(phase_trueW[1, :, :], extent=extent_orig, vmin=-np.pi, vmax=np.pi)
         im2 = axisList[2].imshow(np.squeeze(phase_mlp[0]), extent=extent_upsample, vmin=-np.pi, vmax=np.pi)
         im3 = axisList[3].imshow(np.squeeze(phase_mlp[1]), extent=extent_upsample, vmin=-np.pi, vmax=np.pi)
-        graphFunc.formatPlots(
-            fig, axisList[0], im0, "Fin length x (nm)", "Fin length y (nm)", "Phase shift x-pol. (Lumerical)"
-        )
+        graphFunc.formatPlots(fig, axisList[0], im0, "Fin length x (nm)", "Fin length y (nm)", "Phase shift x-pol. (Lumerical)")
         graphFunc.formatPlots(
             fig,
             axisList[1],
@@ -223,9 +213,7 @@ def plot_MLP_Nanofins(mlp_object):
             rmvyLabel=True,
             cbartitle="Phase (radians)",
         )
-        graphFunc.formatPlots(
-            fig, axisList[2], im2, "Fin length x (nm)", "Fin length y (nm)", "Phase shift x-pol. (MLP)"
-        )
+        graphFunc.formatPlots(fig, axisList[2], im2, "Fin length x (nm)", "Fin length y (nm)", "Phase shift x-pol. (MLP)")
         graphFunc.formatPlots(
             fig,
             axisList[3],
@@ -247,4 +235,6 @@ def plot_MLP_Nanofins(mlp_object):
 if __name__ == "__main__":
     ## Run plotting functions for mlp model
     # plot_MLP_Nanocylinders(MLP_Nanocylinders_Dense64_U180_H600())
+    plot_MLP_Nanofins(MLP_Nanofins_Dense256_U350_H600())
+    plot_MLP_Nanofins(MLP_Nanofins_Dense512_U350_H600())
     plot_MLP_Nanofins(MLP_Nanofins_Dense1024_U350_H600())
