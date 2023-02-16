@@ -289,11 +289,7 @@ def psf_sensor(point_source_locs, ms_modulation_trans, ms_modulation_phase, para
         )
 
         # get finely sampled field just above the sensor
-        (calc_modulation_trans, calc_modulation_phase) = wavefront_afterms_sensor(
-            calc_modulation_trans,
-            calc_modulation_phase,
-            parameters,
-        )
+        (calc_modulation_trans, calc_modulation_phase) = wavefront_afterms_sensor(calc_modulation_trans, calc_modulation_phase, parameters)
 
         # After calculation is done, if radial symmetry was used, convert back to 2D unless override return radial
         if parameters["radial_symmetry"] and convert_2D:
