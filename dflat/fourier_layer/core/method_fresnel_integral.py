@@ -82,7 +82,6 @@ def fresnel_diffraction_fft(
             ),
             TF_ZERO,
         )
-
         ang_fx = tf.range(0, 1 / 2 / input_pixel_size_m["x"], 1 / input_pixel_size_m["x"] / input_pixel_number["x"], dtype=dtype)
         wavefront_outPlane = tf_generalSpline_regular1DGrid(kr / 2 / np.pi, ang_fx, wavefront_outPlane) * normterm
     else:

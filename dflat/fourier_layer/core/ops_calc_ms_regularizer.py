@@ -116,9 +116,6 @@ def regularize_ms_calc_tf(
     calc_samplesM = parameters["calc_samplesM"]
     ms_samplesM = parameters["ms_samplesM"]
 
-    # calc_modulation_trans = tf.identity(ms_modulation_trans)
-    # calc_modulation_phase = tf.identity(ms_modulation_phase)
-
     ### Resample the metasurface via nearest neighbors if required
     resizeCondition = tf.math.logical_or(
         tf.greater(calc_samplesM["x"], ms_samplesM["x"]),
