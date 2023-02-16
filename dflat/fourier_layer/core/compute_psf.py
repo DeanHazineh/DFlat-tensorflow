@@ -289,11 +289,7 @@ def psf_sensor(point_source_locs, ms_modulation_trans, ms_modulation_phase, para
         )
 
         # get finely sampled field just above the sensor
-        (calc_modulation_trans, calc_modulation_phase) = wavefront_afterms_sensor(
-            calc_modulation_trans,
-            calc_modulation_phase,
-            parameters,
-        )
+        (calc_modulation_trans, calc_modulation_phase) = wavefront_afterms_sensor(calc_modulation_trans, calc_modulation_phase, parameters)
 
         # After calculation is done, if radial symmetry was used, convert back to 2D unless override return radial
         if parameters["radial_symmetry"] and convert_2D:
@@ -561,7 +557,7 @@ def field_propagation(field_amplitude, field_phase, parameters):
     """Takes a batch of field amplitudes and field phases at an input plane (of a single wavelength) and propagates the
     field to an output plane.
 
-    The input to output field distances is defined by parameters["sensor_distance_m"].
+    The i nput to output field distances is defined by parameters["sensor_distance_m"].
     The input grid is defined by parameters["ms_samplesM"] and parameters["ms_dx_m"].
     The output grid is defined via discretization of parameters["sensor_dx_m"] and number points of
     parameters["sensor_pixel_number"]; these variable names are used as the architecture builds/reuses the functions
@@ -587,10 +583,17 @@ def field_propagation(field_amplitude, field_phase, parameters):
     field_phase = tf.squeeze(field_phase, 1)
 
     # Reinterpolate to the user specified grid and also ensure resize
+    calc_sensor_dx_m = parameters["calc_sensor_dx_m"]
+    sensor_pixel_size_m = parameters["sensor_pixel_size_m"]
     if parameters["radial_symmetry"]:
-        field_amplitude, field_phase = sensorMeasurement_intensity_phase_radialData(field_amplitude, field_phase, parameters)
+        field_amplitude, field_phase = sensorMeasurement_intensity_phase_radialData(
+            field_amplitude**2 * calc_sensor_dx_m["x"] * calc_sensor_dx_m["y"], field_phase, parameters
+        )
     else:
-        field_amplitude, field_phase = sensorMeasurement_intensity_phase(field_amplitude, field_phase, parameters)
+        field_amplitude, field_phase = sensorMeasurement_intensity_phase(
+            field_amplitude**2 * calc_sensor_dx_m["x"] * calc_sensor_dx_m["y"], field_phase, parameters
+        )
+    field_amplitude = tf.math.sqrt(field_amplitude / sensor_pixel_size_m["x"] / sensor_pixel_size_m["y"])
 
     return field_amplitude, field_phase
 
@@ -648,11 +651,15 @@ def field_propagation_MatrixASM(field_amplitude, field_phase, sim_wavelengths_m,
     calc_field_phase = tf.transpose(calc_field_phase, [1, 0, 2, 3])
 
     # Reinterpolate to the user specified grid and also ensure resize
+    sensor_pixel_size_m = modified_parameters["sensor_pixel_size_m"]
     if radial_symmetry:
         calc_field_amplitude, calc_field_phase = sensorMeasurement_intensity_phase_radialData(
-            calc_field_amplitude, calc_field_phase, modified_parameters
+            calc_field_amplitude**2 * calc_sensor_dx_m["x"] * calc_sensor_dx_m["y"], calc_field_phase, modified_parameters
         )
     else:
-        calc_field_amplitude, calc_field_phase = sensorMeasurement_intensity_phase(calc_field_amplitude, calc_field_phase, modified_parameters)
+        calc_field_amplitude, calc_field_phase = sensorMeasurement_intensity_phase(
+            calc_field_amplitude**2 * calc_sensor_dx_m["x"] * calc_sensor_dx_m["y"], calc_field_phase, modified_parameters
+        )
+    calc_field_amplitude = tf.math.sqrt(calc_field_amplitude / sensor_pixel_size_m["x"] / sensor_pixel_size_m["y"])
 
     return calc_field_amplitude, calc_field_phase
