@@ -20,13 +20,14 @@ class Fronto_Planar_renderer_incoherent(tf.keras.layers.Layer):
         #     self.__dict__[key] = value
         self.sensor_parameters = sensor_parameters
 
-    def __call__(self, psf_intensity, AIF_image, collapse=False):
+    def __call__(self, psf_intensity, AIF_image, collapse=False, rfft=False):
         """Renders image with appropriate PSF blurr for a fronto-planar scene components
 
         Args:
             'psf_intensity' (tf.float): PSF intensity of shape [Num_wl or None, num_profile, num_point_source, sensor_pix_y, sensor_pix_x]
             'AIF_image' (tf.float): All in focus images, the same rank as psf_intensity
             'collapse' (boolean; defaults False): If True, return image summed over the wavelength and point_source_channel
+            'rfft' (boolean; defaults False): If True, compute transform via rfft instead of fft
 
         Returns:
             tf.float: rendered intensity image
@@ -37,7 +38,7 @@ class Fronto_Planar_renderer_incoherent(tf.keras.layers.Layer):
         psf_intensity, AIF_image = self.__check_inputs([psf_intensity, AIF_image])
 
         ### Compute the convolved image
-        meas_photons = general_convolve(AIF_image, psf_intensity, rfft=False)
+        meas_photons = general_convolve(AIF_image, psf_intensity, rfft=rfft)
 
         ### Convert to digital, noisy measurement
         meas_adu = photons_to_ADU(meas_photons, self.sensor_parameters)

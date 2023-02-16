@@ -56,7 +56,7 @@ class Nanofins_U350nm_H600nm:
 
         num_plt = 5
         wl_idx_set = np.linspace(0, len(wavelength) - 1, num_plt).astype(int)
-        fig = plt.figure(figsize=(30,20))
+        fig = plt.figure(figsize=(30, 20))
         axisList = graphFunc.addAxis(fig, 4, num_plt)
         for iter, idx in enumerate(wl_idx_set):
             tx = axisList[iter].imshow(self.transmission[0, :, :, idx], extent=(min(lx), max(lx), max(ly), min(ly)), vmin=0, vmax=1)
@@ -305,4 +305,3 @@ class Nanoellipse_U350nm_H600nm(Nanofins_U350nm_H600nm):
         self.__param1Limits = [60e-9, 300e-9]
         self.__param2Limits = [60e-9, 300e-9]
         self.__param3Limits = [310e-9, 750e-9]
-

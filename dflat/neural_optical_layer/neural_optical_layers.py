@@ -3,6 +3,7 @@ import tensorflow as tf
 from dflat.tools.latent_param_utils import latent_to_param, param_to_latent
 from .neural_model_util import *
 
+
 def flatten_reshape_shape_parameters(shape_vector):
     """Takes a shape/param vector of (D, PixelsY, PixelsX) and flattens to shape (PixelsY*PixelsX,D)"""
     vec_shape = tf.shape(shape_vector)
@@ -35,8 +36,7 @@ class MLP_Layer(tf.keras.layers.Layer):
 
         # Get mlp input/output sizes
         self.input_dimensionality = self.mlp.get_input_shape()[0]
-        self.param_dimensionality = self.input_dimensionality-1
-
+        self.param_dimensionality = self.input_dimensionality - 1
 
     def __call__(self, norm_param, wavelength_m_asList):
         """Call function for the mlp_layer. Given a normalized parameter vector for each
@@ -87,8 +87,8 @@ class MLP_Layer(tf.keras.layers.Layer):
         """Initialize a normalized param input. Valid initializations here are "uniform" and "random".
 
         To use an alternative, user-defined starting param tensor, one cam define another function in range [0,1] or create
-        via phase/transmission to shape lookup with dflat.datasets_metasurface_cells.optical_response_to_param if a library exists 
-        
+        via phase/transmission to shape lookup with dflat.datasets_metasurface_cells.optical_response_to_param if a library exists
+
         Args:
             `init_type` (str): Selection of initialization types, either "uniform" or "random"
             `gridShape` (list): 2D cell grid shape given as a rank 3 array, usually of the form
@@ -109,22 +109,22 @@ class MLP_Layer(tf.keras.layers.Layer):
         """
         # input should be reshaped like the MLP input shape, [N, D] before calling helper function
         gridShape = norm_param.shape
-        norm_param = flatten_reshape_shape_parameters(norm_param)  
+        norm_param = flatten_reshape_shape_parameters(norm_param)
         shape_vector = convert_param_to_shape(norm_param, self.mlp)
         return tf.transpose(tf.reshape(shape_vector, [gridShape[1], gridShape[2], -1]), [2, 0, 1])
 
     def shape_to_param(self, shape_vect):
         """Given the shape vector (units of nm), this function returns the normalized parameter vector for the mlp model
-        Args: 
+        Args:
             `shape_vect` (tf.float): Tensor of cells shape parameters (D, PIxelsY, PixelsX) where D is the shape degree.
         Returns:
             `tf.float`: Normalized shape parameters, same size as shape_vect
         """
         # input should be reshaped like the MLP input shape, [N, D] before calling helper function
         gridShape = shape_vect.shape
-        shape_vect = flatten_reshape_shape_parameters(shape_vect)        
+        shape_vect = flatten_reshape_shape_parameters(shape_vect)
         norm_param = convert_shape_to_param(shape_vect, self.mlp)
-        return  tf.transpose(tf.reshape(norm_param, [gridShape[1], gridShape[2], -1]), [2, 0, 1])
+        return tf.transpose(tf.reshape(norm_param, [gridShape[1], gridShape[2], -1]), [2, 0, 1])
 
 
 class MLP_Latent_Layer(MLP_Layer):
@@ -186,11 +186,7 @@ class MLP_Latent_Layer(MLP_Layer):
         norm_param = latent_to_param(flatten_reshape_shape_parameters(latent_tensor), self.pmin, self.pmax)
         gridShape = [1, latent_tensor.shape[1], latent_tensor.shape[2]]
 
-        return batched_broadband_MLP(
-            norm_param,
-            self.mlp,
-            wavelength_m_asList,
-            gridShape)
+        return batched_broadband_MLP(norm_param, self.mlp, wavelength_m_asList, gridShape)
 
     def initialize_input_tensor(self, init_type, gridShape, init_args=[]):
         """Initialize a latent_tensor input. Valid initializations here are "uniform" and "random". To use an

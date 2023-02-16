@@ -65,23 +65,11 @@ def run_training_neural_model(model, epochs, miniEpoch=1000, batch_size=None, lr
         optimizer = tf.keras.optimizers.Adam(lr)
         model.compile(optimizer, loss=tf.keras.losses.mean_squared_error)
         device = "GPU:0"
-        #val_loss_window = 250
-        #val_loss_vec = []
+      
         for sessCounter in range(splitNumberSessions):
             with tf.device(device):
                 trackhistory = model.fit(xtrain, ytrain, batch_size=batch_size, epochs=miniEpoch, verbose=verbose, validation_split=0.05)
             model.customSaveCheckpoint(trackhistory)
-
-            # Allow for gradient based termination
-            # val_loss_vec = val_loss_vec + trackhistory.history["val_loss"]
-            # if (sessCounter + 1) * miniEpoch > val_loss_window:
-            #     val_loss_set = val_loss_vec[-val_loss_window:]
-            #     avg_grad_window = np.mean(np.array(val_loss_set[1:]) - np.array(val_loss_set[0:-1]))
-            #     avg_grad_window = np.sign(avg_grad_window) * np.sqrt(np.abs(avg_grad_window))
-            #     print("Sess | grad sqrt(mse val): ", sessCounter, avg_grad_window)
-            #     if avg_grad_window < 0 and avg_grad_window > -1e-5:
-            #         print("Gradient based early termination")
-            #         break
 
     # After Training, evaluate the performance by histogram of errors on the test set
     test_complex_error = save_test_evaluation_data(model, xtest, ytest, "training_testDataError")
@@ -93,36 +81,45 @@ def run_training_neural_model(model, epochs, miniEpoch=1000, batch_size=None, lr
 
 def train_caller(train=True, verb=True):
 
-    run_training_neural_model(
-            model= MLP_models.MLP_Nanofins_Dense1024_U350_H600(),
-            epochs=60000,
-            miniEpoch=1000,
-            batch_size=500000,
-            lr=1e-4,
-            train=train,
-            verbose=verb
-        )
+    # run_training_neural_model(
+    #         model= MLP_models.MLP_Nanofins_Dense1024_U350_H600(),
+    #         epochs=60000,
+    #         miniEpoch=1000,
+    #         batch_size=500000,
+    #         lr=1e-4,
+    #         train=train,
+    #         verbose=verb
+    #     )
 
-    run_training_neural_model(
-            model= MLP_models.MLP_Nanofins_Dense512_U350_H600(),
-            epochs=60000,
-            miniEpoch=1000,
-            batch_size=500000,
-            lr=1e-4,
-            train=train,
-            verbose=verb
-        )
+    # run_training_neural_model(
+    #         model= MLP_models.MLP_Nanofins_Dense512_U350_H600(),
+    #         epochs=60000,
+    #         miniEpoch=1000,
+    #         batch_size=500000,
+    #         lr=1e-4,
+    #         train=train,
+    #         verbose=verb
+    #     )
+    
+    # run_training_neural_model(
+    #         model= MLP_models.MLP_Nanofins_Dense256_U350_H600(),
+    #         epochs=60000,
+    #         miniEpoch=1000,
+    #         batch_size=500000,
+    #         lr=1e-4,
+    #         train=train,
+    #         verbose=verb
+    #     )
     
     run_training_neural_model(
-            model= MLP_models.MLP_Nanofins_Dense256_U350_H600(),
-            epochs=60000,
-            miniEpoch=1000,
-            batch_size=500000,
-            lr=1e-4,
-            train=train,
-            verbose=verb
-        )
-    
+        model=MLP_models.MLP_Nanofins_GFFDense256_256s0p5_U350_H600(),
+        epochs=100000,
+        miniEpoch=1000,
+        batch_size=500000,
+        lr=1e-3,
+        train=train,
+        verbose=verb
+    )
     
     # Convenient caller to train many models sequentially with one run call 
     # for a in [0.01, 0.05, 0.1, 0.2, 0.5]:

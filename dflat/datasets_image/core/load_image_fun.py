@@ -30,7 +30,7 @@ def cv_aspectResize(img, sensor_dim, resize_method):
         raise ValueError("resize method must be either 'crop' or 'pad'")
 
     resize_dim = (int(im_shape[1] * resize_ratio), int(im_shape[0] * resize_ratio))
-    img = cv.resize(img, resize_dim, interpolation=cv.INTER_AREA)
+    img = cv.resize(img, resize_dim, interpolation=cv.INTER_CUBIC)
 
     ### resize with crop or pad to sensor dimension now
     img = center_crop_or_pad(img, sensor_dim)

@@ -235,6 +235,6 @@ def plot_MLP_Nanofins(mlp_object):
 if __name__ == "__main__":
     ## Run plotting functions for mlp model
     # plot_MLP_Nanocylinders(MLP_Nanocylinders_Dense64_U180_H600())
-    plot_MLP_Nanofins(MLP_Nanofins_Dense256_U350_H600())
-    plot_MLP_Nanofins(MLP_Nanofins_Dense512_U350_H600())
-    plot_MLP_Nanofins(MLP_Nanofins_Dense1024_U350_H600())
+    # plot_MLP_Nanofins(MLP_Nanofins_Dense256_U350_H600())
+    # plot_MLP_Nanofins(MLP_Nanofins_Dense512_U350_H600())
+    plot_MLP_Nanofins(MLP_Nanofins_GFFDense256_256s1p0_U350_H600())

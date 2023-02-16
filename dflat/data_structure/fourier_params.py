@@ -43,14 +43,14 @@ ADDED_KEYS = [
 
 def print_full_settings(parameters):
     if not "wavelength_set_m" in parameters:
-        raise KeyError("wavelength_set_m is missing from parameters dictionary")
-
-    wavelength_set_m = parameters["wavelength_set_m"]
-    for wavelength in wavelength_set_m:
-        setting_dict = parameters.get_dict()
-        del setting_dict["wavelength_set_m"]
-        setting_dict["wavelength_m"] = wavelength
-        prop_params(setting_dict, verbose=True)
+        parameters._print_info()
+    else:
+        wavelength_set_m = parameters["wavelength_set_m"]
+        for wavelength in wavelength_set_m:
+            setting_dict = parameters.get_dict()
+            del setting_dict["wavelength_set_m"]
+            setting_dict["wavelength_m"] = wavelength
+            prop_params(setting_dict, verbose=True)
 
     return
 
@@ -279,6 +279,34 @@ class prop_params(dict):
         return
 
     ### Run regularization on input output space for proper calculations
+    def _print_info(self):
+        wavelength_m = self.__dict__["wavelength_m"]
+        ms_length_m = self.__dict__["ms_length_m"]
+        ms_dx_m = self.__dict__["ms_dx_m"]
+        calc_ms_dx_m = self.__dict__["calc_ms_dx_m"]
+        ms_samplesM = self.__dict__["ms_samplesM"]
+        calc_samplesM = self.__dict__["calc_samplesM"]
+        calc_samplesN = self.__dict__["calc_samplesN"]
+        initial_sensor_dx_m = self.__dict__["initial_sensor_dx_m"]
+        calc_sensor_dx_m = self.__dict__["calc_sensor_dx_m"]
+        sensor_pixel_size_m = self.__dict__["sensor_pixel_size_m"]
+        sensor_pixel_number = self.__dict__["sensor_pixel_number"]
+
+        print("\n OVERVIEW OF PARAMETERS \n")
+        print("\n", "wavelength_m", wavelength_m)
+        print("\n", "ms_length_m: ", ms_length_m)
+        print("\n", "ms_dx_m: ", ms_dx_m)
+        print("\n", "calc_ms_dx_m: ", calc_ms_dx_m)
+        print("\n", "ms_samplesM: ", ms_samplesM)
+        print("\n", "calc_samplesM: ", calc_samplesM)
+        print("\n", "calc_samplesN: ", calc_samplesN)
+        print("\n", "initial_sensor_dx_m: ", initial_sensor_dx_m)
+        print("\n", "calc_sensor_dx_m: ", calc_sensor_dx_m)
+        print("\n", "sensor_pixel_size_m: ", sensor_pixel_size_m)
+        print("\n", "sensor_pixel_number: ", sensor_pixel_number)
+        print("\n")
+        return
+
     def __regularizeInputOutputSpace(self):
         # Call to update lens sampling rate and number of samples representing the upadded lens
         self.__regularizeLensPlaneSampling()
@@ -288,31 +316,8 @@ class prop_params(dict):
 
         # Print statement to show if samples have changed relative to what the user requested
         if self.__verbose:
-            wavelength_m = self.__dict__["wavelength_m"]
-            ms_length_m = self.__dict__["ms_length_m"]
-            ms_dx_m = self.__dict__["ms_dx_m"]
-            calc_ms_dx_m = self.__dict__["calc_ms_dx_m"]
-            ms_samplesM = self.__dict__["ms_samplesM"]
-            calc_samplesM = self.__dict__["calc_samplesM"]
-            calc_samplesN = self.__dict__["calc_samplesN"]
-            initial_sensor_dx_m = self.__dict__["initial_sensor_dx_m"]
-            calc_sensor_dx_m = self.__dict__["calc_sensor_dx_m"]
-            sensor_pixel_size_m = self.__dict__["sensor_pixel_size_m"]
-            sensor_pixel_number = self.__dict__["sensor_pixel_number"]
+            self._print_info()
 
-            print("\n OVERVIEW OF PARAMETERS \n")
-            print("\n", "wavelength_m", wavelength_m)
-            print("\n", "ms_length_m: ", ms_length_m)
-            print("\n", "ms_dx_m: ", ms_dx_m)
-            print("\n", "calc_ms_dx_m: ", calc_ms_dx_m)
-            print("\n", "ms_samplesM: ", ms_samplesM)
-            print("\n", "calc_samplesM: ", calc_samplesM)
-            print("\n", "calc_samplesN: ", calc_samplesN)
-            print("\n", "initial_sensor_dx_m: ", initial_sensor_dx_m)
-            print("\n", "calc_sensor_dx_m: ", calc_sensor_dx_m)
-            print("\n", "sensor_pixel_size_m: ", sensor_pixel_size_m)
-            print("\n", "sensor_pixel_number: ", sensor_pixel_number)
-            print("\n")
         return
 
     def __regularizeLensPlaneSampling(self):

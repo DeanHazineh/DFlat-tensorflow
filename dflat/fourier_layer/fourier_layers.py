@@ -451,6 +451,10 @@ class Propagate_Planes_Layer(tf.keras.layers.Layer):
         # Generate the fourier grids for each wavelength
         self.parameters_list = self.__generate_simParam_set()
 
+        # Allow for application of aperture like with psf propagation case
+        aperture_trans, _ = gen_aperture_disk(parameters)
+        self.aperture_trans = tf.convert_to_tensor(aperture_trans, dtype=parameters["dtype"])
+
     def __call__(self, inputs, batch_loop=False):
         """propagate_planes_broadband_layer call function. Computes the field amplitude and phase at a parallel plane a
         distance away from the initial plane, for multiple wavelength channels.
@@ -495,6 +499,13 @@ class Propagate_Planes_Layer(tf.keras.layers.Layer):
         else:
             if not field_phase.dtype == use_dtype:
                 field_phase = tf.cast(field_phase, use_dtype)
+
+        # Apply the metasurface aperture
+        ms_rank = tf.rank(field_amplitude)
+        if ms_rank == tf.TensorShape(3):
+            field_amplitude = field_amplitude * self.aperture_trans
+        elif ms_rank == tf.TensorShape(4):
+            field_amplitude = field_amplitude * tf.expand_dims(self.aperture_trans, 0)
 
         if batch_loop:
             out = batch_loopWavelength_field_propagation(field_amplitude, field_phase, self.parameters_list)
@@ -562,6 +573,10 @@ class Propagate_Planes_Layer_MatrixBroadband(tf.keras.layers.Layer):
         # generate the modified parameters object suitable for the ASM broadband matrix version
         self.modified_parameters = self.__generate_new_parameters()
 
+        # Allow for application of aperture like with psf propagation case
+        aperture_trans, _ = gen_aperture_disk(parameters)
+        self.aperture_trans = tf.convert_to_tensor(aperture_trans, dtype=parameters["dtype"])
+
         return
 
     def __call__(self, inputs, sim_wavelengths_m=None, batch_loop=False):
@@ -620,6 +635,9 @@ class Propagate_Planes_Layer_MatrixBroadband(tf.keras.layers.Layer):
         if ms_rank == tf.TensorShape(3):
             field_amplitude = tf.expand_dims(field_amplitude, 0)
             field_phase = tf.expand_dims(field_phase, 0)
+
+        # Apply the field aperture if requested
+        field_amplitude = field_amplitude * tf.expand_dims(self.aperture_trans, 0)
 
         if batch_loop:
             out = batch_field_propagation_MatrixASM(field_amplitude, field_phase, sim_wavelengths_m, self.modified_parameters)
@@ -681,6 +699,10 @@ class Propagate_Planes_Layer_Mono(tf.keras.layers.Layer):
         self.parameters = parameters
         check_single_wavelength_parameters(parameters)
 
+        # Allow for application of aperture like with psf propagation case
+        aperture_trans, _ = gen_aperture_disk(parameters)
+        self.aperture_trans = tf.convert_to_tensor(aperture_trans, dtype=parameters["dtype"])
+
     def __call__(self, inputs, batch_loop=False):
         """propagate_planes_layer call function. Computes the field amplitude and phase at a parallel plane a distance
         away from the initial plane, for a single wavelength.
@@ -724,6 +746,9 @@ class Propagate_Planes_Layer_Mono(tf.keras.layers.Layer):
         if input_rank == tf.TensorShape(4):
             field_amplitude = tf.squeeze(field_amplitude, 0)
             field_phase = tf.squeeze(field_phase, 0)
+
+        # Apply the metasurface aperture
+        field_amplitude = field_amplitude * self.aperture_trans
 
         if batch_loop:
             out = loopBatch_field_propagation(field_amplitude, field_phase, self.parameters)

@@ -2,18 +2,17 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import glob, os
 import imageio
+import numpy as np
 
 # These lines are required to make fonts the right form for adobe illustrator
 plt.rcParams["pdf.fonttype"] = 42.0
 plt.rcParams["ps.fonttype"] = 42.0
 
-fontsize_text = 22.0
-fontsize_title = 22.0
-fontsize_ticks = 20.0
+fontsize_text = 16.0
+fontsize_title = 18.0
+fontsize_ticks = 18.0
 fontsize_cbar = 16.0
-fontsize_legend = 18.0
-saveextension = ".png"
-transperantFlag = False
+fontsize_legend = 16.0
 
 
 def addAxis(thisfig, n1, n2, maxnumaxis=""):
@@ -55,8 +54,8 @@ def formatPlots(
     xlabel="",
     ylabel="",
     title="",
-    xgrid_vec=None,
-    ygrid_vec=None,
+    xgrid_vec=[],
+    ygrid_vec=[],
     rmvxLabel=False,
     rmvyLabel=False,
     addcolorbar=False,
@@ -76,9 +75,8 @@ def formatPlots(
     thisax.set_ylabel(ylabel, fontsize=fontsize_text)
     thisax.set_title(title, fontsize=fontsize_title)
 
-    if xgrid_vec is not None:
-        if ygrid_vec is not None:
-            imhandle.set_extent([min(xgrid_vec), max(xgrid_vec), max(ygrid_vec), min(ygrid_vec)])
+    if len(xgrid_vec) != 0 and len(ygrid_vec) != 0:
+        imhandle.set_extent([np.min(xgrid_vec), np.max(xgrid_vec), np.max(ygrid_vec), np.min(ygrid_vec)])
 
     if rmvxLabel:
         thisax.set_xticklabels([""])
