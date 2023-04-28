@@ -4,7 +4,6 @@
 TRASH/*
 
 **__pycache__
-**.pdf
 
 datasets_metasurface_cells/dev_libraries/*
 datasets_metasurface_cells/libraryClass_dev.py
