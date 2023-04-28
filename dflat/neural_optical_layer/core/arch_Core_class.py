@@ -6,11 +6,16 @@ import pickle
 from keras_flops import get_flops
 import matplotlib.pyplot as plt
 from pathlib import Path
+import time
+import math
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LinearRegression
 
 import dflat.plot_utilities.graphFunc as graphFunc
 from .util_neural import get_flops_alternate
 
-## BASE FOR NEURAL MODELS (PARENT - DO NOT ALTER THIS UNLESS YOU KNOW THE DETAILS)
+### DO NOT ALTER ANYTHING IN THIS FILE IF YOU DON"T KNOW WHAT YOU ARE DOING ELSE IT WILL BREAK THINGS
 
 
 def get_path_to_data(folder_name: str):
@@ -20,6 +25,8 @@ def get_path_to_data(folder_name: str):
     return str(resource_path.joinpath(folder_name)) + "/"
 
 
+####################################
+### Radial Basis function networks
 class InitCentersRandom(Initializer):
     """Initializer for initialization of centers of RBF network
         as random samples from the given data set.
@@ -126,34 +133,26 @@ class EBFLayer(tf.keras.layers.Layer):
     """
 
     def __init__(self, output_dim, initializer=None, betas=1.0, **kwargs):
-
+        super().__init__(**kwargs)
         self.output_dim = output_dim
-
         # betas is either initializer object or float
         if isinstance(betas, Initializer):
             self.betas_initializer = betas
         else:
             self.betas_initializer = Constant(value=betas)
-
         self.initializer = initializer if initializer else RandomUniform(0.0, 1.0)
 
-        super().__init__(**kwargs)
-
     def build(self, input_shape):
-
         self.centers = self.add_weight(name="centers", shape=(self.output_dim, input_shape[1]), initializer=self.initializer, trainable=True)
         self.betas = self.add_weight(
             name="betas",
             shape=(input_shape[1], self.output_dim),
             initializer=self.betas_initializer,
-            # initializer='ones',
             trainable=True,
         )
-
         super().build(input_shape)
 
     def call(self, x):
-
         C = tf.expand_dims(self.centers, -1)  # inserts a dimension of 1
         H = tf.transpose(C - tf.transpose(x))  # matrix of differences
 
@@ -173,6 +172,203 @@ class EBFLayer(tf.keras.layers.Layer):
         return self.centers
 
 
+class EBFLayer2(tf.keras.layers.Layer):
+    def __init__(self, output_dim, initializer=None, betas=None, betas_init_value=10.0, **kwargs):
+        super().__init__(**kwargs)
+        self.output_dim = output_dim
+        self.betas_initializer = initializer if initializer else Constant(value=betas_init_value)  # RandomUniform(0.0, 1.0)
+        self.initializer = initializer if initializer else RandomUniform(0.0, 1.0)
+
+    def build(self, input_shape):
+        self.centers = self.add_weight(name="centers", shape=(self.output_dim, 1, input_shape[1]), initializer=self.initializer, trainable=True)
+        self.betas = self.add_weight(name="betas", shape=(self.output_dim, input_shape[1], input_shape[1]), initializer=self.betas_initializer, trainable=True)
+        super().build(input_shape)
+
+    def call(self, x):
+        precision = tf.expand_dims(tf.linalg.matmul(self.betas, tf.transpose(self.betas, [0, 2, 1])),1)
+        H = tf.expand_dims(self.centers - tf.expand_dims(x, 0), -1)
+
+        out = tf.squeeze(tf.linalg.matmul(tf.linalg.matmul(H, precision, transpose_a=True), H), axis=(2, 3))
+        out = tf.transpose(tf.exp(-out), [1, 0])
+
+        return out
+
+    def compute_output_shape(self, input_shape):
+        return (input_shape[0], self.output_dim)
+
+    def get_config(self):
+        # have to define get_config to be able to use model_from_json
+        config = {"output_dim": self.output_dim}
+        base_config = super().get_config()
+        return dict(list(base_config.items()) + list(config.items()))
+
+    def get_centers(self):
+        return self.centers
+
+
+################################
+### Multivariate Polynomial Models
+class Multivariate_Polynomial_Object:
+    def __init__(self, **kwargs):
+        self.__input_features = 0
+        self.__output_features = 0
+        self.__poly_degree = 0
+        self.__holdPolyObjects = []
+        self.__polynomial_features = []
+
+        return
+
+    def build_poly(self):
+        # Create Poly Coefficient Objects
+        for i in range(self.__output_features):
+            polyModel = LinearRegression()
+            self.__holdPolyObjects.append(polyModel)
+
+        # Create Poly Object for usage
+        self._interactionOnly = False
+        self.__polynomial_features = PolynomialFeatures(self.__poly_degree, interaction_only=self._interactionOnly)
+
+        return
+
+    def _set_input_features(self, input_features):
+        self.__input_features = input_features
+        return
+
+    def _set_output_features(self, output_features):
+        self.__output_features = output_features
+
+        return
+
+    def _set_poly_degree(self, poly_degree):
+        self.__poly_degree = poly_degree
+
+    def save_test_evaluation_data(self, xtest, ytest, savestring):
+
+        poly_pred_train = self.model_predict(xtest)
+        pred_trans, pred_phase = self.convert_output_complex(poly_pred_train)
+        true_trans, true_phase = self.convert_output_complex(ytest)
+
+        trans_error = pred_trans - true_trans
+        phase_error = pred_phase - true_phase
+        complex_error = np.abs(pred_trans * np.exp(1j * pred_phase.numpy()) - true_trans * np.exp(1j * true_phase.numpy()))
+
+        # get relative errors
+        rel_trans = trans_error / true_trans
+        rel_phase = phase_error / true_phase
+        rel_complex = complex_error / np.abs(true_trans * np.exp(1j * true_phase.numpy()))
+
+        # Estimate FLOPs
+        est_FLOPs = self.profile_FLOPs()
+
+        saveTo = self._modelSavePath + savestring
+        data = {
+            "trans_error": trans_error,
+            "rel_trans": rel_trans,
+            "phase_error": phase_error,
+            "rel_phase": rel_phase,
+            "complex_error": complex_error,
+            "rel_complex": rel_complex,
+            "est_FLOPs": est_FLOPs,
+        }
+        with open(saveTo, "wb") as handle:
+            pickle.dump(data, handle)
+
+        return complex_error
+
+    def fit_polyCoeff(self):
+        start_time = time.time()
+        # Get Data
+        inputData, outputData = self.returnLibraryAsTrainingData()
+        xtrain, xtest, ytrain, ytest = train_test_split(inputData, outputData, test_size=0.15, random_state=13, shuffle=True)
+
+        # Fit to training data
+        polyFeatures_train = self.__polynomial_features.fit_transform(xtrain)
+        for i in range(self.__output_features):
+            self.__holdPolyObjects[i].fit(polyFeatures_train, ytrain[:, i])
+        end_time = time.time()
+
+        # Save model fit
+        print("Saving Model Fit")
+        self.customSaveCheckpoint()
+
+        # Save error data
+        complex_error_test = self.save_test_evaluation_data(xtest, ytest, "training_testDataError.pickle")
+        complex_error_train = self.save_test_evaluation_data(xtrain, ytrain, "training_trainDataError.pickle")
+
+        print("time | MAE: ", end_time - start_time, np.mean(complex_error_test), np.mean(complex_error_train))
+
+        return
+
+    def model_predict(self, model_input):
+        polyFeatures_input = self.__polynomial_features.fit_transform(model_input)
+
+        output = []
+        for i in range(self.__output_features):
+            output.append(self.__holdPolyObjects[i].predict(polyFeatures_input))
+        output = np.transpose(np.vstack(output), [1, 0])
+
+        return output
+
+    def predict(self, model_input):
+        return self.model_predict(model_input)
+
+    def __call__(self, model_input):
+        return self.model_predict(model_input)
+
+    def customLoadCheckpoint(self):
+
+        print("Checking for model checkpoint at: " + self._modelSavePath)
+        pkl_filename = self._modelSavePath + "model.pickle"
+
+        if os.path.exists(pkl_filename):
+            with open(pkl_filename, "rb") as file:
+                data = pickle.load(file)
+
+                self.__input_features = data["input_features"]
+                self.__output_features = data["output_features"]
+                self.__poly_degree = data["poly_degree"]
+                self.__holdPolyObjects = data["holdPolyObject"]
+
+            print("\n Model Checkpoint Loaded \n")
+
+        return
+
+    def customSaveCheckpoint(self):
+        # save weights to checkpoint file
+        pkl_filename = self._modelSavePath + "model.pickle"
+
+        data = {
+            "input_features": self.__input_features,
+            "output_features": self.__output_features,
+            "poly_degree": self.__poly_degree,
+            "holdPolyObject": self.__holdPolyObjects,
+        }
+        with open(pkl_filename, "wb") as file:
+            pickle.dump(data, file)
+
+        print("\n Model Saved \n")
+
+        return
+
+    def profile_FLOPs(self):
+        # FLOPs of matrix multiplication
+        # (1 x num_polyCoeffs_per_output) _matmul_ (num_polyCoeffs_per_output x outsize)
+        num_model_input_features = self.__input_features
+        num_polyCoeffs_per_output = math.comb(num_model_input_features + self.__poly_degree, self.__poly_degree)
+
+        estFLOPs = 1 * self.__output_features * (2 * num_polyCoeffs_per_output - 1)
+        print(
+            "Degree; Params; Est FLOPs | ",
+            self.__poly_degree,
+            num_polyCoeffs_per_output * self.__output_features,
+            estFLOPs,
+        )
+
+        return estFLOPs
+
+
+#################################
+#### BASE CLASS FOR MLP MODELS
 class GFF_Projection_layer(tf.keras.layers.Layer):
     def __init__(self, gaussian_projection: int, gaussian_scale: float = 1.0, **kwargs):
         """
@@ -203,9 +399,7 @@ class GFF_Projection_layer(tf.keras.layers.Layer):
         input_dim = input_shape[-1]
 
         if self.gauss_proj <= 0:
-            self.proj_kernel = tf.keras.layers.Dense(
-                input_dim, use_bias=True, trainable=True, kernel_initializer="identity", dtype=self._kernel_dtype
-            )
+            self.proj_kernel = tf.keras.layers.Dense(input_dim, use_bias=True, trainable=True, kernel_initializer="identity", dtype=self._kernel_dtype)
         else:
             initializer = tf.keras.initializers.TruncatedNormal(mean=0.0, stddev=self.gauss_scale)
             self.proj_kernel = tf.keras.layers.Dense(
@@ -233,7 +427,6 @@ class GFF_Projection_layer(tf.keras.layers.Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
 
-## BASE CLASS FOR MLP MODELS (PARENT - DO NOT ALTER THIS UNLESS YOU KNOW THE DETAILS)
 class MLP_Object(tf.keras.Model):
     def __init__(self):
         super(MLP_Object, self).__init__()

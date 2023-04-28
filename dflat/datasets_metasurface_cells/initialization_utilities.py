@@ -1,8 +1,7 @@
-import tensorflow as tf
 from dflat.datasets_metasurface_cells.libraryClass import *
 
 
-def optical_response_to_param(ms_trans_asList, ms_phase_asList, wavelength_m_asList, libraryName, reshape=False):
+def optical_response_to_param(ms_trans_asList, ms_phase_asList, wavelength_m_asList, libraryName, reshape=False, fast=False):
     """Converts a list of metasurface transmission and phase profiles to a list of assembled metasurface shape profiles
     (spatial distributions of nano-shape parameters) corresponding to the physical realization, at the specified
     wavelength channel. These metasurfaces are assemled from structures in one of the included raw FDTD libraries.
@@ -20,6 +19,7 @@ def optical_response_to_param(ms_trans_asList, ms_phase_asList, wavelength_m_asL
         `reshape` (bool): When reshape is True, the shape vector is spatially reshaped to match the inputted
             transmission and phase profile input, i.e. (DoP, Ny, Nx) where DoP is the degree of the cell shape.
             When False, the vector is returned in flattened form as (Ny*Nx, DoP).
+        `fast` (bool): When fast is true, a dictionary look-up table is utilized to predict shape based off phase (assuming unity transmittance as target)
 
     Returns:
         `list`: Shape vector with nanostructure dimensions in units of m.
@@ -29,7 +29,7 @@ def optical_response_to_param(ms_trans_asList, ms_phase_asList, wavelength_m_asL
     """
     # Get the meta-atom library
     library = loadLibrary(libraryName)
-    shape_Vector, shape_Vector_norm = library.optical_response_to_param(ms_trans_asList, ms_phase_asList, wavelength_m_asList, reshape)
+    shape_Vector, shape_Vector_norm = library.optical_response_to_param(ms_trans_asList, ms_phase_asList, wavelength_m_asList, reshape, fast)
 
     # For convenience, if only one lens was passed in, return the lens instead of a list
     if len(shape_Vector) > 1:
@@ -52,4 +52,3 @@ def loadLibrary(libraryName):
 def list_libraries():
     print(listLibraryNames)
     return
-

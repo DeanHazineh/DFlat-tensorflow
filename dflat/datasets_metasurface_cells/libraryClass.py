@@ -23,6 +23,7 @@ class Nanofins_U350nm_H600nm:
     def __init__(self):
         __rawPath = get_path_to_data("data_Nanofins_Unit350nm_Height600nm_EngineFDTD.mat")
         data = scipy.io.loadmat(__rawPath)
+        self.name = "Nanofins_U350nm_H600nm"
 
         # Phase and transmission has shape [Npol=2, leny=49, lenx=49, wavelength=441]
         self.phase = data["phase"]
@@ -125,32 +126,36 @@ class Nanofins_U350nm_H600nm:
 
         return
 
-    def optical_response_to_param(self, trans_asList, phase_asList, wavelength_asList, reshape):
-        ### Given list of target transmission and phase profiles (and list of wavelengths they are used for),
-        ### assemble the best shape vector that most minimizes the complex error between target profiles and true profiles
-        # Note this is not the single lens that best realizes the trans and phase across all wavelengths at once.
-        # That type of design requires optimization rather than naive forward assembly
+    def optical_response_to_param(self, trans_asList, phase_asList, wavelength_asList, reshape=True, fast=False):
+        """Computes the shape vector (here, nanocylinder radius) that most closely matches a transmittance and phase profile input. Note that each transmittance and phase profile for a given wavelength
+        (in wavelength_aslist) is assumed to be a seperate lens. This is a naive-table look-up function.
+
+        Args:
+            trans_asList (float): list of transmittance profiles
+            phase_asList (float): list of phase profiles
+            wavelength_asList (float): list of wavelengths corresponding to the target transmittance and phase profiles
+            reshape (float): Boolean if returned shape vectors are to be given in the same shape as the input or if just return as a flattened list
+            fast (bool, optional): Whether to do exhaustive min-search or a less accurate but fast dictionary look-up. The dictionary look-up assumed the target transmittance is unity and finds the best phase match. Defaults to False.
+
+        Returns:
+            list: List containing the shape vector for each trans and phase pair passed in (elements of the input list)
+        """
 
         ### Run input assertions
         length = len(wavelength_asList)
         # List assertion
         if not all(type(input) is list for input in [trans_asList, phase_asList, wavelength_asList]):
             raise TypeError("optical_response_to_param: trans, phase, and wavelength must all be passed in as lists")
+
         # List length assertion
         if not all(len(lst) == length for lst in [trans_asList, phase_asList]):
             raise ValueError("optical_response_to_param: All lists must be the same length")
+
         # Assert polarization basis dimension is two
         if not all([trans.shape[0] == 2 for trans in trans_asList]) or not all([phase.shape[0] == 2 for phase in phase_asList]):
             raise ValueError(
                 "optical_response_to_param: All transmission/phase profiles in the list must be a stack of two profiles, (2, Ny, Nx)"
             )
-
-        ### Get the library data
-        phaseTable = self.phase
-        transTable = np.clip(self.transmission, 0.0, 1.0)
-        lx = self.params[0][:, :, 0].flatten()
-        ly = self.params[1][:, :, 0].flatten()
-        wavelength = self.params[2][0, 0, :]
 
         ### Assemble metasurfaces
         shape_Vector = []
@@ -159,32 +164,29 @@ class Nanofins_U350nm_H600nm:
             use_wavelength = wavelength_asList[i]
             ms_trans = trans_asList[i]
             ms_phase = phase_asList[i]
-            initial_shape = ms_trans[0:1].shape
+            initial_shape = ms_trans[i : i + 1].shape
 
-            design_lx, design_ly = lookup_D2_pol2(phaseTable, transTable, lx, ly, wavelength, use_wavelength, ms_trans, ms_phase)
+            if fast:
+                design_lx, design_ly = lookup_D2_pol2(self.name + ".pickle", use_wavelength, ms_trans, ms_phase)
+            else:
+                design_lx, design_ly = minsearch_D2_pol2(
+                    self.phase,
+                    np.sqrt(np.clip(self.transmission, 0.0, 1.0)),
+                    self.params[0][:, :, 0].flatten(),
+                    self.params[1][:, :, 0].flatten(),
+                    self.params[2][0, 0, :],
+                    use_wavelength,
+                    ms_trans,
+                    ms_phase,
+                )
 
             # Define a normalized shape vector for convenience
             norm_design_lx = np.clip((design_lx - self.__param1Limits[0]) / (self.__param1Limits[1] - self.__param1Limits[0]), 0, 1)
             norm_design_ly = np.clip((design_ly - self.__param2Limits[0]) / (self.__param2Limits[1] - self.__param2Limits[0]), 0, 1)
 
             if reshape:
-                shape_Vector.append(
-                    np.vstack(
-                        (
-                            np.reshape(design_lx, initial_shape),
-                            np.reshape(design_ly, initial_shape),
-                        )
-                    )
-                )
-
-                shape_Vector_norm.append(
-                    np.vstack(
-                        (
-                            np.reshape(norm_design_lx, initial_shape),
-                            np.reshape(norm_design_ly, initial_shape),
-                        )
-                    )
-                )
+                shape_Vector.append(np.vstack((np.reshape(design_lx, initial_shape), np.reshape(design_ly, initial_shape))))
+                shape_Vector_norm.append(np.vstack((np.reshape(norm_design_lx, initial_shape), np.reshape(norm_design_ly, initial_shape))))
             else:
                 shape_Vector.append(np.hstack((np.expand_dims(design_lx, -1), np.expand_dims(design_ly, -1))))
                 shape_Vector_norm.append(np.hstack((np.expand_dims(norm_design_lx, -1), np.expand_dims(norm_design_ly, -1))))
@@ -194,8 +196,10 @@ class Nanofins_U350nm_H600nm:
 
 class Nanocylinders_U180nm_H600nm:
     def __init__(self):
+        """Library class that contains table-data for the transmission and phase response of cells with 600nm tall TiO2 nanocylinders"""
         __rawPath = get_path_to_data("data_Nanocylinders_Unit180nm_Height600nm_EngineFDTD.mat")
         data = scipy.io.loadmat(__rawPath)
+        self.name = "Nanocylinders_U180nm_H600nm"
 
         # Phase and transmission has shape [wavelength=441, lenr=191]
         self.phase = data["phase"]
@@ -234,32 +238,36 @@ class Nanocylinders_U180nm_H600nm:
 
         return
 
-    def optical_response_to_param(self, trans_asList, phase_asList, wavelength_asList, reshape):
-        ### Given list of target transmission and phase profiles (and list of wavelengths they are used for),
-        ### assemble the best shape vector that most minimizes the complex error between target profiles and true profiles
-        # Note this is not the single lens that best realizes the trans and phase across all wavelengths at once.
-        # That type of design requires optimization rather than naive forward assembly
+    def optical_response_to_param(self, trans_asList, phase_asList, wavelength_asList, reshape=True, fast=False):
+        """Computes the shape vector (here, nanocylinder radius) that most closely matches a transmittance and phase profile input. Note that each transmittance and phase profile for a given wavelength
+        (in wavelength_aslist) is assumed to be a seperate lens. This is a naive-table look-up function.
+
+        Args:
+            trans_asList (float): list of transmittance profiles
+            phase_asList (float): list of phase profiles
+            wavelength_asList (float): list of wavelengths corresponding to the target transmittance and phase profiles
+            reshape (float): Boolean if returned shape vectors are to be given in the same shape as the input or if just return as a flattened list
+            fast (bool, optional): Whether to do exhaustive min-search or a less accurate but fast dictionary look-up. The dictionary look-up assumed the target transmittance is unity and finds the best phase match. Defaults to False.
+
+        Returns:
+            list: List containing the shape vector for each trans and phase pair passed in (elements of the input list)
+        """
 
         ### Run input assertions
         length = len(wavelength_asList)
         # list assertion
         if not all(type(input) is list for input in [trans_asList, phase_asList, wavelength_asList]):
             raise TypeError("optical_response_to_param: trans, phase, and wavelength must all be passed in as lists")
+
         # list length assertion
         if not all(len(lst) == length for lst in [trans_asList, phase_asList]):
             raise ValueError("optical_response_to_param: All lists must be the same length")
+
         # polarization dimensionality check
         if not all([trans.shape[0] == 1 for trans in trans_asList]) or not all([phase.shape[0] == 1 for phase in phase_asList]):
             raise ValueError(
                 "optical_response_to_param: All transmission/phase profiles in the list must be a single transmission profile, (1, Ny, Nx)"
             )
-
-        ### Get the library data
-        phaseTable = self.phase
-        # transTable = np.clip(self.transmission, 0.0, 1.0)
-        transTable = self.transmission
-        radius = self.params[0][0, :].flatten()
-        wavelength = self.params[1][:, 0]
 
         ### Assemble metasurfaces
         shape_Vector = []
@@ -268,9 +276,21 @@ class Nanocylinders_U180nm_H600nm:
             use_wavelength = wavelength_asList[i]
             ms_trans = trans_asList[i]
             ms_phase = phase_asList[i]
-            initial_shape = ms_trans[0:1].shape
+            initial_shape = ms_trans[i : i + 1].shape
 
-            design_radius = lookup_D1_pol1(phaseTable, transTable, radius, wavelength, use_wavelength, ms_trans, ms_phase)
+            if fast:
+                design_radius = lookup_D1_pol1(self.name + ".pickle", use_wavelength, ms_trans, ms_phase)
+            else:
+                design_radius = minsearch_D1_pol1(
+                    self.phase,
+                    np.sqrt(np.clip(self.transmission, 0.0, 1.0)),
+                    self.param1.flatten(),
+                    self.param2.flatten(),
+                    use_wavelength,
+                    ms_trans,
+                    ms_phase,
+                )
+
             norm_design_radius = np.clip((design_radius - self.__param1Limits[0]) / (self.__param1Limits[1] - self.__param1Limits[0]), 0, 1)
 
             if reshape:
@@ -288,6 +308,7 @@ class Nanoellipse_U350nm_H600nm(Nanofins_U350nm_H600nm):
         super(Nanoellipse_U350nm_H600nm, self).__init__()
         __rawPath = get_path_to_data("data_NanoEllipse_Unit350nm_Height600nm_EngineFDTD.mat")
         data = scipy.io.loadmat(__rawPath)
+        self.name = "Nanoellipse_U350nm_H600nm"
 
         # Phase and transmission has shape [Npol=2, leny=49, lenx=49, wavelength=441]
         self.phase = data["phase"]

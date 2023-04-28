@@ -7,6 +7,7 @@ matplotlib.rcParams["ps.fonttype"] = 42
 
 from dflat.neural_optical_layer.core.models_DNN import *
 from dflat.neural_optical_layer.core.models_eRBF import *
+from dflat.neural_optical_layer.core.models_multivariate_polynomial import *
 import dflat.plot_utilities.graphFunc as graphFunc
 
 
@@ -232,9 +233,17 @@ def plot_MLP_Nanofins(mlp_object):
     return
 
 
-if __name__ == "__main__":
-    ## Run plotting functions for mlp model
-    # plot_MLP_Nanocylinders(MLP_Nanocylinders_Dense64_U180_H600())
-    # plot_MLP_Nanofins(MLP_Nanofins_Dense256_U350_H600())
-    # plot_MLP_Nanofins(MLP_Nanofins_Dense512_U350_H600())
-    plot_MLP_Nanofins(MLP_Nanofins_GFFDense256_256s1p0_U350_H600())
+# if __name__ == "__main__":
+## Run plotting functions for mlp model
+# plot_MLP_Nanocylinders(MLP_Nanocylinders_Dense64_U180_H600())
+# plot_MLP_Nanofins(MLP_Nanofins_Dense256_U350_H600())
+# plot_MLP_Nanofins(MLP_Nanofins_Dense512_U350_H600())
+# plot_MLP_Nanofins(MLP_Nanofins_GFFDense256_256s1p0_U350_H600())
+
+# plot_MLP_Nanofins(multipoly_nanofins_6())
+# plot_MLP_Nanofins(multipoly_nanofins_12())
+# plot_MLP_Nanofins(multipoly_nanofins_18())
+# plot_MLP_Nanofins(multipoly_nanofins_24())
+
+# plot_MLP_Nanofins(ERBF_Nanofins_B1024_U350_H600())
+# plot_MLP_Nanofins(ERBF_Nanofins_B4096_U350_H600())

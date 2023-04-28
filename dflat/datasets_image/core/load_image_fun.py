@@ -47,12 +47,12 @@ def center_crop_or_pad(img, new_dim):
 
     ### Run cropping if requested demension is smaller
     height, width = img.shape[0], img.shape[1]
-    cx, cy = 0, 0
     if targ_width < width:  # crop
-        cx = int((width - targ_width) / 2)
+        dx = width - targ_width
+        img = img[:, int(dx // 2) : width - int(dx - dx // 2), :]
     if targ_height < height:
-        cy = int((height - targ_height) / 2)
-    img = img[cy : height - cy, cx : width - cx, :]
+        dy = height - targ_height
+        img = img[int(dy // 2) : height - int(dy - dy // 2), :]
 
     ### Pad if height and width are smaller than the target
     height, width = img.shape[0], img.shape[1]

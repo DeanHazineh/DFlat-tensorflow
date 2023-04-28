@@ -40,16 +40,14 @@ class Pipeline_Object(tf.keras.Model):
         self.__checkModelPath()
 
     def __checkModelPath(self):
-
         if not os.path.exists(self.savepath):
             os.makedirs(self.savepath)
-            os.makedirs(self.savepath + "trainingOutput/")
 
         # Make folders for images too
-        if not os.path.exists(self.savepath + "trainingOutput/png_images/"):
-            os.makedirs(self.savepath + "trainingOutput/png_images/")
-        if not os.path.exists(self.savepath + "trainingOutput/pdf_images/"):
-            os.makedirs(self.savepath + "trainingOutput/pdf_images/")
+        if not os.path.exists(self.savepath + "/png_images/"):
+            os.makedirs(self.savepath + "/png_images/")
+        if not os.path.exists(self.savepath + "/pdf_images/"):
+            os.makedirs(self.savepath + "/pdf_images/")
 
         return
 
@@ -76,8 +74,8 @@ class Pipeline_Object(tf.keras.Model):
         gF.formatPlots(fig, ax[0], None, "epoch", "Loss", "Traning Loss")
         gF.formatPlots(fig, ax[1], None, "epoch", "Log10(Loss)", "Log Loss")
 
-        plt.savefig(self.savepath + "trainingOutput/png_images/trainingHistory.png")
-        plt.savefig(self.savepath + "trainingOutput/pdf_images/trainingHistory.pdf")
+        plt.savefig(self.savepath + "/png_images/trainingHistory.png")
+        plt.savefig(self.savepath + "/pdf_images/trainingHistory.pdf")
         plt.close()
 
     def customLoad(self):
@@ -92,7 +90,7 @@ class Pipeline_Object(tf.keras.Model):
             with open(self.savepath + "trainingHistory.pickle", "rb") as handle:
                 trackHistory = pickle.load(handle)
                 self.loss_vector = trackHistory["trainingLoss"]
-                #self.test_loss_vector = trackHistory["testLoss"]
+                # self.test_loss_vector = trackHistory["testLoss"]
 
     def visualizeTrainingCheckpoint(self, epoch_str):
         # It is expected that this function is overloaded by child class

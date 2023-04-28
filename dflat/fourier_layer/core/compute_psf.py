@@ -104,12 +104,8 @@ def psf_sensor_MatrixASM(
 
         # The fields passed in are expected to be of form (batch, Nwl, Ny, Nx) so we need some reshaping from the
         # prevous shape of (Nwl, Nbatch, Nps, Ny, Nx)
-        calc_modulation_trans = tf.reshape(
-            tf.transpose(calc_modulation_trans, [1, 2, 0, 3, 4]), [-1, init_shape[0], init_shape[3], init_shape[4]]
-        )
-        calc_modulation_phase = tf.reshape(
-            tf.transpose(calc_modulation_phase, [1, 2, 0, 3, 4]), [-1, init_shape[0], init_shape[3], init_shape[4]]
-        )
+        calc_modulation_trans = tf.reshape(tf.transpose(calc_modulation_trans, [1, 2, 0, 3, 4]), [-1, init_shape[0], init_shape[3], init_shape[4]])
+        calc_modulation_phase = tf.reshape(tf.transpose(calc_modulation_phase, [1, 2, 0, 3, 4]), [-1, init_shape[0], init_shape[3], init_shape[4]])
         calc_modulation_trans, calc_modulation_phase = transfer_function_Broadband(
             calc_modulation_trans,
             calc_modulation_phase,
@@ -215,9 +211,7 @@ def wavefront_pointSources_afterms_MatrixASM(sim_wavelengths_m, point_sources_lo
 
     ## As in wavefront_pointSources_afterms, we remove the 1/r and 1/lambda dependence to aid in normalized psf downstream
     TF_ZERO = tf.constant(0.0, dtype=tf.float64)
-    wavefront = tf.complex(calc_modulation_trans, TF_ZERO) * tf.exp(
-        tf.complex(TF_ZERO, calc_modulation_phase + angular_wave_number * distance_point_ms)
-    )
+    wavefront = tf.complex(calc_modulation_trans, TF_ZERO) * tf.exp(tf.complex(TF_ZERO, calc_modulation_phase + angular_wave_number * distance_point_ms))
 
     return tf.math.abs(wavefront), tf.math.angle(wavefront)
 
@@ -246,14 +240,10 @@ def psf_measured(point_source_locs, ms_modulation_trans, ms_modulation_phase, pa
 
     # compute the PSF at the sensor plane -- note that psf_sensor returns
     # tf.math.abs(field)**2 already with appropriate psf normalization on energy!
-    calc_modulation_intensity, calc_modulation_phase = psf_sensor(
-        point_source_locs, ms_modulation_trans, ms_modulation_phase, parameters, normby_transmittance
-    )
+    calc_modulation_intensity, calc_modulation_phase = psf_sensor(point_source_locs, ms_modulation_trans, ms_modulation_phase, parameters, normby_transmittance)
 
     # Predict the measurement on specified detector pixel size and shape
-    (calc_modulation_intensity, calc_modulation_phase) = sensorMeasurement_intensity_phase(
-        calc_modulation_intensity, calc_modulation_phase, parameters
-    )
+    (calc_modulation_intensity, calc_modulation_phase) = sensorMeasurement_intensity_phase(calc_modulation_intensity, calc_modulation_phase, parameters)
 
     return calc_modulation_intensity, calc_modulation_phase
 
@@ -284,9 +274,7 @@ def psf_sensor(point_source_locs, ms_modulation_trans, ms_modulation_phase, para
         calc_modulation_trans, calc_modulation_phase = regularize_ms_calc_tf(ms_modulation_trans, ms_modulation_phase, parameters)
 
         # Get the field after the metasurface, given a point-source spherical wave origin
-        calc_modulation_trans, calc_modulation_phase = wavefront_pointSources_afterms(
-            point_source_locs, calc_modulation_trans, calc_modulation_phase, parameters
-        )
+        calc_modulation_trans, calc_modulation_phase = wavefront_pointSources_afterms(point_source_locs, calc_modulation_trans, calc_modulation_phase, parameters)
 
         # get finely sampled field just above the sensor
         (calc_modulation_trans, calc_modulation_phase) = wavefront_afterms_sensor(calc_modulation_trans, calc_modulation_phase, parameters)
@@ -375,9 +363,7 @@ def wavefront_pointSources_afterms(
     ## However we remove the 1/r and 1/lambda dependence to aid in normalized psf downstream
     calc_modulation_trans = tf.expand_dims(calc_modulation_trans, 1)
     calc_modulation_phase = tf.expand_dims(calc_modulation_phase, 1)
-    wavefront = tf.complex(calc_modulation_trans, TF_ZERO) * tf.exp(
-        tf.complex(TF_ZERO, calc_modulation_phase + angular_wave_number * distance_point_ms)
-    )
+    wavefront = tf.complex(calc_modulation_trans, TF_ZERO) * tf.exp(tf.complex(TF_ZERO, calc_modulation_phase + angular_wave_number * distance_point_ms))
 
     return tf.math.abs(wavefront), tf.math.angle(wavefront)
 
@@ -557,7 +543,7 @@ def field_propagation(field_amplitude, field_phase, parameters):
     """Takes a batch of field amplitudes and field phases at an input plane (of a single wavelength) and propagates the
     field to an output plane.
 
-    The i nput to output field distances is defined by parameters["sensor_distance_m"].
+    The input to output field distances is defined by parameters["sensor_distance_m"].
     The input grid is defined by parameters["ms_samplesM"] and parameters["ms_dx_m"].
     The output grid is defined via discretization of parameters["sensor_dx_m"] and number points of
     parameters["sensor_pixel_number"]; these variable names are used as the architecture builds/reuses the functions
@@ -586,13 +572,9 @@ def field_propagation(field_amplitude, field_phase, parameters):
     calc_sensor_dx_m = parameters["calc_sensor_dx_m"]
     sensor_pixel_size_m = parameters["sensor_pixel_size_m"]
     if parameters["radial_symmetry"]:
-        field_amplitude, field_phase = sensorMeasurement_intensity_phase_radialData(
-            field_amplitude**2 * calc_sensor_dx_m["x"] * calc_sensor_dx_m["y"], field_phase, parameters
-        )
+        field_amplitude, field_phase = sensorMeasurement_intensity_phase_radialData(field_amplitude**2 * calc_sensor_dx_m["x"] * calc_sensor_dx_m["y"], field_phase, parameters)
     else:
-        field_amplitude, field_phase = sensorMeasurement_intensity_phase(
-            field_amplitude**2 * calc_sensor_dx_m["x"] * calc_sensor_dx_m["y"], field_phase, parameters
-        )
+        field_amplitude, field_phase = sensorMeasurement_intensity_phase(field_amplitude**2 * calc_sensor_dx_m["x"] * calc_sensor_dx_m["y"], field_phase, parameters)
     field_amplitude = tf.math.sqrt(field_amplitude / sensor_pixel_size_m["x"] / sensor_pixel_size_m["y"])
 
     return field_amplitude, field_phase

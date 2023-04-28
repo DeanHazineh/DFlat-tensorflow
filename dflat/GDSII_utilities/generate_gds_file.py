@@ -19,7 +19,7 @@ def upsample_with_cv2(inputs, upsample_factor):
     return outputs
 
 
-def assemble_nanofin_gdsII(shape_array, rotation_array, cell_size, savepath, boolean_mask=None, gds_unit=1e-6, gds_precision=1e-9):
+def assemble_nanofin_gdsII(shape_array, rotation_array, cell_size, savepath, boolean_mask=None, gds_unit=1e-6, gds_precision=1e-9, tag=True):
     # If no boolean mask is provided, then set to True everywhere
     if boolean_mask is None:
         boolean_mask = np.ones_like(shape_array, dtype=bool)
@@ -55,9 +55,10 @@ def assemble_nanofin_gdsII(shape_array, rotation_array, cell_size, savepath, boo
                 cell.add(rect)
 
     ### Add some text underneath the lens
-    text_height = 2 * cell_size / gds_unit
-    htext = gdspy.Text("DFlat V2 GDSII", text_height, (0, -1.5 * text_height))
-    cell.add(htext)
+    if tag:
+        text_height = 2 * cell_size / gds_unit
+        htext = gdspy.Text("DFlat V2 GDSII", text_height, (0, -1.5 * text_height))
+        cell.add(htext)
 
     lib.write_gds(savepath + ".gds")
     mystyle = {(1, 0): {"fill": "#000000", "stroke": "#CC00FF"}}

@@ -2,9 +2,11 @@ import tensorflow as tf
 
 from .core.models_DNN import *
 from .core.models_eRBF import *
+from .core.models_multivariate_polynomial import *
 from .core.caller_MLP import *
 
-listModelNames = erbf_model_names + mlp_model_names
+listModelNames = erbf_model_names + mlp_model_names + erbf_model_names
+
 
 def list_models():
     print(listModelNames)
@@ -13,7 +15,7 @@ def list_models():
 
 def load_neuralModel(model_selection_string, dtype=tf.float32):
     if model_selection_string not in listModelNames:
-            raise ValueError("mlp_layer: requested MLP is not one of the supported libraries")
+        raise ValueError("mlp_layer: requested MLP is not one of the supported libraries")
     else:
         mlp = globals()[model_selection_string]
         mlp = mlp(dtype)
@@ -54,9 +56,9 @@ def convert_param_to_shape(norm_param, MLP_model):
     """
     databounds = MLP_model.get_preprocessDataBounds()
     shapeDegree = len(databounds) - 1
-    #return tf.transpose(tf.stack([norm_param[:, i] * (databounds[i][1] - databounds[i][0]) + databounds[i][0] for i in range(shapeDegree)]))
+    # return tf.transpose(tf.stack([norm_param[:, i] * (databounds[i][1] - databounds[i][0]) + databounds[i][0] for i in range(shapeDegree)]))
     return np.array([norm_param[:, i] * (databounds[i][1] - databounds[i][0]) + databounds[i][0] for i in range(shapeDegree)]).T
-    
+
 
 def init_norm_param(init_type, dtype, gridShape, mlp_input_shape, init_args=[]):
 

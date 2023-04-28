@@ -26,9 +26,7 @@ class customLoss(tf.keras.losses.Loss):
         field_pred = tf.complex(trans_model, self.TF_ZERO) * tf.math.exp(tf.complex(self.TF_ZERO, phase_model))
 
         # MAE of Complex phasors
-        return tf.math.reduce_mean(
-            tf.math.sqrt(tf.math.square(tf.math.real(field_true - field_pred)) + tf.math.square(tf.math.imag(field_true - field_pred)))
-        )
+        return tf.math.reduce_mean(tf.math.sqrt(tf.math.square(tf.math.real(field_true - field_pred)) + tf.math.square(tf.math.imag(field_true - field_pred))))
 
 
 def get_flops_alternate(keras_sequential_model):

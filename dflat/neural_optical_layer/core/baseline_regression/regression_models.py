@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
 
-from ..mlp_parent_class import MLP_Nanofins_U350_H600, MLP_Nanocylinders_U180_H600
+from dflat.neural_optical_layer.core.arch_Parent_class import MLP_Nanofins_U350_H600, MLP_Nanocylinders_U180_H600
 
 
 class multivariate_polynomial_regression_sklearn:
@@ -53,13 +53,11 @@ class multivariate_polynomial_regression_sklearn:
 
         trans_error = pred_trans - true_trans
         phase_error = pred_phase - true_phase
-        complex_error = np.abs(
-            pred_trans * np.exp(1j * pred_phase.numpy()) - true_trans * np.exp(1j * true_phase.numpy())
-        )
+        complex_error = np.abs(pred_trans * np.exp(1j * pred_phase.numpy()) - true_trans * np.exp(1j * true_phase.numpy()))
 
         # get relative errors
-        # rel_trans = trans_error / true_trans
-        # rel_phase = phase_error / true_phase
+        rel_trans = trans_error / true_trans
+        rel_phase = phase_error / true_phase
         rel_complex = complex_error / np.abs(true_trans * np.exp(1j * true_phase.numpy()))
 
         # Estimate FLOPs
@@ -68,9 +66,9 @@ class multivariate_polynomial_regression_sklearn:
         saveTo = self._modelSavePath + savestring
         data = {
             "trans_error": trans_error,
-            # "rel_trans": rel_trans,
+            "rel_trans": rel_trans,
             "phase_error": phase_error,
-            # "rel_phase": rel_phase,
+            "rel_phase": rel_phase,
             "complex_error": complex_error,
             "rel_complex": rel_complex,
             "est_FLOPs": est_FLOPs,
@@ -84,9 +82,7 @@ class multivariate_polynomial_regression_sklearn:
         start_time = time.time()
         # Get Data
         inputData, outputData = self.returnLibraryAsTrainingData()
-        xtrain, xtest, ytrain, ytest = train_test_split(
-            inputData, outputData, test_size=0.15, random_state=13, shuffle=True
-        )
+        xtrain, xtest, ytrain, ytest = train_test_split(inputData, outputData, test_size=0.15, random_state=13, shuffle=True)
 
         # Fit to training data
         polyFeatures_train = self.__polynomial_features.fit_transform(xtrain)
@@ -172,6 +168,8 @@ class multivariate_polynomial_regression_sklearn:
 
 
 ## Sub Models for comparison of MAE/FLOPs
+
+### Nanocylinder multivariate polynomial
 class multipoly_nanocylinders_10(
     multivariate_polynomial_regression_sklearn,
     MLP_Nanocylinders_U180_H600,
@@ -181,9 +179,7 @@ class multipoly_nanocylinders_10(
         multivariate_polynomial_regression_sklearn.__init__(self)
 
         self.set_model_name("multipoly_nanocylinders_10")
-        self.set_modelSavePath(
-            "dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_10/"
-        )
+        self.set_modelSavePath("dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_10/")
 
         self._set_input_features(2)
         self._set_output_features(3)
@@ -200,9 +196,7 @@ class multipoly_nanocylinders_12(
         multivariate_polynomial_regression_sklearn.__init__(self)
 
         self.set_model_name("multipoly_nanocylinders_12")
-        self.set_modelSavePath(
-            "dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_12/"
-        )
+        self.set_modelSavePath("dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_12/")
 
         self._set_input_features(2)
         self._set_output_features(3)
@@ -219,9 +213,7 @@ class multipoly_nanocylinders_14(
         multivariate_polynomial_regression_sklearn.__init__(self)
 
         self.set_model_name("multipoly_nanocylinders_14")
-        self.set_modelSavePath(
-            "dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_14/"
-        )
+        self.set_modelSavePath("dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_14/")
 
         self._set_input_features(2)
         self._set_output_features(3)
@@ -238,9 +230,7 @@ class multipoly_nanocylinders_16(
         multivariate_polynomial_regression_sklearn.__init__(self)
 
         self.set_model_name("multipoly_nanocylinders_16")
-        self.set_modelSavePath(
-            "dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_16/"
-        )
+        self.set_modelSavePath("dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_16/")
 
         self._set_input_features(2)
         self._set_output_features(3)
@@ -257,9 +247,7 @@ class multipoly_nanocylinders_18(
         multivariate_polynomial_regression_sklearn.__init__(self)
 
         self.set_model_name("multipoly_nanocylinders_18")
-        self.set_modelSavePath(
-            "dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_18/"
-        )
+        self.set_modelSavePath("dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_18/")
 
         self._set_input_features(2)
         self._set_output_features(3)
@@ -276,9 +264,7 @@ class multipoly_nanocylinders_20(
         multivariate_polynomial_regression_sklearn.__init__(self)
 
         self.set_model_name("multipoly_nanocylinders_20")
-        self.set_modelSavePath(
-            "dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_20/"
-        )
+        self.set_modelSavePath("dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_20/")
 
         self._set_input_features(2)
         self._set_output_features(3)
@@ -295,9 +281,7 @@ class multipoly_nanocylinders_22(
         multivariate_polynomial_regression_sklearn.__init__(self)
 
         self.set_model_name("multipoly_nanocylinders_22")
-        self.set_modelSavePath(
-            "dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_22/"
-        )
+        self.set_modelSavePath("dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_22/")
 
         self._set_input_features(2)
         self._set_output_features(3)
@@ -314,9 +298,7 @@ class multipoly_nanocylinders_24(
         multivariate_polynomial_regression_sklearn.__init__(self)
 
         self.set_model_name("multipoly_nanocylinders_24")
-        self.set_modelSavePath(
-            "dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_24/"
-        )
+        self.set_modelSavePath("dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_24/")
 
         self._set_input_features(2)
         self._set_output_features(3)
@@ -333,9 +315,7 @@ class multipoly_nanocylinders_26(
         multivariate_polynomial_regression_sklearn.__init__(self)
 
         self.set_model_name("multipoly_nanocylinders_26")
-        self.set_modelSavePath(
-            "dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_26/"
-        )
+        self.set_modelSavePath("dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_26/")
 
         self._set_input_features(2)
         self._set_output_features(3)
@@ -352,9 +332,7 @@ class multipoly_nanocylinders_28(
         multivariate_polynomial_regression_sklearn.__init__(self)
 
         self.set_model_name("multipoly_nanocylinders_28")
-        self.set_modelSavePath(
-            "dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_28/"
-        )
+        self.set_modelSavePath("dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_28/")
 
         self._set_input_features(2)
         self._set_output_features(3)
@@ -371,9 +349,7 @@ class multipoly_nanocylinders_30(
         multivariate_polynomial_regression_sklearn.__init__(self)
 
         self.set_model_name("multipoly_nanocylinders_30")
-        self.set_modelSavePath(
-            "dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_30/"
-        )
+        self.set_modelSavePath("dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_30/")
 
         self._set_input_features(2)
         self._set_output_features(3)
@@ -390,9 +366,7 @@ class multipoly_nanocylinders_32(
         multivariate_polynomial_regression_sklearn.__init__(self)
 
         self.set_model_name("multipoly_nanocylinders_32")
-        self.set_modelSavePath(
-            "dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_32/"
-        )
+        self.set_modelSavePath("dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_32/")
 
         self._set_input_features(2)
         self._set_output_features(3)
@@ -409,9 +383,7 @@ class multipoly_nanocylinders_34(
         multivariate_polynomial_regression_sklearn.__init__(self)
 
         self.set_model_name("multipoly_nanocylinders_34")
-        self.set_modelSavePath(
-            "dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_34/"
-        )
+        self.set_modelSavePath("dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanocylinders_34/")
 
         self._set_input_features(2)
         self._set_output_features(3)
@@ -419,6 +391,7 @@ class multipoly_nanocylinders_34(
         self.build_poly()
 
 
+### Nanocylinder multivariate polynomial
 class multipoly_nanofins_6(
     multivariate_polynomial_regression_sklearn,
     MLP_Nanofins_U350_H600,
@@ -428,9 +401,7 @@ class multipoly_nanofins_6(
         multivariate_polynomial_regression_sklearn.__init__(self)
 
         self.set_model_name("multipoly_nanofins_6")
-        self.set_modelSavePath(
-            "dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanofins_6/"
-        )
+        self.set_modelSavePath("dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanofins_6/")
 
         self._set_input_features(3)
         self._set_output_features(6)
@@ -447,9 +418,7 @@ class multipoly_nanofins_7(
         multivariate_polynomial_regression_sklearn.__init__(self)
 
         self.set_model_name("multipoly_nanofins_7")
-        self.set_modelSavePath(
-            "dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanofins_7/"
-        )
+        self.set_modelSavePath("dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanofins_7/")
 
         self._set_input_features(3)
         self._set_output_features(6)
@@ -466,9 +435,7 @@ class multipoly_nanofins_8(
         multivariate_polynomial_regression_sklearn.__init__(self)
 
         self.set_model_name("multipoly_nanofins_8")
-        self.set_modelSavePath(
-            "dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanofins_8/"
-        )
+        self.set_modelSavePath("dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanofins_8/")
 
         self._set_input_features(3)
         self._set_output_features(6)
@@ -485,9 +452,7 @@ class multipoly_nanofins_9(
         multivariate_polynomial_regression_sklearn.__init__(self)
 
         self.set_model_name("multipoly_nanofins_9")
-        self.set_modelSavePath(
-            "dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanofins_9/"
-        )
+        self.set_modelSavePath("dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanofins_9/")
 
         self._set_input_features(3)
         self._set_output_features(6)
@@ -504,9 +469,7 @@ class multipoly_nanofins_10(
         multivariate_polynomial_regression_sklearn.__init__(self)
 
         self.set_model_name("multipoly_nanofins_10")
-        self.set_modelSavePath(
-            "dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanofins_10/"
-        )
+        self.set_modelSavePath("dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanofins_10/")
 
         self._set_input_features(3)
         self._set_output_features(6)
@@ -523,9 +486,7 @@ class multipoly_nanofins_11(
         multivariate_polynomial_regression_sklearn.__init__(self)
 
         self.set_model_name("multipoly_nanofins_11")
-        self.set_modelSavePath(
-            "dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanofins_11/"
-        )
+        self.set_modelSavePath("dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanofins_11/")
 
         self._set_input_features(3)
         self._set_output_features(6)
@@ -542,9 +503,7 @@ class multipoly_nanofins_12(
         multivariate_polynomial_regression_sklearn.__init__(self)
 
         self.set_model_name("multipoly_nanofins_12")
-        self.set_modelSavePath(
-            "dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanofins_12/"
-        )
+        self.set_modelSavePath("dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanofins_12/")
 
         self._set_input_features(3)
         self._set_output_features(6)
@@ -561,9 +520,7 @@ class multipoly_nanofins_13(
         multivariate_polynomial_regression_sklearn.__init__(self)
 
         self.set_model_name("multipoly_nanofins_13")
-        self.set_modelSavePath(
-            "dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanofins_13/"
-        )
+        self.set_modelSavePath("dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanofins_13/")
 
         self._set_input_features(3)
         self._set_output_features(6)
@@ -580,9 +537,7 @@ class multipoly_nanofins_14(
         multivariate_polynomial_regression_sklearn.__init__(self)
 
         self.set_model_name("multipoly_nanofins_14")
-        self.set_modelSavePath(
-            "dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanofins_14/"
-        )
+        self.set_modelSavePath("dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanofins_14/")
 
         self._set_input_features(3)
         self._set_output_features(6)
@@ -599,9 +554,7 @@ class multipoly_nanofins_15(
         multivariate_polynomial_regression_sklearn.__init__(self)
 
         self.set_model_name("multipoly_nanofins_15")
-        self.set_modelSavePath(
-            "dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanofins_15/"
-        )
+        self.set_modelSavePath("dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanofins_15/")
 
         self._set_input_features(3)
         self._set_output_features(6)
@@ -618,9 +571,7 @@ class multipoly_nanofins_16(
         multivariate_polynomial_regression_sklearn.__init__(self)
 
         self.set_model_name("multipoly_nanofins_16")
-        self.set_modelSavePath(
-            "dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanofins_16/"
-        )
+        self.set_modelSavePath("dflat/neural_optical_layer/core/baseline_regression/fitted_regression_models/multipoly_nanofins_16/")
 
         self._set_input_features(3)
         self._set_output_features(6)

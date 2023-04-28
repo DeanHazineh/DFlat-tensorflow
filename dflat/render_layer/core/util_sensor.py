@@ -5,7 +5,6 @@ import pandas as pd
 
 
 def get_path_to_data(file_name: str):
-    ## This is not the accepted solution but it should work for bootstrapping research with few users
     resource_path = Path(__file__).parent / ""
     return resource_path.joinpath(file_name)
 
@@ -24,7 +23,6 @@ def get_QE_SONY_Pregius(channels_nm):
     ]
     delimiter = " "
 
-    #
     df = pd.read_csv(csv, delimiter=delimiter)
     sensor_QE = df[column_labels].to_numpy()
     bands = df["wavelength"].to_numpy()
@@ -45,7 +43,6 @@ def get_QETrans_Basler_Bayer(channels_nm):
     column_labels = ["R", "G1", "G2", "B"]
     delimiter = ","
 
-    #
     df = pd.read_csv(csv, delimiter=delimiter)
     sensor_QE = df[column_labels].to_numpy()
     bands = df["Wavelength[nm]"].to_numpy()

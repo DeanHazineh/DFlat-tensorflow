@@ -3,16 +3,17 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import glob, os
 import imageio
 import numpy as np
+from PIL import Image
 
 # These lines are required to make fonts the right form for adobe illustrator
 plt.rcParams["pdf.fonttype"] = 42.0
 plt.rcParams["ps.fonttype"] = 42.0
 
-fontsize_text = 16.0
-fontsize_title = 18.0
-fontsize_ticks = 18.0
-fontsize_cbar = 16.0
-fontsize_legend = 16.0
+fontsize_text = 10.0
+fontsize_title = 12.0
+fontsize_ticks = 14.0
+fontsize_cbar = 10.0
+fontsize_legend = 12.0
 
 
 def addAxis(thisfig, n1, n2, maxnumaxis=""):
@@ -113,14 +114,25 @@ def formatPlots(
     return
 
 
-def gif_from_saved_images(filepath, filetag, savename, fps):
+def gif_from_saved_images(filepath, filetag, savename, fps, deleteFrames=True, verbose=False):
     print("Call GIF generator")
+    images = []
 
-    writer = imageio.get_writer(filepath + savename + ".gif", fps=fps)
-    for file in sorted(glob.glob(filepath + filetag), key=os.path.getmtime):
-        writer.append_data(imageio.imread(file))
-        print("Write image file as frame: " + file)
-
-    writer.close()
-
+    png_files = [f for f in os.listdir(filepath) if f.startswith(filetag) and f.endswith(".png")]
+    png_files = sorted(png_files, key=lambda f: os.path.getmtime(os.path.join(filepath, f)))
+    for file in png_files:
+        file_path = os.path.join(filepath, file)
+        images.append(Image.open(file_path))
+       
+        if verbose:
+            print("Write image file as frame: " + file) 
+        if deleteFrames:
+            os.remove(file_path)
+    
+    duration = int(1000/fps)
+    images[0].save(filepath+savename,
+                   save_all=True,
+                   append_images=images[1:],
+                   duration=duration,
+                   loop=0)
     return

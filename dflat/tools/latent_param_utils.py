@@ -14,8 +14,7 @@ def latent_to_param(z_latent, pmin=0, pmax=1):
         `tf.float`: param tensor of equivalent shape
 
     """
-
-    return ((tf.math.tanh(z_latent) + 1) / 2 * (pmax - pmin)) + pmin
+    return ((tf.math.tanh(tf.clip_by_value(z_latent, -10, 10)) + 1) / 2 * (pmax - pmin)) + pmin
 
 
 def param_to_latent(p_param, pmin=0, pmax=1):

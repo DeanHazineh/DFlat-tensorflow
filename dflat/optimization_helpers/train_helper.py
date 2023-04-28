@@ -22,12 +22,14 @@ def run_pipeline_optimization(pipeline, optimizer, num_epochs, loss_fn=None, all
         def loss_fn(pipeline_output):
             return pipeline_output
 
-    if not allow_gpu:
-        with tf.device("/cpu:0"):
-            train_loop(pipeline, optimizer, loss_fn, num_epochs)
-    else:
-        with tf.device("/gpu:0"):
-            train_loop(pipeline, optimizer, loss_fn, num_epochs)
+    train_loop(pipeline, optimizer, loss_fn, num_epochs)
+
+    # if not allow_gpu:
+    #     with tf.device("/cpu:0"):
+    #         train_loop(pipeline, optimizer, loss_fn, num_epochs)
+    # else:
+    #     with tf.device("/gpu:0"):
+    #         train_loop(pipeline, optimizer, loss_fn, num_epochs)
 
     return
 
@@ -49,7 +51,7 @@ def train_loop(pipeline, optimizer, loss_fn, num_epochs):
         current_loss = train(pipeline, loss_fn, optimizer)
         end = time.time()
 
-        print("Training Log | (Step, time, loss): ", start_iter + epoch, end - start, current_loss)
+        print("Training Log | (Step, time, loss, lr): ", start_iter + epoch, end - start, current_loss, optimizer.lr.numpy())
         lossVec.append(current_loss)
 
         # After every N steps, save a figure with useful information
@@ -73,6 +75,7 @@ def train(pipeline, loss_fn, optimizer):
         current_loss = loss_fn(pipeline())
 
     gradients = tape.gradient(current_loss, pipeline.trainable_variables)
+    gradients = [tf.where(tf.math.is_nan(gradient), tf.zeros_like(gradient), gradient) for gradient in gradients]
     optimizer.apply_gradients(zip(gradients, pipeline.trainable_variables))
 
     return current_loss.numpy()

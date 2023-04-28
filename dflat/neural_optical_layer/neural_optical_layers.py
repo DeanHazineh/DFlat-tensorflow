@@ -24,7 +24,7 @@ class MLP_Layer(tf.keras.layers.Layer):
     """
 
     def __init__(self, model_name, dtype=tf.float64):
-        """Initialize the mlp_latent_layer.
+        """Initialize the mlp_layer.
         Args:
             `model_name` (str): Name of the MLP model to use. See up-to-date documentation for valid models.
         """
@@ -177,8 +177,7 @@ class MLP_Latent_Layer(MLP_Layer):
         tf.debugging.assert_equal(
             latent_tensor.shape[0],
             self.param_dimensionality,
-            message="",
-            summarize="latent_tensor has incorrect number of parameters per cell (shape parameters D)",
+            message="latent_tensor has incorrect number of parameters per cell (shape parameters D)",
             name="latent_tensor_degree_assertion",
         )
 

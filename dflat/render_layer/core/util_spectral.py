@@ -1,10 +1,10 @@
 from scipy import interpolate
 from pathlib import Path
 import numpy as np
+import tensorflow as tf
 
 
 def get_path_to_data(file_name: str):
-    ## This is not the accepted solution but it should work for bootstrapping research with few users
     resource_path = Path(__file__).parent / ""
     return resource_path.joinpath(file_name)
 
@@ -41,3 +41,10 @@ def get_illuminant_6500(channels_nm):
     illum_ = interpolate.interp1d(illum[:, 0], illum[:, 1], kind="linear")
 
     return illum_(channels_nm)
+
+
+def hsi_to_rgb(hsi_cube, wavelength_set_nm):
+    # hsi_cube has wl in the last dimension
+    cmf_bar = get_rgb_bar_CIE1931(wavelength_set_nm)
+
+    return tf.linalg.matmul(hsi_cube, cmf_bar)
