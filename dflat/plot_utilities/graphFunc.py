@@ -72,8 +72,8 @@ def formatPlots(
     setAspect="auto",
 ):  # Pass figure and axis to set common formatting options
 
-    if imhandle==None:
-        imhandle = thisax.images[0]
+    # if imhandle==None:
+    #     imhandle = thisax.images[0]
         
     thisax.set_xlabel(xlabel, fontsize=fontsize_text)
     thisax.set_ylabel(ylabel, fontsize=fontsize_text)
