@@ -1,8 +1,44 @@
 import tensorflow as tf
 import time
 import numpy as np
+import math
 
+class LinearRampCosineDecayScheduler(tf.keras.optimizers.schedules.LearningRateSchedule):
+    def __init__(self, initial_learning_rate, ramp_up_epochs, total_epochs, min_learning_rate=0, warmup=False):
+        super(LinearRampCosineDecayScheduler, self).__init__()
+        self.initial_learning_rate = initial_learning_rate
+        self.ramp_up_epochs = ramp_up_epochs
+        self.total_epochs = total_epochs
+        self.min_learning_rate = min_learning_rate
+        self.warmup = warmup
 
+    def __call__(self, step):
+        if self.warmup:
+            # Linear warmup
+            warmup_lr = self.initial_learning_rate * tf.math.minimum(1.0, (step + 1) / self.ramp_up_epochs)
+            completed_fraction = (step - self.ramp_up_epochs) / (self.total_epochs - self.ramp_up_epochs)
+        else:
+            completed_fraction = step / self.total_epochs
+
+        # Cosine decay
+        cosine_decay = 0.5 * (1 + tf.math.cos(math.pi * completed_fraction))
+        decayed_learning_rate = self.initial_learning_rate * cosine_decay
+        decayed_learning_rate = tf.maximum(decayed_learning_rate, self.min_learning_rate)
+
+        if self.warmup:
+            return tf.cond(step < self.ramp_up_epochs, lambda: warmup_lr, lambda: decayed_learning_rate)
+        else:
+            return decayed_learning_rate
+
+    def get_config(self):
+        return {
+            "initial_learning_rate": self.initial_learning_rate,
+            "ramp_up_epochs": self.ramp_up_epochs,
+            "total_epochs": self.total_epochs,
+            "min_learning_rate": self.min_learning_rate,
+            "warmup": self.warmup
+        }
+    
 def run_pipeline_optimization(pipeline, optimizer, num_epochs, loss_fn=None, allow_gpu=True):
     """Runs the training for DFlat's custom pipelines.
 

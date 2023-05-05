@@ -51,7 +51,7 @@ def addColorbar(thisfig, thisax, thisim, cbartitle="", fontsize_cbar=fontsize_cb
 def formatPlots(
     thisfig,
     thisax,
-    imhandle,
+    imhandle=None,
     xlabel="",
     ylabel="",
     title="",
@@ -72,6 +72,9 @@ def formatPlots(
     setAspect="auto",
 ):  # Pass figure and axis to set common formatting options
 
+    if imhandle==None:
+        imhandle = thisax.images[0]
+        
     thisax.set_xlabel(xlabel, fontsize=fontsize_text)
     thisax.set_ylabel(ylabel, fontsize=fontsize_text)
     thisax.set_title(title, fontsize=fontsize_title)
