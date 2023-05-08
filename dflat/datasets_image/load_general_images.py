@@ -1,5 +1,5 @@
 from pathlib import Path
-from .core.load_image_fun import *
+from .core.load_image_fun import load_png_as_grayscale
 
 
 def get_path_to_data(file_name: str):
