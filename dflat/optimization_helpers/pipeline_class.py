@@ -85,13 +85,15 @@ class Pipeline_Object(tf.keras.Model):
         if os.path.exists(self.savepath + "checkpoint"):
             self.load_weights(self.savepath).expect_partial()
             print("\n Model Checkpoint Loaded \n")
+        else:
+            print("\n No Model Checkpoint Found")
 
         # Load the previous training loss vector if it exists
         if os.path.exists(self.savepath + "trainingHistory.pickle"):
             with open(self.savepath + "trainingHistory.pickle", "rb") as handle:
                 trackHistory = pickle.load(handle)
                 self.loss_vector = trackHistory["trainingLoss"]
-                # self.test_loss_vector = trackHistory["testLoss"]
+                self.test_loss_vector = trackHistory["testLoss"]
 
     def visualizeTrainingCheckpoint(self, epoch_str):
         # It is expected that this function is overloaded by child class

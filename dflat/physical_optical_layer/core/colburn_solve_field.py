@@ -5,6 +5,39 @@ from . import colburn_rcwa_utils as rcwa_utils
 from . import colburn_tensor_utils as tensor_utils
 
 
+def complex_pseudoinverse(tensor, rcond=1e-15):
+    dtype = tensor.dtype
+    if not dtype.is_complex:
+        return tf.linalg.pinv(tensor)
+
+    # Compute SVD
+    s, u, v = tf.linalg.svd(tensor, full_matrices=False)
+
+    # Compute the reciprocal of singular values
+    cutoff = rcond * tf.reduce_max(s)
+    s_inv = tf.where(s > cutoff, tf.math.reciprocal(s), 0.0)
+
+    # Cast the reciprocal of singular values to complex
+    s_inv_complex = tf.cast(s_inv, dtype)
+
+    # Compute the pseudoinverse
+    pseudo_inv_s = tf.linalg.diag(s_inv_complex)
+    pseudo_inv = tf.matmul(v, tf.matmul(pseudo_inv_s, u, adjoint_b=True))
+
+    return pseudo_inv
+
+
+def batch_regularized_inverse(matrix, alpha=0.1):
+    if matrix.shape[-1] != matrix.shape[-2]:
+        raise ValueError("The last two dimensions of the input tensor must be square.")
+
+    matrix_shape = matrix.shape[:-2]
+    identity = tf.eye(matrix.shape[-1], dtype=matrix.dtype)
+    identity = tf.broadcast_to(identity, matrix_shape + matrix.shape[-2:])
+    regularized_matrix = matrix + alpha * identity
+    return complex_pseudoinverse(regularized_matrix)
+
+
 def simulate(ER_t, UR_t, params):
     """
     Calculates the transmission/reflection coefficients for a unit cell with a
@@ -143,16 +176,20 @@ def simulate(ER_t, UR_t, params):
 
     # Build the eigenvalue problem.
     P_00 = tf.linalg.matmul(KX, tf.linalg.inv(ERC))
+    # P_00 = tf.linalg.matmul(KX, batch_regularized_inverse(ERC))
     P_00 = tf.linalg.matmul(P_00, KY)
 
     P_01 = tf.linalg.matmul(KX, tf.linalg.inv(ERC))
+    # P_01 = tf.linalg.matmul(KX, batch_regularized_inverse(ERC))
     P_01 = tf.linalg.matmul(P_01, KX)
     P_01 = URC - P_01
 
     P_10 = tf.linalg.matmul(KY, tf.linalg.inv(ERC))
+    # P_10 = tf.linalg.matmul(KY, batch_regularized_inverse(ERC))
     P_10 = tf.linalg.matmul(P_10, KY) - URC
 
     P_11 = tf.linalg.matmul(-KY, tf.linalg.inv(ERC))
+    # P_11 = tf.linalg.matmul(-KY, batch_regularized_inverse(ERC))
     P_11 = tf.linalg.matmul(P_11, KX)
 
     P_row0 = tf.concat([P_00, P_01], axis=5)
