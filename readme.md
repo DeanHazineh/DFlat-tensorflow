@@ -52,12 +52,6 @@ Note that you should not just download the zip file from above because this will
 - For Windows users: please note that Tensorflow v2.10 is the last official tensorflow release with native GPU compatibility for Windows os. DFlat is currently compatible with v2.10 but in the longterm, we will keep the main package updated to the primary tensorflow release. 
 - We are also considering a port of the package to Pytorch in the future which has now become the dominant ML framework
 
-## Contact:
-This repository is intended to be accessible and community driven. It may not be fully error-proof and will be continually updated. 
-If you have improvements, fixes, or contributions, please branch and initiate a merge request to master (or email me)!
-
-For any questions, functionality requests, or other concerns, don't hesitate to contact me at dhazineh@g.harvard.edu. 
-
 ## Works that use DFlat: 
 - Polarization Multi-Image Synthesis with Birefringent Metasurfaces [<a href="https://github.com/DeanHazineh/Multi-Image-Synthesis" target="_blank">Github>]
  
@@ -82,5 +76,11 @@ This work pulls inspiration from, builds on, or otherwise ports/modifies previou
  
 This work was supported by the National Science Foundation (IIS) for End-to-End Computational Sensing.
 We thank Professors Todd Zickler, Qi Guo, and Federico Capasso for their role in the conception of this software. For further interest or discussion on research, please direct contact and questions there. We also thank Dr. Zhujun Shi for contributions to the conception and early development and Soon Wei Daniel Lim for help with validations.
+
+## Contact:
+This repository is intended to be accessible and community driven. It may not be fully error-proof and will be continually updated. 
+If you have improvements, fixes, or contributions, please branch and initiate a merge request to master (or email me)!
+
+For any questions, functionality requests, or other concerns, don't hesitate to contact me at dhazineh@g.harvard.edu. 
 
 
