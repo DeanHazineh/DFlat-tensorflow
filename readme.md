@@ -8,9 +8,9 @@
 
 # An End-to-End Design Framework for Diffractive Optics and Metasurface-Based Vision Systems
 `D-Flat` is a forward and inverse design framework for flat optics, specially geared to the design of dielectric metasurfaces for imaging and sensing. This package is reviewed in paper https://arxiv.org/abs/2207.14780. D-Flat provides users with: 
-- A validated, auto-differentiable (AD) framework for optical field propagation built on TF Keras
+- A validated, auto-differentiable framework for optical field propagation built on tensorflow Keras
 - Pre-trained, efficient neural models to describe the optical response of metasurface cells
-- An AD field solver (RCWA) packaged as a TF-Keras layer that is automatically set to optimize pre-defined cell types
+- An auto-differentiable field solver (RCWA) packaged as a TF-Keras layer that is easy to use
 - A community driven, maintained framework for rendering and end-to-end design
 
 By treating optical layers in the same fashion as standard, TF neural layers, deep learning pipelines can be built to simultaneously optimize optical hardware and ML computational back-ends. 
@@ -25,7 +25,6 @@ For developers and researchers,
 ### (a) install and run DFlat in Google collab:
 DFlat can be easily installed in used in the cloud on Google Collab. This is ideal for mac os users as tensorflow_gpu is not supported by mac. 
 Google collab versions of current examples can be found in the examples folder and online at the links:
-
 
  - <a href="https://colab.research.google.com/drive/1MknLVB6cQ1GQ2xRfHhlAfCQPiWXLHUM3?usp=sharing" target="_blank">Tutorial_I_Dflat_Field_Propagation</a>
  - <a href="https://colab.research.google.com/drive/162Fg0P_QGiddUUeXUrJhikAdy2qpNXpc?usp=sharing" target="_blank">Tutorial_I_RCWA_and_Physical_Layers</a>
@@ -48,6 +47,10 @@ You can then install additional dependencies via
 pip install -r requirements.txt
 ```
 Note that you should not just download the zip file from above because this will not download the files hosted on githubs LFS database. 
+
+### Future Notes:
+- For Windows users: please note that Tensorflow v2.10 is the last official tensorflow release with native GPU compatibility for Windows os. DFlat is currently compatible with v2.10 but in the longterm, we will keep the main package updated to the primary tensorflow release. 
+- We are also considering a port of the package to Pytorch in the future which has now become the dominant ML framework
 
 ## Contact:
 This repository is intended to be accessible and community driven. It may not be fully error-proof and will be continually updated. 
@@ -79,5 +82,6 @@ If you utilize DFlat or included data sets for your own work, please cite it by 
     copyright = {Creative Commons Attribution 4.0 International}
   }
 ```
+## Works that use DFlat: 
+- Polarization Multi-Image Synthesis with Birefringent Metasurfaces [<a href="https://github.com/DeanHazineh/Multi-Image-Synthesis" target="_blank">Github>]
 
-...
