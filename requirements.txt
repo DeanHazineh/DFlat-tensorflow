@@ -1,7 +1,7 @@
 scikit-learn
 numpy
-tensorflow==2.11.*
-tensorflow_probability==0.19.0
+tensorflow_gpu==2.10.*
+tensorflow_probability==0.18.*
 matplotlib
 keras_flops
 mat73
