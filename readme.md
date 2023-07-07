@@ -58,16 +58,10 @@ If you have improvements, fixes, or contributions, please branch and initiate a 
 
 For any questions, functionality requests, or other concerns, don't hesitate to contact me at dhazineh@g.harvard.edu. 
 
-## Acknowledgements and Support:
-This work pulls inspiration from, builds on, or otherwise ports/modifies previous open-source contributions from the following individuals:
- * Shane Colburn - RCWA_TF
- * Manuel Guizar-Sicairos and Julio C. Guitierrez-Vega - Pyhank
- * Petra Vidnerova - rbf_for_tf2; 
+## Works that use DFlat: 
+- Polarization Multi-Image Synthesis with Birefringent Metasurfaces [<a href="https://github.com/DeanHazineh/Multi-Image-Synthesis" target="_blank">Github>]
  
-This work was supported by the National Science Foundation (IIS) for End-to-End Computational Sensing.
-We thank Professors Todd Zickler, Qi Guo, and Federico Capasso for their role in the conception of this software. For further interest or discussion on research, please direct contact and questions there. We also thank Dr. Zhujun Shi for contributions to the conception and early development and Soon Wei Daniel Lim for help with validations.
-
-## Credits
+## Credits and Acknowledgements:
 If you utilize DFlat or included data sets for your own work, please cite it by clicking the github citation link on the right or by copying:
 ```
   @misc{https://doi.org/10.48550/arxiv.2207.14780,
@@ -81,6 +75,12 @@ If you utilize DFlat or included data sets for your own work, please cite it by 
     copyright = {Creative Commons Attribution 4.0 International}
   }
 ```
-## Works that use DFlat: 
-- Polarization Multi-Image Synthesis with Birefringent Metasurfaces [<a href="https://github.com/DeanHazineh/Multi-Image-Synthesis" target="_blank">Github>]
+This work pulls inspiration from, builds on, or otherwise ports/modifies previous open-source contributions from the following individuals:
+ * Shane Colburn - RCWA_TF
+ * Manuel Guizar-Sicairos and Julio C. Guitierrez-Vega - Pyhank
+ * Petra Vidnerova - rbf_for_tf2; 
+ 
+This work was supported by the National Science Foundation (IIS) for End-to-End Computational Sensing.
+We thank Professors Todd Zickler, Qi Guo, and Federico Capasso for their role in the conception of this software. For further interest or discussion on research, please direct contact and questions there. We also thank Dr. Zhujun Shi for contributions to the conception and early development and Soon Wei Daniel Lim for help with validations.
+
 
