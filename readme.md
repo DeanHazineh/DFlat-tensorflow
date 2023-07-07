@@ -48,7 +48,7 @@ pip install -r requirements.txt
 ```
 Note that you should not just download the zip file from above because this will not download the files hosted on githubs LFS database. 
 
-### Future Notes:
+## Future Notes:
 - For Windows users: please note that Tensorflow v2.10 is the last official tensorflow release with native GPU compatibility for Windows os. DFlat is currently compatible with v2.10 but in the longterm, we will keep the main package updated to the primary tensorflow release. 
 - We are also considering a port of the package to Pytorch in the future which has now become the dominant ML framework
 
