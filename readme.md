@@ -53,7 +53,7 @@ Note that you should not just download the zip file from above because this will
 - We are also considering a port of the package to Pytorch in the future which has now become the dominant ML framework
 
 ## Works that use DFlat: 
-- Polarization Multi-Image Synthesis with Birefringent Metasurfaces [<a href="https://github.com/DeanHazineh/Multi-Image-Synthesis" target="_blank">Github>]
+- Polarization Multi-Image Synthesis with Birefringent Metasurfaces [<a href="https://github.com/DeanHazineh/Multi-Image-Synthesis" target="_blank">Github]
  
 ## Credits and Acknowledgements:
 If you utilize DFlat or included data sets for your own work, please cite it by clicking the github citation link on the right or by copying:
