@@ -7,9 +7,7 @@
 <img src=/docs/imgs/autoGDS_metalens.png alt="Dflat" width="500"/>
 
 # An End-to-End Design Framework for Diffractive Optics and Metasurface-Based Vision Systems
-
 `D-Flat` is a forward and inverse design framework for flat optics, specially geared to the design of dielectric metasurfaces for imaging and sensing. This package is reviewed in paper https://arxiv.org/abs/2207.14780. D-Flat provides users with:
-
 - A validated, auto-differentiable framework for optical field propagation built on tensorflow Keras
 - Pre-trained, efficient neural models to describe the optical response of metasurface cells
 - An auto-differentiable field solver (RCWA) packaged as a TF-Keras layer that is easy to use
@@ -30,7 +28,6 @@ For developers and researchers,
 
 DFlat can be easily installed in used in the cloud on Google Collab. This is ideal for mac os users as tensorflow_gpu is not supported by mac.
 Google collab versions of current examples can be found in the examples folder and online at the links:
-
 - <a href="https://colab.research.google.com/drive/1MknLVB6cQ1GQ2xRfHhlAfCQPiWXLHUM3?usp=sharing" target="_blank">Tutorial_I_Dflat_Field_Propagation</a>
 - <a href="https://colab.research.google.com/drive/162Fg0P_QGiddUUeXUrJhikAdy2qpNXpc?usp=sharing" target="_blank">Tutorial_I_RCWA_and_Physical_Layers</a>
 - <a href="https://colab.research.google.com/drive/1a27zLKMXfObyjQDF5nWZ9ug-7jWzmQer?usp=sharing" target="_blank">Tutorial_I_Dflat_Library_and_Neural_Models </a>
@@ -70,7 +67,6 @@ Note that you should not just download the zip file from above because this will
 - Polarization Multi-Image Synthesis with Birefringent Metasurfaces [<a href="https://github.com/DeanHazineh/Multi-Image-Synthesis" target="_blank">Github]
 
 ## Credits and Acknowledgements:
-
 If you utilize DFlat or included data sets for your own work, please cite it by clicking the github citation link on the right or by copying:
 
 ```
@@ -85,19 +81,17 @@ If you utilize DFlat or included data sets for your own work, please cite it by 
     copyright = {Creative Commons Attribution 4.0 International}
   }
 ```
-
 This work pulls inspiration from, builds on, or otherwise ports/modifies previous open-source contributions from the following individuals:
-
-- Shane Colburn - RCWA_TF
-- Manuel Guizar-Sicairos and Julio C. Guitierrez-Vega - Pyhank
-- Petra Vidnerova - rbf_for_tf2;
-
+ * Shane Colburn - RCWA_TF
+ * Manuel Guizar-Sicairos and Julio C. Guitierrez-Vega - Pyhank
+ * Petra Vidnerova - rbf_for_tf2; 
+ 
 This work was supported by the National Science Foundation (IIS) for End-to-End Computational Sensing.
 We thank Professors Todd Zickler, Qi Guo, and Federico Capasso for their role in the conception of this software. For further interest or discussion on research, please direct contact and questions there. We also thank Dr. Zhujun Shi for contributions to the conception and early development and Soon Wei Daniel Lim for help with validations.
 
 ## Contact:
-
-This repository is intended to be accessible and community driven. It may not be fully error-proof and will be continually updated.
+This repository is intended to be accessible and community driven. It may not be fully error-proof and will be continually updated. 
 If you have improvements, fixes, or contributions, please branch and initiate a merge request to master (or email me)!
 
-For any questions, functionality requests, or other concerns, don't hesitate to contact me at dhazineh@g.harvard.edu.
+For any questions, functionality requests, or other concerns, don't hesitate to contact me at dhazineh@g.harvard.edu. 
+
