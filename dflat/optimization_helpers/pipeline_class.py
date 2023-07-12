@@ -3,11 +3,9 @@ import os
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
-import math
 
 plt.rcParams["pdf.fonttype"] = 42
 plt.rcParams["ps.fonttype"] = 42
-
 import dflat.plot_utilities.graphFunc as gF
 
 
@@ -56,16 +54,16 @@ class Pipeline_Object(tf.keras.Model):
         # Save Weights
         self.save_weights(self.savepath)
         print("\n Model Saved Succesfully \n")
+
         if loss_vector:
             self.loss_vector = np.concatenate((self.loss_vector, loss_vector))
         if test_loss_vector:
             self.test_loss_vector = np.concatenate((self.test_loss_vector, test_loss_vector))
-
         data = {"trainingLoss": self.loss_vector, "testLoss": self.test_loss_vector}
         pickle.dump(data, open(self.savepath + "trainingHistory.pickle", "wb"))
 
         # Make and save a plot of the training history
-        fig = plt.figure(figsize=(30, 15))
+        fig = plt.figure(figsize=(15, 15))
         ax = gF.addAxis(fig, 1, 2)
         ax[0].plot(self.loss_vector, "k-")
         ax[0].plot(self.test_loss_vector, "b-")
@@ -79,14 +77,18 @@ class Pipeline_Object(tf.keras.Model):
         plt.savefig(self.savepath + "/pdf_images/trainingHistory.pdf")
         plt.close()
 
-    def customLoad(self):
+    def customLoad(self, verbose=False):
         # If a checkpoint file exists then load the checkpoint weights to architecture
-        print("Checking for model checkpoint at: " + self.savepath)
+        if verbose:
+            print("Checking for model checkpoint at: " + self.savepath)
+
         if os.path.exists(self.savepath + "checkpoint"):
             self.load_weights(self.savepath).expect_partial()
-            print("\n Model Checkpoint Loaded \n")
         else:
             print("\n No Model Checkpoint Found")
+
+        if verbose:
+            print("\n Model Checkpoint Loaded \n")
 
         # Load the previous training loss vector if it exists
         if os.path.exists(self.savepath + "trainingHistory.pickle"):

@@ -1,11 +1,10 @@
 import tensorflow as tf
-
 from .core.models_DNN import *
 from .core.models_eRBF import *
 from .core.models_multivariate_polynomial import *
 from .core.caller_MLP import *
 
-listModelNames = erbf_model_names + mlp_model_names + erbf_model_names
+listModelNames = erbf_model_names + mlp_model_names
 
 
 def list_models():

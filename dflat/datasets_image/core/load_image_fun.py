@@ -3,6 +3,9 @@ import cv2 as cv
 
 
 def load_png_as_grayscale(file_path, sensor_dim=None, resize_method="crop"):
+    # Resize method is either "crop" or "pad". Aspect ratio is preserved but the image fits the sensor dimension either
+    # by cropping or zero-padding
+
     ### read in image as grayscale with CV and make (H, W, Channels=1)
     img = np.asarray(cv.imread(str(file_path), cv.IMREAD_GRAYSCALE))
     if len(img.shape) == 2:
@@ -58,7 +61,6 @@ def center_crop_or_pad(img, new_dim):
     height, width = img.shape[0], img.shape[1]
     dx = targ_width - width
     dy = targ_height - height
-
     padx = (0, 0)
     pady = (0, 0)
     if dx > 0:
@@ -68,3 +70,10 @@ def center_crop_or_pad(img, new_dim):
     img = np.pad(img, (pady, padx, (0, 0)), "constant", constant_values=0)
 
     return img
+
+
+def scale_and_zero_pad(img, scale_factor):
+    # Want to resize (mainly shrink the image) and then zero-pad
+    im_shape = img.shape
+    resize_dim = (int(im_shape[1] * scale_factor), int(im_shape[0] * scale_factor))
+    return center_crop_or_pad(cv.resize(img, resize_dim, interpolation=cv.INTER_CUBIC), {"x": im_shape[1], "y": im_shape[0]})

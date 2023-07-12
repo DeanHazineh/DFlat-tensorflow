@@ -1,5 +1,4 @@
 import tensorflow as tf
-import numpy as np
 
 
 def batched_broadband_MLP(norm_param, mlp_model, wavelength_m_asList, gridShape):

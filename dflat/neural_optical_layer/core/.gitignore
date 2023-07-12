@@ -1,9 +1,0 @@
-baseline_regression/fitted_regression_models/**
-trained_erbf_models/**
-trained_MLP_models/fourier_features/**
-trained_MLP_models/gauss_activation/**
-trained_MultiPoly_models/**
-
-trained_MLP_models/comparison_retrain/*
-trained_MLP_models/fourier_features/*
-trained_MLP_models/gauss_activation/*

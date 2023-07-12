@@ -175,21 +175,21 @@ def simulate(ER_t, UR_t, params):
     ### Step 7: Calculate eigenmodes ###
 
     # Build the eigenvalue problem.
-    # P_00 = tf.linalg.matmul(KX, tf.linalg.inv(ERC))
-    P_00 = tf.linalg.matmul(KX, batch_regularized_inverse(ERC))
+    P_00 = tf.linalg.matmul(KX, tf.linalg.inv(ERC))
+    # P_00 = tf.linalg.matmul(KX, batch_regularized_inverse(ERC))
     P_00 = tf.linalg.matmul(P_00, KY)
 
-    # P_01 = tf.linalg.matmul(KX, tf.linalg.inv(ERC))
-    P_01 = tf.linalg.matmul(KX, batch_regularized_inverse(ERC))
+    P_01 = tf.linalg.matmul(KX, tf.linalg.inv(ERC))
+    # P_01 = tf.linalg.matmul(KX, batch_regularized_inverse(ERC))
     P_01 = tf.linalg.matmul(P_01, KX)
     P_01 = URC - P_01
 
-    # P_10 = tf.linalg.matmul(KY, tf.linalg.inv(ERC))
-    P_10 = tf.linalg.matmul(KY, batch_regularized_inverse(ERC))
+    P_10 = tf.linalg.matmul(KY, tf.linalg.inv(ERC))
+    # P_10 = tf.linalg.matmul(KY, batch_regularized_inverse(ERC))
     P_10 = tf.linalg.matmul(P_10, KY) - URC
 
-    # P_11 = tf.linalg.matmul(-KY, tf.linalg.inv(ERC))
-    P_11 = tf.linalg.matmul(-KY, batch_regularized_inverse(ERC))
+    P_11 = tf.linalg.matmul(-KY, tf.linalg.inv(ERC))
+    # P_11 = tf.linalg.matmul(-KY, batch_regularized_inverse(ERC))
     P_11 = tf.linalg.matmul(P_11, KX)
 
     P_row0 = tf.concat([P_00, P_01], axis=5)

@@ -1,6 +1,5 @@
 .vscode
-*DS_Store
 **.egg-info
-
-DEAN_TEST_STUDIES/**
-DEAN_EXCLUDE_WORK/**
+DEAN_TEST_STUDIES**
+**.gitignore
+**__pycache__**

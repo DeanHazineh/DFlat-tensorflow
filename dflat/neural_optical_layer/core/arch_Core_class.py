@@ -11,17 +11,13 @@ import math
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
-
 import dflat.plot_utilities.graphFunc as graphFunc
-from .util_neural import get_flops_alternate
 
 ### DO NOT ALTER ANYTHING IN THIS FILE IF YOU DON"T KNOW WHAT YOU ARE DOING ELSE IT WILL BREAK THINGS
 
 
-def get_path_to_data(folder_name: str):
-    ## This is not the accepted solution but it should work for bootstrapping research with few users
+def get_current_path(folder_name: str):
     resource_path = Path(__file__).parent
-
     return str(resource_path.joinpath(folder_name)) + "/"
 
 
@@ -172,7 +168,7 @@ class EBFLayer(tf.keras.layers.Layer):
         return self.centers
 
 
-class EBFLayer2(tf.keras.layers.Layer):
+class Cov_EBFLayer(tf.keras.layers.Layer):
     def __init__(self, output_dim, initializer=None, betas=None, betas_init_value=10.0, **kwargs):
         super().__init__(**kwargs)
         self.output_dim = output_dim
@@ -185,7 +181,7 @@ class EBFLayer2(tf.keras.layers.Layer):
         super().build(input_shape)
 
     def call(self, x):
-        precision = tf.expand_dims(tf.linalg.matmul(self.betas, tf.transpose(self.betas, [0, 2, 1])),1)
+        precision = tf.expand_dims(tf.linalg.matmul(self.betas, tf.transpose(self.betas, [0, 2, 1])), 1)
         H = tf.expand_dims(self.centers - tf.expand_dims(x, 0), -1)
 
         out = tf.squeeze(tf.linalg.matmul(tf.linalg.matmul(H, precision, transpose_a=True), H), axis=(2, 3))
@@ -243,7 +239,6 @@ class Multivariate_Polynomial_Object:
         self.__poly_degree = poly_degree
 
     def save_test_evaluation_data(self, xtest, ytest, savestring):
-
         poly_pred_train = self.model_predict(xtest)
         pred_trans, pred_phase = self.convert_output_complex(poly_pred_train)
         true_trans, true_phase = self.convert_output_complex(ytest)
@@ -368,7 +363,7 @@ class Multivariate_Polynomial_Object:
 
 
 #################################
-#### BASE CLASS FOR MLP MODELS
+#### MLP Models
 class GFF_Projection_layer(tf.keras.layers.Layer):
     def __init__(self, gaussian_projection: int, gaussian_scale: float = 1.0, **kwargs):
         """
@@ -454,7 +449,7 @@ class MLP_Object(tf.keras.Model):
         return self._dtype
 
     def set_modelSavePath(self, modelSavePath):
-        self._modelSavePath = get_path_to_data(modelSavePath)
+        self._modelSavePath = get_current_path(modelSavePath)
 
         if not os.path.exists(self._modelSavePath):
             os.makedirs(modelSavePath, exist_ok=True)
@@ -508,7 +503,6 @@ class MLP_Object(tf.keras.Model):
     def call(self, y):
         for layer in self._arch:
             y = layer(y)
-
         y = tf.cast(y, dtype=self._dtype)
         return y
 
@@ -526,16 +520,14 @@ class MLP_Object(tf.keras.Model):
         return outParams
 
     def normalizeWavelength(self, wavelength_m):
-
-        tf.debugging.assert_equal(
+        with tf.debugging.assert_equal(
             self.__dataBoundsLabel[-1],
             "wavelength_m",
             message="wavelength should have been the last listed parameter",
             name="preprocessDataBound format assertion",
-        )
-        wavelength_preprocessBounds = self.__preprocessDataBounds[-1]
-
-        wavelength_mlp = (wavelength_m - wavelength_preprocessBounds[0]) / (wavelength_preprocessBounds[1] - wavelength_preprocessBounds[0])
+        ):
+            wavelength_preprocessBounds = self.__preprocessDataBounds[-1]
+            wavelength_mlp = (wavelength_m - wavelength_preprocessBounds[0]) / (wavelength_preprocessBounds[1] - wavelength_preprocessBounds[0])
 
         return wavelength_mlp
 
@@ -550,7 +542,6 @@ class MLP_Object(tf.keras.Model):
 
     def customLoadCheckpoint(self):
         ## Custom models require their own functions to handle loads and saves
-
         # If a checkpoint file exists then load the checkpoint weights to architecture
         print("Checking for model checkpoint at: " + self._modelSavePath)
         if os.path.exists(self._modelSavePath + "checkpoint"):

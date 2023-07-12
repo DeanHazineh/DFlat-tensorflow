@@ -1,15 +1,12 @@
 import tensorflow as tf
 import numpy as np
-import pickle
 
-import dflat.cell_library_generation as lib_gen
+from dflat.cell_library_generation import run_library_gen, assemble_ER_super_ellipse
 import dflat.data_structure as df_struct
 
 
-def run_nanofin_Sweep(fourier_modes, shape_function):
-
-    ### Specify RCWA Solver parameters
-    wavelength_set_m = np.arange(310e-9, 750e-9, 10e-9)
+def gen_super_ellipse_library(savepath, fourier_modes=11, checkpoint_num=100):
+    wavelength_set_m = np.arange(350e-9, 750e-9, 5e-9)
     rcwa_parameters = df_struct.rcwa_params(
         {
             "wavelength_set_m": wavelength_set_m,
@@ -35,43 +32,23 @@ def run_nanofin_Sweep(fourier_modes, shape_function):
         }
     )
 
-    ### Define sweep ranges and savepath
+    ## Define sweep ranges and savepath
     # Rotation can be computed more efficiently by basis change on eigenvectors
-    # but sometimes, one actually wants to compute rotation directly
+    # but sometimes, one actually wants to compute rotation directly (not here)
     len_x = np.arange(60e-9, 305e-9, 5e-9)
     len_y = np.arange(60e-9, 305e-9, 5e-9)
     theta = [0.0]
     Len_x, Len_y, Theta = np.meshgrid(len_x, len_y, theta)
     paramlist = np.transpose(np.vstack((Len_x.flatten(), Len_y.flatten(), Theta.flatten())))
+    superEllipse_args = [20, False]  # exponential power and inverse True or False
 
-    ### Run library Sweep
-    savepath = "dflat/cell_library_generation/output/simulation_"
-    transmission, phase = lib_gen.run_zeroOrder_library_gen(
-        rcwa_parameters,
-        paramlist,
-        cell_fun=shape_function,
-        showDebugPlot=True,
-        savepath=savepath,
-        checkpoint_num=250,
+    run_library_gen(
+        rcwa_parameters, paramlist, assemble_ER_super_ellipse, fun_args=superEllipse_args, showDebugPlot=True, savepath=savepath, checkpoint_num=checkpoint_num, zero_order_only=False
     )
-
-    ### Save the data
-    data = {
-        "transmission": transmission,
-        "phase": phase,
-        "paramlist": paramlist,
-        "lenx": len_x,
-        "leny": len_y,
-        "theta": theta,
-        "wavelength_set_m": wavelength_set_m,
-    }
-    save_data_path = savepath + "nanofin_library.pickle"
-    with open(save_data_path, "wb") as handle:
-        pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     return
 
 
 if __name__ == "__main__":
-    run_nanofin_Sweep(fourier_modes=3, shape_function=lib_gen.assemble_ER_rectangular_resonator)
-    
+    savepath = "dflat/cell_library_generation/output/nanofins/"
+    gen_super_ellipse_library(savepath)

@@ -1,1 +1,1 @@
-from .load_general_images import get_grayscale_image
+from .load_general_images import get_grayscale_image, load_grayscale_fromPath

@@ -11,7 +11,6 @@ erbf_model_names = [
 ]
 
 
-## USABLE ERBF Models
 class ERBF_Nanocylinders_B1024_U180_H600(MLP_Nanocylinders_U180_H600):
     def __init__(self, dtype=tf.float64):
         super(ERBF_Nanocylinders_B1024_U180_H600, self).__init__(dtype)
@@ -57,7 +56,6 @@ class ERBF_Nanocylinders_B256_U180_H600(MLP_Nanocylinders_U180_H600):
         self._arch = [rbflayer, outputlayer]
 
 
-##
 class ERBF_Nanofins_B5000_U350_H600(MLP_Nanofins_U350_H600):
     def __init__(self, dtype=tf.float64):
         super(ERBF_Nanofins_B5000_U350_H600, self).__init__(dtype)

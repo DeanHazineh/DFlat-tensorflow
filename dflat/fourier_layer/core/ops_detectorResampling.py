@@ -160,12 +160,8 @@ def sensorMeasurement_intensity_phase(sensor_intensity, sensor_phase, parameters
         sensor_phase = tf.squeeze(resample_phase_sensor(tf.expand_dims(sensor_phase, -1), round_ratio_pixel_grid), -1)
 
     # Crop or pad with zeros to the sensor size
-    sensor_intensity = tf.squeeze(
-        tf.image.resize_with_crop_or_pad(tf.expand_dims(sensor_intensity, -1), sensor_pixel_number["y"], sensor_pixel_number["x"]), -1
-    )
-    sensor_phase = tf.squeeze(
-        tf.image.resize_with_crop_or_pad(tf.expand_dims(sensor_phase, -1), sensor_pixel_number["y"], sensor_pixel_number["x"]), -1
-    )
+    sensor_intensity = tf.squeeze(tf.image.resize_with_crop_or_pad(tf.expand_dims(sensor_intensity, -1), sensor_pixel_number["y"], sensor_pixel_number["x"]), -1)
+    sensor_phase = tf.squeeze(tf.image.resize_with_crop_or_pad(tf.expand_dims(sensor_phase, -1), sensor_pixel_number["y"], sensor_pixel_number["x"]), -1)
 
     # Return with the same batch_size shape
     new_shape = sensor_intensity.shape
@@ -234,9 +230,7 @@ def sensorMeasurement_intensity_phase_radialData(sensor_intensity, sensor_phase,
             )
 
         # Now call the area resize methods for intensity and phase. We extend the dimension to add the required channel dimension
-        sensor_intensity = tf.squeeze(
-            resample_intensity_sensor(tf.expand_dims(sensor_intensity, -1), {"x": round_ratio_pixel_grid_x, "y": 1}), -1
-        )
+        sensor_intensity = tf.squeeze(resample_intensity_sensor(tf.expand_dims(sensor_intensity, -1), {"x": round_ratio_pixel_grid_x, "y": 1}), -1)
         sensor_phase = tf.squeeze(resample_phase_sensor(tf.expand_dims(sensor_phase, -1), {"x": round_ratio_pixel_grid_x, "y": 1}), -1)
 
     # Resize or crop the signal
