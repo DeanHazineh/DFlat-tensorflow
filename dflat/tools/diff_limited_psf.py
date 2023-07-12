@@ -1,6 +1,5 @@
 import numpy as np
 from scipy.special import j1
-
 from dflat.fourier_layer.core.ops_hankel import radial_2d_transform
 
 

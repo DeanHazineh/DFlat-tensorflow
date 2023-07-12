@@ -14,7 +14,6 @@ listLibraryNames = [
 
 
 def get_path_to_data(file_name: str):
-    ## This is not the accepted solution but it should work for bootstrapping research with few users
     resource_path = Path(__file__).parent / "raw_meta_libraries"
     return resource_path.joinpath(file_name)
 
@@ -43,14 +42,12 @@ class Nanofins_U350nm_H600nm:
         self.__param2Limits = [60e-9, 300e-9]
         self.__param3Limits = [310e-9, 750e-9]
 
-    def plotLibrary(self, savepath=[]):
+    def plotLibrary(self, savepath=None):
         # This function is added so the user may get familiar with the data themselves
         # and poke around the visualization as a test.
         # It is also a test that we have flattened and packaged things in the way that is expected when later loading
         # the training data
 
-        # we keep it here with a plt.show() command so that at any point in another script, we can call and check the library we are using
-        # without digging up the saved png
         lx = self.params[0][0, :, 0] * 1e9
         ly = self.params[1][:, 0, 0] * 1e9
         wavelength = self.params[2][0, 0, :] * 1e9
@@ -69,9 +66,7 @@ class Nanofins_U350nm_H600nm:
                 cmap="hsv",
             )
 
-            ty = axisList[num_plt * 2 + iter].imshow(
-                self.transmission[1, :, :, idx], extent=(min(lx), max(lx), max(ly), min(ly)), vmin=0, vmax=1
-            )
+            ty = axisList[num_plt * 2 + iter].imshow(self.transmission[1, :, :, idx], extent=(min(lx), max(lx), max(ly), min(ly)), vmin=0, vmax=1)
             phiy = axisList[num_plt * 3 + iter].imshow(
                 self.phase[1, :, :, idx],
                 extent=(min(lx), max(lx), max(ly), min(ly)),
@@ -118,7 +113,7 @@ class Nanofins_U350nm_H600nm:
                 addcolorbar=True if iter == 4 else False,
             )
 
-        if savepath:
+        if savepath is not None:
             plt.savefig(savepath + ".png")
             plt.savefig(savepath + ".pdf")
         else:
@@ -153,9 +148,7 @@ class Nanofins_U350nm_H600nm:
 
         # Assert polarization basis dimension is two
         if not all([trans.shape[0] == 2 for trans in trans_asList]) or not all([phase.shape[0] == 2 for phase in phase_asList]):
-            raise ValueError(
-                "optical_response_to_param: All transmission/phase profiles in the list must be a stack of two profiles, (2, Ny, Nx)"
-            )
+            raise ValueError("optical_response_to_param: All transmission/phase profiles in the list must be a stack of two profiles, (2, Ny, Nx)")
 
         ### Assemble metasurfaces
         shape_Vector = []
@@ -265,9 +258,7 @@ class Nanocylinders_U180nm_H600nm:
 
         # polarization dimensionality check
         if not all([trans.shape[0] == 1 for trans in trans_asList]) or not all([phase.shape[0] == 1 for phase in phase_asList]):
-            raise ValueError(
-                "optical_response_to_param: All transmission/phase profiles in the list must be a single transmission profile, (1, Ny, Nx)"
-            )
+            raise ValueError("optical_response_to_param: All transmission/phase profiles in the list must be a single transmission profile, (1, Ny, Nx)")
 
         ### Assemble metasurfaces
         shape_Vector = []

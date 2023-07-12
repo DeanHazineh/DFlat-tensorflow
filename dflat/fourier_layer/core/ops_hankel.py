@@ -1,7 +1,5 @@
-# The QDHT code included here is a tensorflow port/implementation inspired by pyhank (https://github.com/etfrogers/pyhank Edward
-# Rogers)
-
-
+# The QDHT code included here is a tensorflow port/implementation inspired by
+# pyhank (https://github.com/etfrogers/pyhank Edward Rogers)
 import tensorflow as tf
 import tensorflow_probability as tfp
 import numpy as np
@@ -26,8 +24,6 @@ def radial_crop_or_pad(image, output_size):
     elif target_r > current_r:
         padby = target_r - current_r
         image = tf.pad(image, [[0, 0], [0, 0], [0, padby]], mode="CONSTANT", constant_values=0)
-    else:
-        image = image
 
     return image
 
@@ -78,7 +74,6 @@ def radial_2d_transform(r_array):
 
 def radial_2d_transform_wrapped_phase(r_array):
     """Transform a radial, real array of phase values in radians (,N) to a 2D phase profile (,2N-1, 2N-1).
-
     This function is analogous to radial_2d_transform but properly interpolates the phase-wrapping discontinuity.
 
     Args:
@@ -90,7 +85,6 @@ def radial_2d_transform_wrapped_phase(r_array):
 
     realTrans = radial_2d_transform(tf.cos(r_array))
     imagTrans = radial_2d_transform(tf.sin(r_array))
-
     return tf.math.atan2(imagTrans, realTrans)
 
 
@@ -153,7 +147,6 @@ def tf_generalSpline_regular1DGrid(r_ref, r, fr):
     """
     # Note: Using this implementation to snap back to a uniform grid after the qdht calls is is not correct because the qdht returns non-uniform grids
     # However, we will use this for now to reduce time and since we find the errors to have negligible effect thus far
-
     dtype = fr.dtype
     interpFr = tf.cond(
         tf.math.logical_or(dtype == tf.complex64, dtype == tf.complex128),

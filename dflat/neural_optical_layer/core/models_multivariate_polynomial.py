@@ -2,14 +2,14 @@ import tensorflow as tf
 from .arch_Core_class import Multivariate_Polynomial_Object
 from .arch_Parent_class import MLP_Nanofins_U350_H600, MLP_Nanocylinders_U180_H600
 
-erbf_model_names = [
+multipoly_model_names = [
     # "multipoly_nanofins_6",
     # "multipoly_nanofins_12",
     # "multipoly_nanofins_18",
     # "multipoly_nanofins_24",
 ]
 
-### Nanocylinder multivariate polynomial
+### nanofin multivariate polynomial
 class multipoly_nanofins_6(Multivariate_Polynomial_Object, MLP_Nanofins_U350_H600):
     def __init__(self, dtype=tf.float64):
         # Super initialize the MLP_Nanofins Parent followed by multivariatePoly architecture
@@ -19,7 +19,6 @@ class multipoly_nanofins_6(Multivariate_Polynomial_Object, MLP_Nanofins_U350_H60
         model_name = "multipoly_nanofins_6"
         self.set_model_name(model_name)
         self.set_modelSavePath("trained_MultiPoly_models/" + model_name)
-
         self._set_input_features(3)
         self._set_output_features(6)
         self._set_poly_degree(6)

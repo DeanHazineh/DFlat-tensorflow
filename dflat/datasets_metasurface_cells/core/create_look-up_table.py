@@ -8,7 +8,6 @@ from util_library_lookup import *
 
 
 def get_path_to_data(file_name: str):
-    ## This is not the accepted solution but it should work for bootstrapping research with few users
     resource_path = Path(__file__).parent / "pregen_lookup_tables"
     return resource_path.joinpath(file_name)
 
@@ -20,7 +19,7 @@ def create_d1_pol1_lookup_table(library):
     p1_table = library.param1
     wl_table = library.param2
 
-    # Create dictionary keys (unity transmittance, wl in nm units as int)
+    # Create dictionary keys (unity transmittance, wl (nm) as int)
     wl_dx = 1
     phase_dx = 0.1
     phase_key = np.round(np.arange(-3.14, 3.14 + phase_dx, phase_dx), 1)
@@ -81,6 +80,6 @@ def create_d2_pol2_lookup_table(library):
 
 
 if __name__ == "__main__":
-    # create_d1_pol1_lookup_table(df_library.Nanocylinders_U180nm_H600nm())
-    # create_d2_pol2_lookup_table(df_library.Nanofins_U350nm_H600nm())
+    create_d1_pol1_lookup_table(df_library.Nanocylinders_U180nm_H600nm())
+    create_d2_pol2_lookup_table(df_library.Nanofins_U350nm_H600nm())
     create_d2_pol2_lookup_table(df_library.Nanoellipse_U350nm_H600nm())

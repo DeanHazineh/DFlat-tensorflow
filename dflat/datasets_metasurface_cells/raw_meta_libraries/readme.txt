@@ -24,7 +24,6 @@ o data_Nanofins_Unit350nm_Height600nm_EngineFDTD.mat:
         and normalizing by energy at that point with no structure present. 
         (The total light transmitted (polarization averaged) by this method is compared against the averaged Lumerical power monitor and shows good agreement between the two methods)
 
-
 o data_Nanocylinders_Unit180nm_Height600nm_EngineFDTD.mat:
     - Generated via Lumerical FDTD parameter sweep on march 2022 (Dean Hazineh)
     - 180 nm unit cell size

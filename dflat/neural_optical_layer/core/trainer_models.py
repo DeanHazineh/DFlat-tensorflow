@@ -83,14 +83,7 @@ def run_training_neural_model(model, epochs, miniEpoch=1000, batch_size=None, lr
 if __name__ == "__main__":
 
     with tf.device("/device:GPU:0"):
-
-        run_training_neural_model(model=eRBF_models.ERBF_Nanofins_B5000_U350_H600(), epochs=30000, miniEpoch=500, batch_size=50000, lr=1e-3, train=False, verbose=True)
-        run_training_neural_model(model=eRBF_models.ERBF_Nanofins_B256_U350_H600(), epochs=30000, miniEpoch=500, batch_size=50000, lr=1e-3, train=False, verbose=True)
-
-        # run_training_neural_model(
-        #     model=eRBF_models.ERBF_Nanofins_B1024_U350_H600(), epochs=10000, miniEpoch=500, batch_size=100000, lr=1e-3, train=True, verbose=True
-        # )
-
-        # run_training_neural_model(
-        #     model=eRBF_models.ERBF_Nanofins_B512_U350_H600(), epochs=10000, miniEpoch=1000, batch_size=100000, lr=1e-3, train=True, verbose=True
-        # )
+        #run_training_neural_model(model=eRBF_models.ERBF_Nanofins_B5000_U350_H600(), epochs=30000, miniEpoch=500, batch_size=50000, lr=1e-3, train=False, verbose=True)
+        run_training_neural_model(model=MLP_models.MLP_Nanofins_Dense256_U350_H600(), epochs=30000, miniEpoch=500, batch_size=50000, lr=1e-3, train=False, verbose=True)
+       
+       

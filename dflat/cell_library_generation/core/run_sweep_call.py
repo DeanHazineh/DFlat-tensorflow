@@ -10,12 +10,12 @@ from dflat.physical_optical_layer.core.colburn_solve_field import simulate
 import dflat.plot_utilities.graphFunc as gF
 
 
-def run_zeroOrder_library_gen(rcwa_parameters, paramlist, cell_fun, showDebugPlot=False, savepath=None, checkpoint_num=500):
+def run_library_gen(rcwa_parameters, paramlist, cell_fun, fun_args=None, showDebugPlot=False, savepath=None, checkpoint_num=500, zero_order_only=False):
     # Enforce that the batch_wavelength dim is false since it is slow if done this way
     if rcwa_parameters["batch_wavelength_dim"] == True:
         raise ValueError("For library generation, dont batch wavelengths! Run in CPU instead of GPU of out of Memory")
 
-    ### Unpack some RCWA settings
+    # Unpack some RCWA settings
     batchSize = rcwa_parameters["batchSize"]
     pixelsX = rcwa_parameters["pixelsX"]
     pixelsY = rcwa_parameters["pixelsY"]
@@ -27,8 +27,6 @@ def run_zeroOrder_library_gen(rcwa_parameters, paramlist, cell_fun, showDebugPlo
     dtype = rcwa_parameters["dtype"]
     cdtype = rcwa_parameters["cdtype"]
     layer_dielectric = 1  # in old version, this was utilized differently
-    paramlist = tf.convert_to_tensor(paramlist, dtype=dtype)
-
     materials_shape = (batchSize, pixelsX, pixelsY, Nlay, Nx, Ny)
     materials_shape_lay = (batchSize, pixelsX, pixelsY, 1, Nx, Ny)
     PQ_zero = tf.math.reduce_prod(rcwa_parameters["PQ"]) // 2
@@ -36,44 +34,45 @@ def run_zeroOrder_library_gen(rcwa_parameters, paramlist, cell_fun, showDebugPlo
 
     # Assume unity magnetic permeability
     UR = rcwa_parameters["urd"] * tf.ones(materials_shape, dtype=cdtype)
-    ER_list = []
-    for lay_eps in lay_eps_list:
-        ER_list.append(lay_eps * tf.ones(materials_shape_lay, dtype=cdtype))
+    ER_list = [lay_eps * tf.ones(materials_shape_lay, dtype=cdtype) for lay_eps in lay_eps_list]
 
-    ### Get a reference field (reference field is crucial to interpret outputs I find)
+    # Get a reference field (reference field is crucial to interpret outputs I find)
     outputs = simulate(tf.concat(values=ER_list, axis=3), UR, rcwa_parameters)
-    tx_ref = outputs["tx"][:, 0, 0, PQ_zero, 0]
-    ty_ref = outputs["ty"][:, 0, 0, PQ_zero, 0]
-    ref_field = tf.expand_dims(tf.transpose(tf.stack((tx_ref, ty_ref))), 0)
+    tx_ref = outputs["tx"][:, 0, 0, :, 0]
+    ty_ref = outputs["ty"][:, 0, 0, :, 0]
+    ref_field = tf.expand_dims(tf.transpose(tf.stack((tx_ref, ty_ref))), 0).numpy()
+    if zero_order_only:
+        ref_field = ref_field[:, PQ_zero, :, :]
 
-    ### Assemble the cells structure and simulate each shape
-    ## Load from previous savepath checkpoint if it exists
+    # Load from previous savepath checkpoint if it exists
     if savepath and os.path.exists(savepath + "Checkpoint.pickle"):
         print("Resuming from previous checkpoint")
         with open(savepath + "Checkpoint.pickle", "rb") as handle:
             checkpoint = pickle.load(handle)
-            hold_field_zero_order = tf.convert_to_tensor(checkpoint["hold_field_zero_order"], cdtype)
+            hold_field = checkpoint["hold_field"]
             i_start = checkpoint["i"]
-            print(i_start)
     else:
-        hold_field_zero_order = tf.zeros(shape=(1, batchSize, 2), dtype=cdtype)
+        if zero_order_only:
+            hold_field = np.zeros(shape=(paramlist.shape[0], batchSize, 2), dtype=complex)
+        else:
+            hold_field = np.zeros(shape=(paramlist.shape[0], np.prod(rcwa_parameters["PQ"]), batchSize, 2), dtype=complex)
         i_start = -1
 
+    # Run library sweep
     for i in np.arange(i_start + 1, paramlist.shape[0], 1):
         start = time.time()
-
         ## Generate shape
-        ER_struct = cell_fun(rcwa_parameters, lay_eps_list[layer_dielectric - 1], paramlist[i, :])
+        cell_params = tf.convert_to_tensor(paramlist[i, :], dtype)
+        ER_struct = cell_fun(rcwa_parameters, lay_eps_list[layer_dielectric - 1], cell_params, fun_args)
         ER_list[layer_dielectric - 1] = ER_struct
         ER = tf.concat(values=ER_list, axis=3)
 
         ### Call Simulation
         outputs = simulate(ER, UR, rcwa_parameters)
-        tx = outputs["tx"][:, 0, 0, PQ_zero, 0]
-        ty = outputs["ty"][:, 0, 0, PQ_zero, 0]
-
+        tx = outputs["tx"][:, 0, 0, :, 0]
+        ty = outputs["ty"][:, 0, 0, :, 0]
         field = tf.expand_dims(tf.transpose(tf.stack((tx, ty))), 0)
-        hold_field_zero_order = tf.concat((hold_field_zero_order, field), axis=0)
+        hold_field[i] = field.numpy()[:, PQ_zero, :, :] if zero_order_only else field.numpy()
 
         end = time.time()
         print("Progress: ", f"{i / paramlist.shape[0] * 100:3.2f}", " Step: ", i, " Time Elapsed: ", end - start)
@@ -106,20 +105,25 @@ def run_zeroOrder_library_gen(rcwa_parameters, paramlist, cell_fun, showDebugPlo
             plt.pause(1e-1)
 
         # Save checkpoint in case of early termination
-        # This is important for long runs where one might stop the code prematurely
+        # This is helpful for long runs where one might stop the code prematurely
         if savepath and (np.mod(i, checkpoint_num) == 0):
             print("saving checkpoint at step: ", i)
-            data = {"hold_field_zero_order": hold_field_zero_order.numpy(), "i": i}
+            data = {"hold_field": hold_field, "i": i, "ref_field": ref_field}
             with open(savepath + "Checkpoint.pickle", "wb") as handle:
                 pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    # Save the simulation results
+    transmission = np.abs(hold_field) ** 2 / (np.abs(ref_field) ** 2 + 1e-6)
+    phase = np.angle(ref_field) - np.angle(hold_field)
+    if savepath:
+        data = {"hold_field": hold_field, "ref_field": ref_field, "transmission": transmission, "phase": phase, "paramlist": paramlist}
+        with open(savepath + "Library_gen_output.pickle", "wb") as handle:
+            pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     # If a checkpoint file was made and the full run is finished, delete it
     if savepath:
         if os.path.exists(savepath + "Checkpoint.pickle"):
             os.remove(savepath + "Checkpoint.pickle")
-
-    transmission = tf.abs(hold_field_zero_order) ** 2 / tf.abs(ref_field) ** 2
-    phase = tf.math.angle(ref_field) - tf.math.angle(hold_field_zero_order)
     plt.close()
 
-    return transmission[1:].numpy(), phase[1:].numpy()
+    return transmission, phase

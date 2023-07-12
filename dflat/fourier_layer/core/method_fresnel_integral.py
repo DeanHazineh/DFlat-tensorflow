@@ -70,13 +70,7 @@ def fresnel_diffraction_fft(
         normterm = tf.complex(
             tf.math.sqrt(
                 tf.cast(
-                    1
-                    / input_pixel_size_m["x"]
-                    / input_pixel_number["x"]
-                    / input_pixel_size_m["y"]
-                    / input_pixel_number["y"]
-                    / output_pixel_size_m["x"]
-                    / output_pixel_size_m["y"],
+                    1 / input_pixel_size_m["x"] / input_pixel_number["x"] / input_pixel_size_m["y"] / input_pixel_number["y"] / output_pixel_size_m["x"] / output_pixel_size_m["y"],
                     dtype=dtype,
                 )
             ),
@@ -88,12 +82,7 @@ def fresnel_diffraction_fft(
         normterm = tf.complex(
             tf.math.sqrt(
                 tf.cast(
-                    input_pixel_size_m["x"]
-                    * input_pixel_size_m["y"]
-                    / output_pixel_size_m["x"]
-                    / output_pixel_size_m["y"]
-                    / input_pixel_number["x"]
-                    / input_pixel_number["y"],
+                    input_pixel_size_m["x"] * input_pixel_size_m["y"] / output_pixel_size_m["x"] / output_pixel_size_m["y"] / input_pixel_number["x"] / input_pixel_number["y"],
                     dtype=dtype,
                 )
             ),

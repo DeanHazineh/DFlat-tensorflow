@@ -3,6 +3,7 @@ import time
 import numpy as np
 import math
 
+
 class LinearRampCosineDecayScheduler(tf.keras.optimizers.schedules.LearningRateSchedule):
     def __init__(self, initial_learning_rate, ramp_up_epochs, total_epochs, min_learning_rate=0, warmup=False):
         super(LinearRampCosineDecayScheduler, self).__init__()
@@ -36,9 +37,10 @@ class LinearRampCosineDecayScheduler(tf.keras.optimizers.schedules.LearningRateS
             "ramp_up_epochs": self.ramp_up_epochs,
             "total_epochs": self.total_epochs,
             "min_learning_rate": self.min_learning_rate,
-            "warmup": self.warmup
+            "warmup": self.warmup,
         }
-    
+
+
 def run_pipeline_optimization(pipeline, optimizer, num_epochs, loss_fn=None, allow_gpu=True):
     """Runs the training for DFlat's custom pipelines.
 
