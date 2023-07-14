@@ -1,5 +1,7 @@
 import numpy as np
 
+# Eventually we may want to move this to fourier layer
+
 
 def get_detector_pixel_coordinates(propagation_parameters):
     sensor_pixel_size_m = propagation_parameters["sensor_pixel_size_m"]

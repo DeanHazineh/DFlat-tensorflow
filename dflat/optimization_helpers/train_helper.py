@@ -89,7 +89,12 @@ def train_loop(pipeline, optimizer, loss_fn, num_epochs):
         current_loss = train(pipeline, loss_fn, optimizer)
         end = time.time()
 
-        print("Training Log | (Step, time, loss, lr): ", start_iter + epoch, end - start, current_loss, optimizer.lr.numpy())
+        # Depending on the tensorflow version the following lines might need editing
+        try:
+            print("Training Log | (Step, time, loss, lr): ", start_iter + epoch, end - start, current_loss, optimizer.learning_rate(epoch).numpy())
+            #print("Training Log | (Step, time, loss, lr): ", start_iter + epoch, end - start, current_loss, optimizer.lr.numpy())
+        except:
+            print("Training Log | (Step, time, loss): ", start_iter + epoch, end - start, current_loss)
         lossVec.append(current_loss)
 
         # After every N steps, save a figure with useful information
