@@ -80,8 +80,7 @@ This work pulls inspiration from, builds on, or otherwise ports/modifies previou
  * Manuel Guizar-Sicairos and Julio C. Guitierrez-Vega - Pyhank
  * Petra Vidnerova - rbf_for_tf2; 
  
-This work was supported by the National Science Foundation (IIS) for End-to-End Computational Sensing.
-We thank Professors Todd Zickler, Qi Guo, and Federico Capasso for their role in the conception of this software. For further interest or discussion on research, please direct contact and questions there. We also thank Dr. Zhujun Shi for contributions to the conception and early development and Soon Wei Daniel Lim for help with validations.
+This work was supported by the National Science Foundation (IIS). We thank Professors Todd Zickler, Qi Guo, and Federico Capasso for their role in the conception of this software. We also thank Dr. Zhujun Shi for contributions to the conception and early development and Soon Wei Daniel Lim for help with validations.
 
 ## Contact:
 This repository is intended to be accessible and community driven. It may not be fully error-proof.
