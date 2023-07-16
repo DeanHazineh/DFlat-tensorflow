@@ -29,8 +29,8 @@ preferred-citation:
     given-names: "Federico"
   - family-names: "Zickler"
     given-names: "Todd"
-journal: "IEEE International Conference of Computational Photography (ICCP)"
-month: 8
-title: "Polarization Multi-Image Synthesis with Birefringent Metasurfaces"
-year: 2023
+  journal: "IEEE International Conference of Computational Photography (ICCP)"
+  month: 8
+  title: "Polarization Multi-Image Synthesis with Birefringent Metasurfaces"
+  year: 2023
 
