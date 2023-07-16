@@ -1,36 +1,51 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
 cff-version: 1.2.0
-message: "If you use this software or included datasets, please cite it as below."
+title: DFlat
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
 authors:
-- family-names: "Hazineh"
-  given-names: "Dean"
-- family-names: "Lim"
-  given-names: "Soon Wei Daniel"
-- family-names: "Guo"
-  given-names: "Qi"
-- family-names: "Capasso"
-  given-names: "Federico"
-- family-names: "Zickler"
-  given-names: "Todd"
-
-title: "Polarization Multi-Image Synthesis with Birefringent Metasurfaces"
-version: 3.0.0
-date-released: 2023-07-16
-url: "https://github.com/DeanHazineh/DFlat"
-preferred-citation:
-  type: conference-paper
-  authors:
-  - family-names: "Hazineh"
-    given-names: "Dean"
-  - family-names: "Lim"
-    given-names: "Soon Wei Daniel"
-  - family-names: "Guo"
-    given-names: "Qi"
-- family-names: "Capasso"
-    given-names: "Federico"
-  - family-names: "Zickler"
-    given-names: "Todd"
-  journal: "IEEE International Conference of Computational Photography (ICCP)"
-  month: 8
-  title: "Polarization Multi-Image Synthesis with Birefringent Metasurfaces"
-  year: 2023
-
+  - given-names: 'Dean '
+    family-names: Hazineh
+    email: dhazineh@g.harvard.edu
+    affiliation: Harvard University
+  - given-names: Soon Wei Daniel
+    family-names: Lim
+  - given-names: Qi
+    family-names: Guo
+  - given-names: Federico
+    family-names: Capasso
+  - given-names: Todd
+    family-names: Zickler
+repository-code: >-
+  https://github.com/DeanHazineh/DFlat/blob/main/CITATION.cff
+repository: 'https://github.com/DeanHazineh/Multi-Image-Synthesis'
+abstract: >-
+  Optical metasurfaces are planar substrates with
+  custom-designed, nanoscale features that selectively
+  modulate incident light with respect to direction,
+  wavelength, and polarization. When coupled with
+  photodetectors and appropriate post-capture processing,
+  they provide a means to create computational imagers and
+  sensors that are exceptionally small and have distinctive
+  capabilities. We introduce D-Flat, a framework in
+  TensorFlow that renders physically-accurate images induced
+  by metasurface optical systems. This framework is fully
+  differentiable with respect to metasurface shape and
+  post-capture computational parameters and allows
+  simultaneous optimization with respect to almost any
+  measure of sensor performance. D-Flat enables simulation
+  of millimeter to centimeter diameter metasurfaces on
+  commodity computers, and it is modular in the sense of
+  accommodating a variety of wave optics models for
+  scattering at the metasurface and for propagation to
+  photosensors. We validate D-Flat against symbolic
+  calculations and previous experimental measurements, and
+  we provide simulations that demonstrate its ability to
+  discover novel computational sensor designs for two
+  applications: single-shot depth sensing and single-shot
+  spatial frequency filtering.
+date-released: '2023-07-16'
