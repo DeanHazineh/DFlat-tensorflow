@@ -18,7 +18,7 @@ By treating optical layers in the same fashion as standard, differentiable neura
 
 ## Usage and Documentation:
 
-For usage and documentation, a readthedocs page is in active development. You may also visit the code pages for projects that use DFlat to learn more (example: https://github.com/DeanHazineh/Multi-Image-Synthesis). A few tutorial notebooks (google collab) as a demo are also provided in `DFlat/examples/`. Additional examples will be provided in the future (we welcome community made examples).
+For usage and documentation, a readthedocs page is in active development. You may also visit the code pages for projects that use DFlat to learn more (example: https://github.com/DeanHazineh/Multi-Image-Synthesis). A few tutorial notebooks (google collab) as a demo are also provided in `DFlat/examples/`. Additional examples will be provided in the future (we welcome community made examples sent by email).
 
 For developers and researchers,
 
