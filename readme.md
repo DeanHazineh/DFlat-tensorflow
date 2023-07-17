@@ -1,12 +1,15 @@
-<img src=/docs/imgs/DFlat_Long.png alt="Dflat" width="500"/>
-<img src=/docs/imgs/autoGDS_metalens.png alt="Dflat" width="500"/>
+<div align="center">
+  <img src=/docs/imgs/DFlat_Long.png alt="Dflat" width="500"/>
+</div>
+<div align="center">
+  <img src=/docs/imgs/autoGDS_metalens.png alt="Dflat" width="500"/>
+</div>
 
+# An End-to-End Design Framework for Diffractive Optics and Metasurface-Based Vision Systems
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![TensorFlow](https://img.shields.io/badge/TensorFlow-%23FF6F00.svg?style=for-the-badge&logo=TensorFlow&logoColor=white)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-<!-- [![Documentation Status](https://readthedocs.org/projects/dflat-master/badge/?version=latest)](https://dflat-master.readthedocs.io/en/latest/?badge=latest) --> 
 
-# An End-to-End Design Framework for Diffractive Optics and Metasurface-Based Vision Systems
 `D-Flat` is an auto-differentiable design framework for flat optics, specially geared to the design of dielectric metasurfaces for imaging and sensing tasks. This package was officially released alongside our paper,  <a href="https://deanhazineh.github.io/publications/Multi_Image_Synthesis/combined_paper.pdf" target="_blank"> Polarization Multi-Image Synthesis with Birefringent Metasurfaces</a>, published in the proceedings of the 2023 IEEE International Conference of Computational Photography (ICCP). The package is further documented and discussed in the manuscript available on <a href="https://arxiv.org/abs/2207.14780" target="_blank">arxiv</a>. If you use this package, please cite the ICCP paper (See below for details). 
 
 D-Flat provides users with:
@@ -38,21 +41,11 @@ Google collab versions of current examples can be found in the examples folder a
 
 ### (b) install and run locally:
 
-To use DFlat on your own machine, first download the repository:
-
-```
-git clone https://github.com/DeanHazineh/DFlat
-```
-
 Note that git LFS should be installed if not already via `git lfs install` at the terminal. Next install the local repository to your venv by entering the following in terminal:
 
 ```
+git clone https://github.com/DeanHazineh/DFlat
 python setup.py develop
-```
-
-You can then install additional dependencies via
-
-```
 pip install -r requirements.txt
 ```
 
