@@ -57,7 +57,7 @@ Note that you should not just download the zip file from above because this will
 - Lastly, we are also considering a port of the package to Pytorch which has now become the dominant ML framework. At that time, DFlat on tensorflow will still be available but will no longer be updated.
 
 ## Credits and Acknowledgements:
-If you utilize DFlat or included data sets for your own work, please cite it by clicking the github citation link on the right or by copying:
+If you utilize DFlat or included data sets for your own work, please cite it by copying:
 
 ```
 @INPROCEEDINGS{Hazineh2023,
