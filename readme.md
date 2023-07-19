@@ -19,6 +19,8 @@ D-Flat provides users with:
 
 By treating optical layers in the same fashion as standard, differentiable neural layers, deep learning pipelines can be built to simultaneously optimize optical hardware and ML computational back-ends for the next generation of computational imaging devices.
 
+DFlat will also be available on Pytorch (<a href="https://github.com/DeanHazineh/DFlat-pytorch" target="_blank">DFlat-pytorch</a>). Long-term support will eventually only be provided for the pytorch version of the software.   
+
 ## Usage and Documentation:
 
 For usage and documentation, a readthedocs page is in active development. You may also visit the code pages for projects that use DFlat to learn more (example: https://github.com/DeanHazineh/Multi-Image-Synthesis). A few tutorial notebooks (google collab) as a demo are also provided in `DFlat/examples/`. Additional examples will be provided in the future (we welcome community made examples sent by email).
@@ -53,8 +55,8 @@ Note that you should not just download the zip file from above because this will
 
 ## Future Notes:
 
-- Please note that Tensorflow v2.10 is the last official tensorflow release with native GPU compatibility for Windows OS. DFlat is currently kept on v2.10. In the future, DFlat may be ugraded to the newest Tensorflow version.
-- Lastly, we are also considering a port of the package to Pytorch which has now become the dominant ML framework. At that time, DFlat on tensorflow will still be available but will no longer be updated.
+- Please note that Tensorflow v2.10 is the last official tensorflow release with native GPU compatibility for Windows OS. DFlat is currently kept on v2.10 and may or may not be upgraded.
+- Importantly, we are also porting the package to Pytorch which has now become the dominant ML framework. Dflat-tensorflow will then no longer be updated and new developments will be released on DFlat-pytorch.
 
 ## Credits and Acknowledgements:
 If you utilize DFlat or included data sets for your own work, please cite it by copying:
