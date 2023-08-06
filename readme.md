@@ -57,6 +57,7 @@ Note that you should not just download the zip file from above because this will
 
 - Please note that Tensorflow v2.10 is the last official tensorflow release with native GPU compatibility for Windows OS. DFlat is currently kept on v2.10 and may or may not be upgraded.
 - Importantly, we are also porting the package to Pytorch which has now become the dominant ML framework. Dflat-tensorflow will then no longer be updated and new developments will be released on DFlat-pytorch.
+- We expect that the pytorch version will be both faster and more memory efficient due to improvements to the back-end
 
 ## Credits and Acknowledgements:
 If you utilize DFlat or included data sets for your own work, please cite it by copying:
