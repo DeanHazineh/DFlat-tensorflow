@@ -32,11 +32,21 @@ def check_nanocylinder():
 
     # Try out different lookup methods
     shape_vect_min, norm_shape_vect_min = df_library.optical_response_to_param(
-        [focus_trans], [focus_phase], wavelength, "Nanocylinders_U180nm_H600nm", reshape=True, fast=False
+        [focus_trans],
+        [focus_phase],
+        wavelength,
+        "Nanocylinders_U180nm_H600nm",
+        reshape=True,
+        fast=False,
     )
 
     shape_vect_lookup, norm_shape_vect_lookup = df_library.optical_response_to_param(
-        [focus_trans], [focus_phase], wavelength, "Nanocylinders_U180nm_H600nm", reshape=True, fast=True
+        [focus_trans],
+        [focus_phase],
+        wavelength,
+        "Nanocylinders_U180nm_H600nm",
+        reshape=True,
+        fast=True,
     )
     print(shape_vect_min.shape, shape_vect_lookup.shape)
 
@@ -80,7 +90,10 @@ def check_nanofin():
         }
     )
     focus_trans, focus_phase, _, _ = df_fourier.focus_lens_init(
-        propagation_parameters, [532e-9, 532e-9], [2e-3, 2e-3], [{"x": -20e-6, "y": 0}, {"x": -20e-6, "y": 0}]
+        propagation_parameters,
+        [532e-9, 532e-9],
+        [2e-3, 2e-3],
+        [{"x": -20e-6, "y": 0}, {"x": -20e-6, "y": 0}],
     )
 
     # Try out different lookup methods
@@ -110,16 +123,18 @@ def check_nanofin():
     phase_look = phase_look - phase_look[:, :, cy, cx][..., None, None]
 
     fig = plt.figure()
-    ax = gF.addAxis(fig, 2, 2)
-    ax[0].imshow(phase_min[0, 0, :, :])
-    ax[1].imshow(phase_min[0, 1, :, :])
-    ax[2].imshow(phase_look[0, 0, :, :])
-    ax[3].imshow(phase_look[0, 1, :, :])
+    ax = gF.addAxis(fig, 3, 2)
+    ax[0].imshow(focus_phase[0, :, :])
+    ax[1].imshow(focus_phase[1, :, :])
+    ax[2].imshow(phase_min[0, 0, :, :])
+    ax[3].imshow(phase_min[0, 1, :, :])
+    ax[4].imshow(phase_look[0, 0, :, :])
+    ax[5].imshow(phase_look[0, 1, :, :])
     plt.show()
 
     return
 
 
 if __name__ == "__main__":
-    # check_nanocylinder()
+    check_nanocylinder()
     check_nanofin()

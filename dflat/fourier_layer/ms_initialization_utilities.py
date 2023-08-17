@@ -146,7 +146,13 @@ def gen_focusing_profile(ms_samplesM, ms_dx_m, wavelength_m, focal_distance_m, f
 
     # Define focusing profile phase
     lens_phase = (
-        -2 * np.pi / wavelength_m * (np.sqrt(focal_distance_m**2 + xx**2 + yy**2) + np.sqrt(sensor_distance_m**2 + (xx - focus_offset_m["x"]) ** 2 + (yy - focus_offset_m["y"]) ** 2))
+        -2
+        * np.pi
+        / wavelength_m
+        * (
+            np.sqrt(focal_distance_m**2 + xx**2 + yy**2)
+            + np.sqrt(sensor_distance_m**2 + (xx - focus_offset_m["x"]) ** 2 + (yy - focus_offset_m["y"]) ** 2)
+        )
     )
     lens_transmittance = np.ones_like(lens_phase)
     lens_phase = np.angle(lens_transmittance * np.exp(1j * lens_phase))

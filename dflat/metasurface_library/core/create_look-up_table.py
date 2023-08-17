@@ -19,6 +19,10 @@ def create_d1_pol1_lookup_table(library):
     p1_table = library.param1
     wl_table = library.param2
 
+    # Wrap Phase to be consistent with the other method
+    or_table = trans_table * np.exp(1j * phase_table)
+    phase_table = np.angle(or_table)
+
     # Create dictionary keys (unity transmittance, wl (nm) as int)
     wl_dx = 1
     phase_dx = 0.1
@@ -45,6 +49,11 @@ def create_d2_pol2_lookup_table(library):
     # Get the library
     phase_table = library.phase
     trans_table = library.transmittance
+
+    # Wrap Phase to be consistent with the other method
+    or_table = trans_table * np.exp(1j * phase_table)
+    phase_table = np.angle(or_table)
+
     p1_vect = library.params[0][:, :, 0].flatten()
     p2_vect = library.params[1][:, :, 0].flatten()
     wl_vect = library.params[2][0, 0, :]
@@ -80,6 +89,6 @@ def create_d2_pol2_lookup_table(library):
 
 
 if __name__ == "__main__":
-    create_d1_pol1_lookup_table(df_library.Nanocylinders_U180nm_H600nm())
+    # create_d1_pol1_lookup_table(df_library.Nanocylinders_U180nm_H600nm())
     create_d2_pol2_lookup_table(df_library.Nanofins_U350nm_H600nm())
-    create_d2_pol2_lookup_table(df_library.Nanoellipse_U350nm_H600nm())
+    # create_d2_pol2_lookup_table(df_library.Nanoellipse_U350nm_H600nm())

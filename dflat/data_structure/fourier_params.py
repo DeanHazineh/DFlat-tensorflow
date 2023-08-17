@@ -28,7 +28,17 @@ ALL_OPTIONAL_KEYS = {
 HIDDEN_KEYS = ["_prop_params__verbose"]
 
 ## These keys get automatically added to the dictionary after initialization and processing of the user-provided inputs
-ADDED_KEYS = ["ms_length_m", "calc_ms_dx_m", "padms_half", "calc_samplesN", "calc_sensor_dx_m", "ratio_pixel_to_grid", "broadband_flag", "grid_shape", "tf_zero"]
+ADDED_KEYS = [
+    "ms_length_m",
+    "calc_ms_dx_m",
+    "padms_half",
+    "calc_samplesN",
+    "calc_sensor_dx_m",
+    "ratio_pixel_to_grid",
+    "broadband_flag",
+    "grid_shape",
+    "tf_zero",
+]
 
 
 def print_full_settings(parameters):
@@ -222,7 +232,9 @@ class prop_params(dict):
         initial_sensor_dx_m = self.__dict__["initial_sensor_dx_m"]
         sensor_pixel_size_m = self.__dict__["sensor_pixel_size_m"]
         if (initial_sensor_dx_m["x"] > sensor_pixel_size_m["x"]) or (initial_sensor_dx_m["y"] > sensor_pixel_size_m["y"]):
-            raise ValueError("params: requested output/sensor plane field grid cannot be discretized larger than the requested, resampled output/detector 'pixel' size!")
+            raise ValueError(
+                "params: requested output/sensor plane field grid cannot be discretized larger than the requested, resampled output/detector 'pixel' size!"
+            )
 
         return
 

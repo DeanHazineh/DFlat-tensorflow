@@ -9,7 +9,16 @@ def get_path_to_data(file_name: str):
     return resource_path.joinpath(file_name)
 
 
-def minsearch_D2_pol2(phaseTable, transTable, p1_vect, p2_vect, wavelength, use_wavelength, ms_trans, ms_phase):
+def minsearch_D2_pol2(
+    phaseTable,
+    transTable,
+    p1_vect,
+    p2_vect,
+    wavelength,
+    use_wavelength,
+    ms_trans,
+    ms_phase,
+):
     # Find the sub-table matching the wavelength requested
     _, w_idx = min((val, idx) for (idx, val) in enumerate(np.abs(use_wavelength - wavelength)))
     sublib_phase = phaseTable[:, :, :, w_idx]
@@ -62,25 +71,30 @@ def lookup_D1_pol1(dict_name, use_wavelength, ms_trans, ms_phase):
     with open(get_path_to_data(dict_name), "rb") as fhandle:
         lookup_table = pickle.load(fhandle)
 
+    # Wrap the phase to be consistent with the table
+    ms_phase = np.angle(np.exp(1j * ms_phase))
+    ms_phase = np.round(ms_phase.flatten(), 1)
+
     design_p1 = []
-    phase = np.round(ms_phase.flatten(), 1)
     use_wavelength = int(use_wavelength * 1e9)
-    for cell in range(phase.shape[0]):
-        design_p1.append(lookup_table[(1.0, phase[cell], use_wavelength)])
+    for cell in range(ms_phase.shape[0]):
+        design_p1.append(lookup_table[(1.0, ms_phase[cell], use_wavelength)])
 
     return np.array(design_p1)
 
 
 def lookup_D2_pol2(dict_name, use_wavelength, ms_trans, ms_phase):
     # Get the look-up table dictionary
-    print(get_path_to_data(dict_name))
     with open(get_path_to_data(dict_name), "rb") as fhandle:
         lookup_table = pickle.load(fhandle)
 
+    # Wrap the phase to be consistent with the table
+    init_shape = ms_phase.shape
+    ms_phase = np.angle(np.exp(1j * ms_phase))
+    ms_phase = np.round(np.reshape(ms_phase, [init_shape[0], -1]), 1)
+
     use_wavelength = int(use_wavelength * 1e9)
     design_p = []
-    init_shape = ms_phase.shape
-    ms_phase = np.round(np.reshape(ms_phase, [init_shape[0], -1]), 1)
     for cell in range(ms_phase.shape[1]):
         design_p.append(lookup_table[(1.0, 1.0, ms_phase[0, cell], ms_phase[1, cell], use_wavelength)])
     design_p = np.stack(design_p)

@@ -144,15 +144,44 @@ class Nanofins_U350nm_H600nm:
                 )
 
             # Define a normalized shape vector for convenience
-            norm_design_lx = np.clip((design_lx - self.__param1Limits[0]) / (self.__param1Limits[1] - self.__param1Limits[0]), 0, 1)
-            norm_design_ly = np.clip((design_ly - self.__param2Limits[0]) / (self.__param2Limits[1] - self.__param2Limits[0]), 0, 1)
+            norm_design_lx = np.clip(
+                (design_lx - self.__param1Limits[0]) / (self.__param1Limits[1] - self.__param1Limits[0]),
+                0,
+                1,
+            )
+            norm_design_ly = np.clip(
+                (design_ly - self.__param2Limits[0]) / (self.__param2Limits[1] - self.__param2Limits[0]),
+                0,
+                1,
+            )
 
             if reshape:
-                shape_Vector.append(np.vstack((np.reshape(design_lx, initial_shape), np.reshape(design_ly, initial_shape))))
-                shape_Vector_norm.append(np.vstack((np.reshape(norm_design_lx, initial_shape), np.reshape(norm_design_ly, initial_shape))))
+                shape_Vector.append(
+                    np.vstack(
+                        (
+                            np.reshape(design_lx, initial_shape),
+                            np.reshape(design_ly, initial_shape),
+                        )
+                    )
+                )
+                shape_Vector_norm.append(
+                    np.vstack(
+                        (
+                            np.reshape(norm_design_lx, initial_shape),
+                            np.reshape(norm_design_ly, initial_shape),
+                        )
+                    )
+                )
             else:
                 shape_Vector.append(np.hstack((np.expand_dims(design_lx, -1), np.expand_dims(design_ly, -1))))
-                shape_Vector_norm.append(np.hstack((np.expand_dims(norm_design_lx, -1), np.expand_dims(norm_design_ly, -1))))
+                shape_Vector_norm.append(
+                    np.hstack(
+                        (
+                            np.expand_dims(norm_design_lx, -1),
+                            np.expand_dims(norm_design_ly, -1),
+                        )
+                    )
+                )
 
         return shape_Vector, shape_Vector_norm
 
@@ -186,10 +215,31 @@ class Nanocylinders_U180nm_H600nm:
 
         fig = plt.figure(figsize=(12, 6))
         axisList = graphFunc.addAxis(fig, 1, 2)
-        tt = axisList[0].imshow(self.transmittance[:, :], extent=(min(lr), max(lr), max(wl), min(wl)), vmin=0, vmax=1)
+        tt = axisList[0].imshow(
+            self.transmittance[:, :],
+            extent=(min(lr), max(lr), max(wl), min(wl)),
+            vmin=0,
+            vmax=1,
+        )
         phi = axisList[1].imshow(self.phase[:, :], extent=(min(lr), max(lr), max(wl), min(wl)), cmap="hsv")
-        graphFunc.formatPlots(fig, axisList[0], tt, "len r (nm)", "wavelength (nm)", "transmission", addcolorbar=True)
-        graphFunc.formatPlots(fig, axisList[1], phi, "len r (nm)", "wavelength (nm)", "phase", addcolorbar=True)
+        graphFunc.formatPlots(
+            fig,
+            axisList[0],
+            tt,
+            "len r (nm)",
+            "wavelength (nm)",
+            "transmission",
+            addcolorbar=True,
+        )
+        graphFunc.formatPlots(
+            fig,
+            axisList[1],
+            phi,
+            "len r (nm)",
+            "wavelength (nm)",
+            "phase",
+            addcolorbar=True,
+        )
 
         if savepath:
             plt.savefig(savepath + ".png")
@@ -249,7 +299,11 @@ class Nanocylinders_U180nm_H600nm:
                     ms_phase,
                 )
 
-            norm_design_radius = np.clip((design_radius - self.__param1Limits[0]) / (self.__param1Limits[1] - self.__param1Limits[0]), 0, 1)
+            norm_design_radius = np.clip(
+                (design_radius - self.__param1Limits[0]) / (self.__param1Limits[1] - self.__param1Limits[0]),
+                0,
+                1,
+            )
 
             if reshape:
                 shape_Vector.append(np.reshape(design_radius, initial_shape))
