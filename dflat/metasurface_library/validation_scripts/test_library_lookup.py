@@ -31,9 +31,13 @@ def check_nanocylinder():
     wavelength = propagation_parameters["wavelength_set_m"]
 
     # Try out different lookup methods
-    shape_vect_min, norm_shape_vect_min = df_library.optical_response_to_param([focus_trans], [focus_phase], wavelength, "Nanocylinders_U180nm_H600nm", reshape=True, fast=False)
+    shape_vect_min, norm_shape_vect_min = df_library.optical_response_to_param(
+        [focus_trans], [focus_phase], wavelength, "Nanocylinders_U180nm_H600nm", reshape=True, fast=False
+    )
 
-    shape_vect_lookup, norm_shape_vect_lookup = df_library.optical_response_to_param([focus_trans], [focus_phase], wavelength, "Nanocylinders_U180nm_H600nm", reshape=True, fast=True)
+    shape_vect_lookup, norm_shape_vect_lookup = df_library.optical_response_to_param(
+        [focus_trans], [focus_phase], wavelength, "Nanocylinders_U180nm_H600nm", reshape=True, fast=True
+    )
     print(shape_vect_min.shape, shape_vect_lookup.shape)
 
     mlp_layer = df_neural.MLP_Layer("MLP_Nanocylinders_Dense256_U180_H600")
@@ -75,14 +79,18 @@ def check_nanofin():
             "manual_upsample_factor": 1,
         }
     )
-    focus_trans, focus_phase, _, _ = df_fourier.focus_lens_init(propagation_parameters, [532e-9, 532e-9], [2e-3, 2e-3], [{"x": -20e-6, "y": 0}, {"x": -20e-6, "y": 0}])
-    wavelength = propagation_parameters["wavelength_set_m"]
+    focus_trans, focus_phase, _, _ = df_fourier.focus_lens_init(
+        propagation_parameters, [532e-9, 532e-9], [2e-3, 2e-3], [{"x": -20e-6, "y": 0}, {"x": -20e-6, "y": 0}]
+    )
 
     # Try out different lookup methods
-    shape_vect_min, norm_shape_vect_min = df_library.optical_response_to_param([focus_trans], [focus_phase], wavelength, "Nanofins_U350nm_H600nm", reshape=True, fast=False)
+    shape_vect_min, norm_shape_vect_min = df_library.optical_response_to_param(
+        [focus_trans], [focus_phase], propagation_parameters["wavelength_set_m"], "Nanofins_U350nm_H600nm", reshape=True, fast=False
+    )
 
-    shape_vect_lookup, norm_shape_vect_lookup = df_library.optical_response_to_param([focus_trans], [focus_phase], wavelength, "Nanofins_U350nm_H600nm", reshape=True, fast=True)
-    print(shape_vect_min.shape, shape_vect_lookup.shape)
+    shape_vect_lookup, norm_shape_vect_lookup = df_library.optical_response_to_param(
+        [focus_trans], [focus_phase], propagation_parameters["wavelength_set_m"], "Nanofins_U350nm_H600nm", reshape=True, fast=True
+    )
 
     fig = plt.figure()
     ax = gF.addAxis(fig, 2, 2)
@@ -91,10 +99,15 @@ def check_nanofin():
     im = ax[2].imshow(shape_vect_lookup[0, :, :])
     im = ax[3].imshow(shape_vect_lookup[1, :, :])
 
-    mlp_layer = df_neural.MLP_Layer("MLP_Nanofins_Dense512_U350_H600")
-    trans_min, phase_min = mlp_layer(norm_shape_vect_min, [532e-9])
-    trans_look, phase_look = mlp_layer(norm_shape_vect_lookup, [532e-9])
-    print(phase_look.shape, phase_min.shape)
+    mlp_layer = df_neural.MLP_Layer("MLP_Nanofins_Dense1024_U350_H600")
+    _, phase_min = mlp_layer(norm_shape_vect_min, [532e-9])
+    _, phase_look = mlp_layer(norm_shape_vect_lookup, [532e-9])
+    out_shape = phase_min.shape
+    cx, cy = out_shape[-1] // 2, out_shape[-2] // 2
+
+    #
+    phase_min = phase_min - phase_min[:, :, cy, cx][..., None, None]
+    phase_look = phase_look - phase_look[:, :, cy, cx][..., None, None]
 
     fig = plt.figure()
     ax = gF.addAxis(fig, 2, 2)

@@ -24,7 +24,10 @@ def minsearch_D2_pol2(phaseTable, transTable, p1_vect, p2_vect, wavelength, use_
     design_p1 = []
     design_p2 = []
     for cell in range(target_profile.shape[1]):
-        _, param_idx = min((val, idx) for (idx, val) in enumerate(0.5 * np.abs(target_profile[0, cell] - or_table[0, :]) + 0.5 * np.abs(target_profile[1, cell] - or_table[1, :])))
+        _, param_idx = min(
+            (val, idx)
+            for (idx, val) in enumerate(0.5 * np.abs(target_profile[0, cell] - or_table[0, :]) + 0.5 * np.abs(target_profile[1, cell] - or_table[1, :]))
+        )
         design_p1.append(p1_vect[param_idx])
         design_p2.append(p2_vect[param_idx])
 
@@ -70,6 +73,7 @@ def lookup_D1_pol1(dict_name, use_wavelength, ms_trans, ms_phase):
 
 def lookup_D2_pol2(dict_name, use_wavelength, ms_trans, ms_phase):
     # Get the look-up table dictionary
+    print(get_path_to_data(dict_name))
     with open(get_path_to_data(dict_name), "rb") as fhandle:
         lookup_table = pickle.load(fhandle)
 

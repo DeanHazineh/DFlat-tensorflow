@@ -1,9 +1,6 @@
 import numpy as np
 import tensorflow as tf
 
-import matplotlib.pyplot as plt
-import dflat.plot_utilities as df_plt
-
 
 def get_cartesian_grid(Lx, Nx, Ly, Ny):
     x_mesh, y_mesh = np.meshgrid(np.linspace(-Lx / 2, Lx / 2, Nx), np.linspace(-Ly / 2, Ly / 2, Ny))
@@ -20,7 +17,6 @@ def build_rectangle_resonator(norm_param, feature_layer, span_limits, Lx, Ly, x_
     # norm_param: A 'tf.Tensor' of shape (2, pixelsX, pixelsY, 1)
     # Binary like (batchSize, pixelsX, pixelsY, Nlayer, Nx, Ny)
     POWER_EXP = 20
-
 
     TF_ZERO = tf.constant(0.0, dtype=tf.float32)
     norm_px = norm_param[0, :, :, 0]

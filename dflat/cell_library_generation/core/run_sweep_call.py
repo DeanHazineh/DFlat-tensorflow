@@ -10,7 +10,7 @@ from dflat.physical_optical_layer.core.colburn_solve_field import simulate
 import dflat.plot_utilities.graphFunc as gF
 
 
-def run_library_gen(rcwa_parameters, paramlist, cell_fun, fun_args=None, showDebugPlot=False, savepath=None, checkpoint_num=500, zero_order_only=False):
+def run_library_gen(rcwa_parameters, paramlist, cell_fun, fun_args=None, showDebugPlot=True, savepath=None, checkpoint_num=500, zero_order_only=True):
     # Enforce that the batch_wavelength dim is false since it is slow if done this way
     if rcwa_parameters["batch_wavelength_dim"] == True:
         raise ValueError("For library generation, dont batch wavelengths! Run in CPU instead of GPU of out of Memory")

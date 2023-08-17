@@ -127,7 +127,7 @@ class Nanofins_U350nm_H600nm:
             use_wavelength = wavelength_asList[i]
             ms_trans = trans_asList[i]
             ms_phase = phase_asList[i]
-            initial_shape = ms_trans[i : i + 1].shape
+            initial_shape = [1, *ms_trans.shape[-2:]]
 
             if fast:
                 design_lx, design_ly = lookup_D2_pol2(self.name + ".pickle", use_wavelength, ms_trans, ms_phase)
@@ -135,9 +135,9 @@ class Nanofins_U350nm_H600nm:
                 design_lx, design_ly = minsearch_D2_pol2(
                     self.phase,
                     self.transmittance,
-                    self.param1.flatten(),
-                    self.param2.flatten(),
-                    self.param3.flatten(),
+                    self.params[0][:, :, 0].flatten(),
+                    self.params[1][:, :, 0].flatten(),
+                    self.params[2][0, 0, :],
                     use_wavelength,
                     ms_trans,
                     ms_phase,
@@ -234,7 +234,7 @@ class Nanocylinders_U180nm_H600nm:
             use_wavelength = wavelength_asList[i]
             ms_trans = trans_asList[i]
             ms_phase = phase_asList[i]
-            initial_shape = ms_trans[i : i + 1].shape
+            initial_shape = [1, *ms_trans.shape[-2:]]
 
             if fast:
                 design_radius = lookup_D1_pol1(self.name + ".pickle", use_wavelength, ms_trans, ms_phase)

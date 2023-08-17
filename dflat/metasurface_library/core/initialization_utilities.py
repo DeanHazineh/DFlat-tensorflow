@@ -27,6 +27,7 @@ def optical_response_to_param(ms_trans_asList, ms_phase_asList, wavelength_m_asL
 
 
     """
+
     # Get the meta-atom library
     library = loadLibrary(libraryName)
     shape_Vector, shape_Vector_norm = library.optical_response_to_param(ms_trans_asList, ms_phase_asList, wavelength_m_asList, reshape, fast)

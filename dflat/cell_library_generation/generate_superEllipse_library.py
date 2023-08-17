@@ -43,12 +43,19 @@ def gen_super_ellipse_library(savepath, fourier_modes=11, checkpoint_num=100):
     superEllipse_args = [20, False]  # exponential power and inverse True or False
 
     run_library_gen(
-        rcwa_parameters, paramlist, assemble_ER_super_ellipse, fun_args=superEllipse_args, showDebugPlot=True, savepath=savepath, checkpoint_num=checkpoint_num, zero_order_only=False
+        rcwa_parameters,
+        paramlist,
+        assemble_ER_super_ellipse,
+        fun_args=superEllipse_args,
+        showDebugPlot=True,
+        savepath=savepath,
+        checkpoint_num=checkpoint_num,
+        zero_order_only=False,
     )
 
     return
 
 
 if __name__ == "__main__":
-    savepath = "dflat/cell_library_generation/output/nanofins/"
+    savepath = "dflat/cell_library_generation/output/"
     gen_super_ellipse_library(savepath)
