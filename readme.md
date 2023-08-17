@@ -78,7 +78,6 @@ If you utilize DFlat or included data sets for your own work, please cite it by 
 This work pulls inspiration from, builds on, or otherwise ports/modifies previous open-source contributions from the following individuals:
  * Shane Colburn - RCWA_TF
  * Manuel Guizar-Sicairos and Julio C. Guitierrez-Vega - Pyhank
- * Petra Vidnerova - rbf_for_tf2; 
  
 ## Contact:
 This repository is intended to be accessible and community driven. It may not be fully error-proof.
