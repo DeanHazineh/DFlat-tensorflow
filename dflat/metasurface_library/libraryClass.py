@@ -184,7 +184,7 @@ class Nanocylinders_U180nm_H600nm:
         lr = self.params[0][0, :] * 1e9
         wl = self.params[1][:, 0] * 1e9
 
-        fig = plt.figure(figsize=(25, 10))
+        fig = plt.figure(figsize=(12, 6))
         axisList = graphFunc.addAxis(fig, 1, 2)
         tt = axisList[0].imshow(self.transmittance[:, :], extent=(min(lr), max(lr), max(wl), min(wl)), vmin=0, vmax=1)
         phi = axisList[1].imshow(self.phase[:, :], extent=(min(lr), max(lr), max(wl), min(wl)), cmap="hsv")
