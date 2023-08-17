@@ -1,0 +1,7 @@
+.vscode
+DFlat.egg-info/**
+**__pycache__**
+_config.yml
+.readthedocs.yml
+**dev_pending**
+**output**

@@ -48,10 +48,6 @@ def condResizeFn_true(ms_modulation_trans, ms_modulation_phase, parameters):
     return tf.squeeze(calc_modulation_trans, -1), tf.squeeze(calc_modulation_phase, -1)
 
 
-def condResizeFn_false(ms_modulation_trans, ms_modulation_phase, parameters):
-    return ms_modulation_trans, ms_modulation_phase
-
-
 def condPad_true(calc_modulation_trans, calc_modulation_phase, parameters):
     # Get paddings from parameters
     padms_half = parameters["padms_half"]
@@ -69,10 +65,6 @@ def condPad_true(calc_modulation_trans, calc_modulation_phase, parameters):
     calc_modulation_trans = tf.pad(calc_modulation_trans, paddings, mode="CONSTANT", constant_values=0)
     calc_modulation_phase = tf.pad(calc_modulation_phase, paddings, mode="CONSTANT", constant_values=0)
 
-    return calc_modulation_trans, calc_modulation_phase
-
-
-def condPad_false(calc_modulation_trans, calc_modulation_phase, parameters):
     return calc_modulation_trans, calc_modulation_phase
 
 
@@ -101,13 +93,12 @@ def regularize_ms_calc_tf(
         raise ValueError("transmittance and phase must be the same shape")
 
     ### Handle multi-dimension input for different downstream use cases
-    input_rank = tf.rank(ms_modulation_phase)
+    input_rank = len(ms_modulation_phase.shape)
     init_shape = ms_modulation_phase.shape
-    if tf.math.equal(input_rank, tf.TensorShape(2)):
+    if input_rank == 2:
         ms_modulation_phase = tf.expand_dims(ms_modulation_phase, 0)
         ms_modulation_trans = tf.expand_dims(ms_modulation_trans, 0)
-
-    if tf.math.greater(input_rank, tf.TensorShape(3)):
+    elif input_rank > 3:
         ms_modulation_phase = tf.reshape(ms_modulation_phase, [-1, init_shape[-2], init_shape[-1]])
         ms_modulation_trans = tf.reshape(ms_modulation_trans, [-1, init_shape[-2], init_shape[-1]])
 
@@ -117,32 +108,23 @@ def regularize_ms_calc_tf(
     ms_samplesM = parameters["ms_samplesM"]
 
     ### Resample the metasurface via nearest neighbors if required
-    resizeCondition = tf.math.logical_or(
-        tf.greater(calc_samplesM["x"], ms_samplesM["x"]),
-        tf.greater(calc_samplesM["y"], ms_samplesM["y"]),
-    )
-    calc_modulation_trans, calc_modulation_phase = tf.cond(
-        resizeCondition,
-        lambda: condResizeFn_true(ms_modulation_trans, ms_modulation_phase, parameters),
-        lambda: condResizeFn_false(ms_modulation_trans, ms_modulation_phase, parameters),
-    )
+    if (calc_samplesM["x"] > ms_samplesM["x"]) or (calc_samplesM["y"] > ms_samplesM["y"]):
+        calc_modulation_trans, calc_modulation_phase = condResizeFn_true(ms_modulation_trans, ms_modulation_phase, parameters)
+    else:
+        calc_modulation_trans, calc_modulation_phase = (
+            ms_modulation_trans,
+            ms_modulation_phase,
+        )
 
     ### Pad the array if samplesN (padded) is larger than samplesM (unpadded)
     calc_samplesN = parameters["calc_samplesN"]
-    padCondition = tf.math.logical_or(
-        tf.greater(calc_samplesN["x"], calc_samplesM["x"]),
-        tf.greater(calc_samplesN["y"], calc_samplesM["y"]),
-    )
-    calc_modulation_trans, calc_modulation_phase = tf.cond(
-        padCondition,
-        lambda: condPad_true(calc_modulation_trans, calc_modulation_phase, parameters),
-        lambda: condPad_false(calc_modulation_trans, calc_modulation_phase, parameters),
-    )
+    if (calc_samplesN["x"] > calc_samplesM["x"]) or (calc_samplesN["y"] > calc_samplesM["y"]):
+        calc_modulation_trans, calc_modulation_phase = condPad_true(calc_modulation_trans, calc_modulation_phase, parameters)
 
     # Return with the same batch_size shape
     new_shape = calc_modulation_trans.shape
     if input_rank != 3:
-        calc_modulation_trans = tf.reshape(calc_modulation_trans, tf.concat([init_shape[:-2], new_shape[-2:]], axis=0))
-        calc_modulation_phase = tf.reshape(calc_modulation_phase, tf.concat([init_shape[:-2], new_shape[-2:]], axis=0))
+        calc_modulation_trans = tf.reshape(calc_modulation_trans, [*init_shape[:-2], *new_shape[-2:]])
+        calc_modulation_phase = tf.reshape(calc_modulation_phase, [*init_shape[:-2], *new_shape[-2:]])
 
     return tf.cast(calc_modulation_trans, dtype), tf.cast(calc_modulation_phase, dtype)

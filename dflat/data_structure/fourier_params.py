@@ -22,23 +22,13 @@ ALL_OPTIONAL_KEYS = {
     "automatic_upsample": False,  # Flag to indicate if DFlat should estimate and apply its own upsample factor
     "radius_m": None,  # Radius of a circular field aperture to consider against the square input field array
     "dtype": tf.float64,
-    "accurate_measurement": True,  # Development flag to control field resize correction at the output plane (Should be True when deploy)
     "ASM_Pad_opt": 1,  # Development flag to control field padding for ASM Field transformations
 }
 
 HIDDEN_KEYS = ["_prop_params__verbose"]
 
 ## These keys get automatically added to the dictionary after initialization and processing of the user-provided inputs
-ADDED_KEYS = [
-    "ms_length_m",
-    "calc_ms_dx_m",
-    "padms_half",
-    "calc_samplesN",
-    "calc_sensor_dx_m",
-    "ratio_pixel_to_grid",
-    "broadband_flag",
-    "grid_shape",
-]
+ADDED_KEYS = ["ms_length_m", "calc_ms_dx_m", "padms_half", "calc_samplesN", "calc_sensor_dx_m", "ratio_pixel_to_grid", "broadband_flag", "grid_shape", "tf_zero"]
 
 
 def print_full_settings(parameters):
@@ -58,22 +48,17 @@ def print_full_settings(parameters):
 def estimateBandwidth(parameters):
     # Compute fresnel number to determine estimate for minimum Whittaker-Shannon lens sampling
     # Use fresnel number to define an approximate fourier bandwidth
-
     bandwidthxy = []
-    for dimIdx in ["x", "y"]:
-        ms_length_m = parameters["ms_length_m"][dimIdx]
-        wavelength_m = parameters["wavelength_m"]
-        sensor_distance_m = parameters["sensor_distance_m"]
+    wavelength_m = parameters["wavelength_m"]
+    sensor_distance_m = parameters["sensor_distance_m"]
 
+    for dimIdx in ["x", "y"]:
         # Compute the Fresnel Number
+        ms_length_m = parameters["ms_length_m"][dimIdx]
         Nf = (ms_length_m / 2.0) ** 2 / wavelength_m / sensor_distance_m
 
         # Define Fourier bandwidth based on Fresnel Number Regime
-        if Nf < 0.25:
-            bandwidth = 1 / ms_length_m
-        else:
-            bandwidth = ms_length_m / wavelength_m / sensor_distance_m
-
+        bandwidth = 1 / ms_length_m if Nf < 0.25 else ms_length_m / wavelength_m / sensor_distance_m
         bandwidthxy.append(bandwidth)
 
     return np.array(bandwidthxy)
@@ -124,17 +109,16 @@ class prop_params(dict):
         self.__check_detector_pixel_size()
 
         self.__add_implied_keys()
+        self.__tf_add()
         self.__verbose = verbose
         if self.__dict__["radial_symmetry"]:
             self.__enforce_odd_sensor_pixel_number()
 
         # If wavelength_m is given, this is a usable prop_instance keys
         # so generate the additional keys required for function calls.
-        # If wavelength_set_m is given instead, this is a parent object and
-        # additional keys given how the fourier class is coded -->
-
+        # If wavelength_set_m is given instead, this is a parent object and additional keys will be added
         # The reason is two-fold:
-        # - First, we allow users to use the Fresnel FFT method and get a user-specified output grid!
+        # - First, we allow users to use the Fresnel FFT method and get a user-specified output grid that is the same for each wavelength!
         # - This output grid requires zero-padding the initial field by an amount dependent on wavelength.
         # - Second, we have implemented an optional approach to determine automatically an estimate of upsampling
         # - which is dependent on the simulation wavelength!
@@ -208,7 +192,10 @@ class prop_params(dict):
         ms_samplesM = self.__dict__["ms_samplesM"]
         if not (isinstance(ms_samplesM["x"], int) and isinstance(ms_samplesM["y"], int)):
             print("Warning on params initialization: ms_samplesM should be an int. Int casting used")
-            self.__dict__["ms_samplesM"] = {"x": int(ms_samplesM["x"]), "y": int(ms_samplesM["y"])}
+            self.__dict__["ms_samplesM"] = {
+                "x": int(ms_samplesM["x"]),
+                "y": int(ms_samplesM["y"]),
+            }
 
         return
 
@@ -235,9 +222,13 @@ class prop_params(dict):
         initial_sensor_dx_m = self.__dict__["initial_sensor_dx_m"]
         sensor_pixel_size_m = self.__dict__["sensor_pixel_size_m"]
         if (initial_sensor_dx_m["x"] > sensor_pixel_size_m["x"]) or (initial_sensor_dx_m["y"] > sensor_pixel_size_m["y"]):
-            raise ValueError(
-                "params: requested output/sensor plane field grid cannot be discretized larger than the requested resampled output/detector 'pixel' size!"
-            )
+            raise ValueError("params: requested output/sensor plane field grid cannot be discretized larger than the requested, resampled output/detector 'pixel' size!")
+
+        return
+
+    def __tf_add(self):
+        dtype = self.__dict__["dtype"]
+        self.__dict__["tf_zero"] = tf.convert_to_tensor(0.0, dtype=dtype)
 
         return
 
@@ -254,10 +245,7 @@ class prop_params(dict):
         self.__dict__["ms_samplesM"] = {"x": ms_samplesM["x"], "y": ms_samplesM["y"], "r": ms_samplesM_r}
 
         # It is convenient to add the lens shapes to a grid_shape parameter
-        if self.__dict__["radial_symmetry"]:
-            grid_shape = [1, 1, ms_samplesM_r]
-        else:
-            grid_shape = [1, ms_samplesM["y"], ms_samplesM["x"]]
+        grid_shape = [1, 1, ms_samplesM_r] if self.__dict__["radial_symmetry"] else [1, ms_samplesM["y"], ms_samplesM["x"]]
         self.__dict__["grid_shape"] = grid_shape
 
         return
@@ -477,9 +465,6 @@ class prop_params(dict):
 
     def __delitem__(self, key):
         del self.__dict__[key]
-
-    def __cmp__(self, dict_):
-        return self.__cmp__(self.__dict__, dict_)
 
     def __contains__(self, item):
         return item in self.__dict__

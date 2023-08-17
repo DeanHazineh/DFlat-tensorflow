@@ -1,6 +1,8 @@
 import tensorflow as tf
 import numpy as np
-from .ops_hankel import qdht, tf_generalSpline_regular1DGrid
+from .ops_hankel import qdht
+from .ops_transform_util import tf_generalSpline_regular1DGrid
+from .ops_grid_util import tf_coordinate_grid
 
 
 def fresnel_diffraction_fft(
@@ -40,26 +42,12 @@ def fresnel_diffraction_fft(
     """
 
     # create the coordinate grid at the input
-    if radial_symmetry:
-        input_pixel_x, input_pixel_y = tf.meshgrid(
-            tf.range(input_pixel_number["r"], dtype=dtype),
-            tf.range(1, dtype=dtype),
-        )
-    else:
-        input_pixel_x, input_pixel_y = tf.meshgrid(
-            tf.range(input_pixel_number["x"], dtype=dtype),
-            tf.range(input_pixel_number["y"], dtype=dtype),
-        )
-        input_pixel_x = input_pixel_x - (input_pixel_x.shape[1] - 1) / 2
-        input_pixel_y = input_pixel_y - (input_pixel_y.shape[0] - 1) / 2
-    input_pixel_x = input_pixel_x * input_pixel_size_m["x"]
-    input_pixel_y = input_pixel_y * input_pixel_size_m["y"]
+    input_pixel_x, input_pixel_y = tf_coordinate_grid(input_pixel_number, input_pixel_size_m, radial_symmetry, dtype)
+    TF_ZERO = tf.constant(0.0, dtype=dtype)
 
     # fourier transform approximation of fresnel diffraction
-    TF_ZERO = tf.constant(0.0, dtype=dtype)
     angular_wave_number = 2 * np.pi / wavelength_m
     quadratic_term = angular_wave_number / 2 / distance_m * (input_pixel_x**2 + input_pixel_y**2)
-
     fourier_transform_trans = wavefront_ampl
     fourier_transform_phase = wavefront_phase + tf.expand_dims(quadratic_term, 0)
     fourier_transform_term = tf.complex(fourier_transform_trans, TF_ZERO) * tf.exp(tf.complex(TF_ZERO, fourier_transform_phase))
@@ -130,22 +118,9 @@ def fresnel_diffraction_coeffs(
     TF_ZERO = tf.constant(0.0, dtype=dtype)
 
     # create the output plane coordinate grid
-    if radial_symmetry:
-        output_pixel_x, output_pixel_y = tf.meshgrid(
-            tf.range(output_pixel_number["r"], dtype=dtype),
-            tf.range(1, dtype=dtype),
-        )
-    else:
-        output_pixel_x, output_pixel_y = tf.meshgrid(
-            tf.range(output_pixel_number["x"], dtype=dtype),
-            tf.range(output_pixel_number["y"], dtype=dtype),
-        )
-        output_pixel_x = output_pixel_x - (tf.shape(output_pixel_x)[1] - 1) / 2
-        output_pixel_y = output_pixel_y - (tf.shape(output_pixel_y)[0] - 1) / 2
-    output_pixel_x = output_pixel_x * output_pixel_size_m["x"]
-    output_pixel_y = output_pixel_y * output_pixel_size_m["y"]
-    output_pixel_x = tf.expand_dims(output_pixel_x, 0)
-    output_pixel_y = tf.expand_dims(output_pixel_y, 0)
+    output_pixel_x, output_pixel_y = tf_coordinate_grid(output_pixel_number, output_pixel_size_m, radial_symmetry, dtype)
+    output_pixel_x = output_pixel_x[tf.newaxis]
+    output_pixel_y = output_pixel_y[tf.newaxis]
 
     # add the final terms
     angular_wave_number = 2 * np.pi / wavelength_m

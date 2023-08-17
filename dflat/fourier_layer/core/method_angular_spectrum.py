@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
-from .ops_hankel import iqdht, qdht, tf_generalSpline_regular1DGrid
+from .ops_hankel import iqdht, qdht
+from .ops_transform_util import tf_generalSpline_regular1DGrid
 
 
 def transfer_function_Broadband(
@@ -34,19 +35,17 @@ def transfer_function_Broadband(
         `tf.float64`: Field amplitude at the output plane grid, the same shape as the input field
         `tf.float64`: Field phase at the output plane grid, the same shape as the input field
     """
+
     # trans and phase input has shape (Nbatch, Nwl, Ny, Nx)
-
-    TF_ZERO = tf.cast(0.0, dtype=dtype)
-
-    ### Enable padding for frequency transforms if requested
     padFactor = optArg
-    padhalfx = tf.cast(input_pixel_number["x"] * padFactor, tf.int32)
-    padhalfy = tf.cast(input_pixel_number["y"] * padFactor, tf.int32)
-    paddings = tf.cond(
-        radial_symmetry,
-        lambda: [[0, 0], [0, 0], [0, 0], [0, padhalfx]],
-        lambda: [[0, 0], [0, 0], [padhalfy, padhalfy], [padhalfx, padhalfx]],
-    )
+    TF_ZERO = tf.cast(0.0, dtype=dtype)
+    padhalfx = int(input_pixel_number["x"] * padFactor)
+    padhalfy = int(input_pixel_number["y"] * padFactor)
+    if radial_symmetry:
+        paddings = [[0, 0], [0, 0], [0, 0], [0, padhalfx]]
+    else:
+        paddings = [[0, 0], [0, 0], [padhalfy, padhalfy], [padhalfx, padhalfx]]
+
     padded_wavefront_ampl = tf.pad(wavefront_ampl, paddings, mode="CONSTANT", constant_values=0)
     padded_wavefront_phase = tf.pad(wavefront_phase, paddings, mode="CONSTANT", constant_values=0)
 
@@ -77,11 +76,7 @@ def transfer_function_Broadband(
     rarray = rarray[tf.newaxis, tf.newaxis, :, :]
     angular_wavenumber = tf.cast(2 * np.pi / wavelength_set_m, dtype=dtype)
     angular_wavenumber = angular_wavenumber[tf.newaxis, :, tf.newaxis, tf.newaxis]
-    h = (
-        tf.complex(1 / 2 / np.pi * distance_m / rarray**2, TF_ZERO)
-        * tf.complex(1 / rarray, -1 * angular_wavenumber)
-        * tf.exp(tf.complex(TF_ZERO, angular_wavenumber * rarray))
-    )
+    h = tf.complex(1 / 2 / np.pi * distance_m / rarray**2, TF_ZERO) * tf.complex(1 / rarray, -1 * angular_wavenumber) * tf.exp(tf.complex(TF_ZERO, angular_wavenumber * rarray))
 
     # Compute Fourier Space Transfer Function
     if radial_symmetry:
@@ -102,28 +97,18 @@ def transfer_function_Broadband(
         outputwavefront = tf.signal.fftshift(tf.signal.ifft2d(tf.signal.ifftshift(fourier_transform_term)))
 
     ### Crop to remove the padding used in the calculation
-    # Radial symmetry needs special preperation before cropping because cropping
-    # runs a inner crop so we need to add half padding for symmetry then call crop
-    outputwavefront = tf.cond(
-        radial_symmetry,
-        lambda: tf.pad(outputwavefront, [[0, 0], [0, 0], [0, 0], [padhalfx, 0]], mode="CONSTANT"),
-        lambda: outputwavefront,
-    )
+    # Radial symmetry needs asymmetric cropping not central crop
+    if radial_symmetry:
+        outputwavefront = tf.pad(outputwavefront, [[0, 0], [0, 0], [0, 0], [padhalfx, 0]], mode="CONSTANT")
 
     outputwavefront = tf.image.resize_with_crop_or_pad(
         tf.transpose(outputwavefront, [0, 2, 3, 1]),  # need to make it shape [N, nx, ny, channels]
-        tf.cond(radial_symmetry, lambda: 1, lambda: input_pixel_number["y"]),
-        tf.cond(
-            radial_symmetry,
-            lambda: input_pixel_number["r"],
-            lambda: input_pixel_number["x"],
-        ),
+        1 if radial_symmetry else input_pixel_number["y"],
+        input_pixel_number["r"] if radial_symmetry else input_pixel_number["x"],
     )
     outputwavefront = tf.transpose(outputwavefront, [0, 3, 1, 2])
-    outputwavefront_ampl = tf.math.abs(outputwavefront)
-    outputwavefront_phase = tf.math.angle(outputwavefront)
 
-    return outputwavefront_ampl, outputwavefront_phase
+    return tf.math.abs(outputwavefront), tf.math.angle(outputwavefront)
 
 
 def transfer_function_diffraction(
@@ -162,17 +147,16 @@ def transfer_function_diffraction(
 
     """
 
-    TF_ZERO = tf.cast(0.0, dtype=dtype)
-
     ### Enable padding for frequency transforms if requested
     padFactor = optArg
-    padhalfx = tf.cast(input_pixel_number["x"] * padFactor, tf.int32)
-    padhalfy = tf.cast(input_pixel_number["y"] * padFactor, tf.int32)
-    paddings = tf.cond(
-        radial_symmetry,
-        lambda: [[0, 0], [0, 0], [0, padhalfx]],
-        lambda: [[0, 0], [padhalfy, padhalfy], [padhalfx, padhalfx]],
-    )
+    TF_ZERO = tf.cast(0.0, dtype=dtype)
+    padhalfx = int(input_pixel_number["x"] * padFactor)
+    padhalfy = int(input_pixel_number["y"] * padFactor)
+    if radial_symmetry:
+        paddings = [[0, 0], [0, 0], [0, padhalfx]]
+    else:
+        paddings = [[0, 0], [padhalfy, padhalfy], [padhalfx, padhalfx]]
+
     padded_wavefront_ampl = tf.pad(wavefront_ampl, paddings, mode="CONSTANT", constant_values=0)
     padded_wavefront_phase = tf.pad(wavefront_phase, paddings, mode="CONSTANT", constant_values=0)
 
@@ -201,11 +185,7 @@ def transfer_function_diffraction(
     rarray = tf.math.sqrt(distance_m**2 + x**2 + y**2)
     angular_wavenumber = tf.cast(2 * np.pi / wavelength_m, dtype=dtype)
     h = tf.expand_dims(
-        (
-            tf.complex(1 / 2 / np.pi * distance_m / rarray**2, TF_ZERO)
-            * tf.complex(1 / rarray, -1 * angular_wavenumber)
-            * tf.exp(tf.complex(TF_ZERO, angular_wavenumber * rarray))
-        ),
+        (tf.complex(1 / 2 / np.pi * distance_m / rarray**2, TF_ZERO) * tf.complex(1 / rarray, -1 * angular_wavenumber) * tf.exp(tf.complex(TF_ZERO, angular_wavenumber * rarray))),
         0,
     )
 
@@ -228,25 +208,15 @@ def transfer_function_diffraction(
         outputwavefront = tf.signal.fftshift(tf.signal.ifft2d(tf.signal.ifftshift(fourier_transform_term)))
 
     ### Crop to remove the padding used in the calculation
-    # Radial symmetry needs special preperation before cropping because cropping
-    # runs a inner crop so we need to add half padding for symmetry then call crop
-    outputwavefront = tf.cond(
-        radial_symmetry,
-        lambda: tf.pad(outputwavefront, [[0, 0], [0, 0], [padhalfx, 0]], mode="CONSTANT"),
-        lambda: outputwavefront,
-    )
+    # Radial symmetry needs asymmetric cropping not central crop
+    if radial_symmetry:
+        outputwavefront = tf.pad(outputwavefront, [[0, 0], [0, 0], [padhalfx, 0]], mode="CONSTANT")
 
     outputwavefront = tf.image.resize_with_crop_or_pad(
         tf.expand_dims(outputwavefront, -1),  # need to make it shape [N, nx, ny, channels=1]
-        tf.cond(radial_symmetry, lambda: 1, lambda: input_pixel_number["y"]),
-        tf.cond(
-            radial_symmetry,
-            lambda: input_pixel_number["r"],
-            lambda: input_pixel_number["x"],
-        ),
+        1 if radial_symmetry else input_pixel_number["y"],
+        input_pixel_number["r"] if radial_symmetry else input_pixel_number["x"],
     )
+    outputwavefront = tf.transpose(outputwavefront, [0, 3, 1, 2])
 
-    outputwavefront_ampl = tf.math.abs(outputwavefront)
-    outputwavefront_phase = tf.math.angle(outputwavefront)
-
-    return tf.squeeze(outputwavefront_ampl, -1), tf.squeeze(outputwavefront_phase, -1)
+    return tf.squeeze(tf.math.abs(outputwavefront), 1), tf.squeeze(tf.math.angle(outputwavefront), 1)

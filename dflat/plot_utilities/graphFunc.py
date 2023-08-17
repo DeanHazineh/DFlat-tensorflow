@@ -1,7 +1,6 @@
 from matplotlib import pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-import glob, os
-import imageio
+import os
 import numpy as np
 from PIL import Image
 
@@ -11,37 +10,38 @@ plt.rcParams["ps.fonttype"] = 42.0
 
 fontsize_text = 10.0
 fontsize_title = 12.0
-fontsize_ticks = 14.0
+fontsize_ticks = 10.0
 fontsize_cbar = 10.0
 fontsize_legend = 12.0
 
 
 def addAxis(thisfig, n1, n2, maxnumaxis=""):
     axlist = []
-    if maxnumaxis:
-        counterval = maxnumaxis
-    else:
-        counterval = n1 * n2
-
+    counterval = maxnumaxis if maxnumaxis else n1 * n2
     for i in range(counterval):
         axlist.append(thisfig.add_subplot(n1, n2, i + 1))
 
     return axlist
 
 
-def addColorbar(thisfig, thisax, thisim, cbartitle="", fontsize_cbar=fontsize_cbar, fontsize_ticks=fontsize_ticks):
+def addColorbar(
+    thisfig,
+    thisax,
+    thisim,
+    cbartitle="",
+    fontsize_cbar=fontsize_cbar,
+    fontsize_ticks=fontsize_ticks,
+):
+    if thisim == None:
+        thisim = thisax.images[0]
+
     divider = make_axes_locatable(thisax)
     cax = divider.append_axes("right", size="8%", pad=0.05)
     cbar = thisfig.colorbar(thisim, cax=cax, orientation="vertical")
-
-    # option to change colorbar to horizontal bottom or other location can be done as so
-    # cax = divider.append_axes("bottom", size="8%", pad=0.05)
-    # cbar = thisfig.colorbar(thisim, cax=cax, orientation="horizontal")
-
-    cbar.formatter.set_powerlimits((0, 0))
     cbar.ax.get_yaxis().labelpad = 15
     cbar.ax.set_ylabel(cbartitle, rotation=90, fontsize=fontsize_cbar)
 
+    cbar.formatter.set_powerlimits((0, 0))
     for t in cbar.ax.get_yticklabels():
         t.set_fontsize(fontsize_ticks)
 
@@ -70,18 +70,19 @@ def formatPlots(
     fontsize_cbar=fontsize_cbar,
     fontsize_legend=fontsize_legend,
     setAspect="auto",
-):  # Pass figure and axis to set common formatting options
-
-    # if imhandle==None:
-    #     imhandle = thisax.images[0]
-        
+):
+    # Set axis label and title
     thisax.set_xlabel(xlabel, fontsize=fontsize_text)
     thisax.set_ylabel(ylabel, fontsize=fontsize_text)
     thisax.set_title(title, fontsize=fontsize_title)
 
+    # Add x and y axis coordinates
     if len(xgrid_vec) != 0 and len(ygrid_vec) != 0:
+        if imhandle == None:
+            imhandle = thisax.images[0]
         imhandle.set_extent([np.min(xgrid_vec), np.max(xgrid_vec), np.max(ygrid_vec), np.min(ygrid_vec)])
 
+    # remove axis labels and ticks
     if rmvxLabel:
         thisax.set_xticklabels([""])
         thisax.set_xlabel("")
@@ -90,8 +91,16 @@ def formatPlots(
         thisax.set_yticklabels([""])
         thisax.set_ylabel("")
 
+    # add colorbar and preserve other subplot image sizes
     if addcolorbar:
-        addColorbar(thisfig, thisax, imhandle, cbartitle, fontsize_cbar=fontsize_cbar, fontsize_ticks=fontsize_ticks)
+        addColorbar(
+            thisfig,
+            thisax,
+            imhandle,
+            cbartitle,
+            fontsize_cbar=fontsize_cbar,
+            fontsize_ticks=fontsize_ticks,
+        )
     else:
         # This is useful to change the axis size such that the axis with and without colorbar is the same shape
         divider2 = make_axes_locatable(thisax)
@@ -126,16 +135,18 @@ def gif_from_saved_images(filepath, filetag, savename, fps, deleteFrames=True, v
     for file in png_files:
         file_path = os.path.join(filepath, file)
         images.append(Image.open(file_path))
-       
+
         if verbose:
-            print("Write image file as frame: " + file) 
+            print("Write image file as frame: " + file)
         if deleteFrames:
             os.remove(file_path)
-    
-    duration = int(1000/fps)
-    images[0].save(filepath+savename,
-                   save_all=True,
-                   append_images=images[1:],
-                   duration=duration,
-                   loop=0)
+
+    duration = int(1000 / fps)
+    images[0].save(
+        filepath + savename,
+        save_all=True,
+        append_images=images[1:],
+        duration=duration,
+        loop=0,
+    )
     return
