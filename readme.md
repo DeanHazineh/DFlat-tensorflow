@@ -1,6 +1,5 @@
-# DFlat-tensorflow
- ## Note: DFlat is being ported to Pytorch (<a href="https://github.com/DeanHazineh/DFlat-pytorch" target="_blank">DFlat-pytorch</a>). While the tensorflow version will remain open, long-term support will eventually only be provided for the pytorch version of the software. The new pytorch version will also present very substantial speed and memory improvements.
-
+# DFlat-tensorflow V4
+ ## Note: DFlat is being ported to Pytorch (<a href="https://github.com/DeanHazineh/DFlat-pytorch" target="_blank">DFlat-pytorch</a>). While the tensorflow version will remain open, long-term support will eventually only be provided for the pytorch version of the software.
 <div align="center">
   <img src=/docs/imgs/DFlat_Long.png alt="Dflat" width="500"/>
 </div>
@@ -13,9 +12,7 @@
 ![TensorFlow](https://img.shields.io/badge/TensorFlow-%23FF6F00.svg?style=for-the-badge&logo=TensorFlow&logoColor=white)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-**Note: DFlat is being ported to Pytorch (<a href="https://github.com/DeanHazineh/DFlat-pytorch" target="_blank">DFlat-pytorch</a>). While the tensorflow version will remain open, long-term support will eventually only be provided for the pytorch version of the software. The new pytorch version will also present substantial speed and memory improvements.**   
-
-`D-Flat` is an auto-differentiable design framework for flat optics, specially geared to the design of dielectric metasurfaces for imaging and sensing tasks. This package was officially released alongside our paper,  <a href="https://deanhazineh.github.io/publications/Multi_Image_Synthesis/combined_paper.pdf" target="_blank"> Polarization Multi-Image Synthesis with Birefringent Metasurfaces</a>, published in the proceedings of the 2023 IEEE International Conference of Computational Photography (ICCP). The package is further documented and discussed in the manuscript available on <a href="https://arxiv.org/abs/2207.14780" target="_blank">arxiv</a>. If you use this package, please cite the ICCP paper (See below for details). 
+`D-Flat` is an auto-differentiable design framework for flat optics, specially geared to the design of dielectric metasurfaces for imaging and sensing tasks. This package was officially released alongside our paper,  <a href="https://deanhazineh.github.io/publications/Multi_Image_Synthesis/MIS_Home.html" target="_blank"> Polarization Multi-Image Synthesis with Birefringent Metasurfaces</a>, published in the proceedings of the 2023 IEEE International Conference of Computational Photography (ICCP). This package is further documented and discussed in the manuscript available on <a href="https://arxiv.org/abs/2207.14780" target="_blank">arxiv</a>. If you use this package, please cite the ICCP paper (See below for details). 
 
 D-Flat provides users with:
 - A validated, auto-differentiable framework for optical field propagation and rendering built on tensorflow Keras
@@ -24,14 +21,18 @@ D-Flat provides users with:
 
 By treating optical layers in the same fashion as standard, differentiable neural layers, deep learning pipelines can be built to simultaneously optimize optical hardware and ML computational back-ends for the next generation of computational imaging devices.
 
+## Version Notes 
+Dflat version 4 presents several changes relative to v3. Some scripts in the Fourier layer have been modified to improve the computational speed and efficiency. The package has also been restructured for easier interpretability; we have removed extra scripts, functions, and files that were related to the original papers and were only there for initial academic benchmarking. Lastly, all data files are now zipped to enable faster downloads and are unpackaged during install.  
+
+Older versions will now be kept as seperate branches for archival purposes.
+
 ## Usage and Documentation:
 
-For usage and documentation, a readthedocs page is in active development. You may also visit the code pages for projects that use DFlat to learn more (example: https://github.com/DeanHazineh/Multi-Image-Synthesis). A few tutorial notebooks (google collab) as a demo are also provided in `DFlat/examples/`. Additional examples will be provided in the future (we welcome community made examples sent by email).
+A readthedocs page will be provided in the future. You may also visit the code pages for projects that use DFlat to learn more (example: https://github.com/DeanHazineh/Multi-Image-Synthesis). Several tutorial notebooks (google collabs linked below) are also provided as demos. Additional examples will be provided in the future and we welcome community made examples sent by email.
 
 For developers and researchers,
-
 - a script to train neural models can be found in `DFlat/dflat/neural_optical_layer/core/trainer_models.py`
-- a script to build a cell library using RCWA_TF can be found in `DFlat/dflat/cell_library_generation/generate_cell_library.py`.
+- a script to build a cell library using RCWA_TF can be found in `DFlat/dflat/cell_library_generation/`.
 
 ### (a) install and run DFlat in Google collab:
 
@@ -50,17 +51,14 @@ Note that git LFS should be installed if not already via `git lfs install` at th
 
 ```
 git clone https://github.com/DeanHazineh/DFlat
-python setup.py develop
-pip install -r requirements.txt
+python setup.py install clean
 ```
-
-Note that you should not just download the zip file from above because this will not download the files hosted on githubs LFS database.
 
 ## Future Notes:
 
-- Please note that Tensorflow v2.10 is the last official tensorflow release with native GPU compatibility for Windows OS. DFlat is currently kept on v2.10 and may or may not be upgraded.
-- Importantly, we are also porting the package to Pytorch which has now become the dominant ML framework. Dflat-tensorflow will then no longer be updated and new developments will be released on DFlat-pytorch.
-- We expect that the pytorch version will be both faster and more memory efficient due to improvements to the back-end
+- Please note that Tensorflow v2.10 is the last official tensorflow release with native GPU compatibility for Windows OS. DFlat is currently kept on v2.10 and will likely not be upgraded officially.
+- Importantly, we are porting the package to Pytorch which has now become the dominant ML framework. Dflat-tensorflow will then no longer be updated and new developments will be released on DFlat-pytorch.
+- We expect that the pytorch version will be both faster due to improvements to the back-end and easier to use
 
 ## Credits and Acknowledgements:
 If you utilize DFlat or included data sets for your own work, please cite it by copying:
