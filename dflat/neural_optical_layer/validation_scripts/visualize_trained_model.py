@@ -8,7 +8,7 @@ import dflat.neural_optical_layer as df_neural
 import dflat.plot_utilities as df_plt
 
 
-def plot_MLP_Nanocylinders(model_name):
+def plot_MLP_Nanocylinders(model_name, show=False):
     savepath = "dflat/neural_optical_layer/validation_scripts/output/"
     use_dtype = tf.float64  # This is the output dtype
     neural_model = df_neural.MLP_Layer(model_name, dtype=use_dtype)
@@ -29,7 +29,6 @@ def plot_MLP_Nanocylinders(model_name):
     trans = tf.squeeze(trans)
     phase = tf.squeeze(phase)
 
-    print(lib_trans.shape, lib_phase.shape)
     ### make plot
     fig = plt.figure(figsize=(10, 10))
     axisList = graphFunc.addAxis(fig, 2, 2)
@@ -62,13 +61,17 @@ def plot_MLP_Nanocylinders(model_name):
         vmax=np.pi,
         aspect="auto",
     )
-    plt.savefig(savepath + f"{model_name}.png")
-    plt.close()
+
+    if show == False:
+        plt.savefig(savepath + f"{model_name}.png")
+        plt.close()
+    else:
+        plt.show()
 
     return
 
 
-def plot_MLP_Nanofins(model_name):
+def plot_MLP_Nanofins(model_name, show=False):
     savepath = "dflat/neural_optical_layer/validation_scripts/output/"
     use_dtype = tf.float64  # This is the output dtype
     neural_model = df_neural.MLP_Layer(model_name, dtype=use_dtype)
@@ -129,7 +132,8 @@ def plot_MLP_Nanofins(model_name):
     df_plt.formatPlots(fig, ax[1], im2, setAspect="auto", xgrid_vec=wx * 1e9, ygrid_vec=wl * 1e9, rmvxLabel=True, rmvyLabel=True)
     df_plt.formatPlots(fig, ax[2], im3, setAspect="auto", xgrid_vec=Lx[0, :] * 1e9, ygrid_vec=Ll * 1e9)
     df_plt.formatPlots(fig, ax[3], im4, setAspect="auto", xgrid_vec=Lx[0, :] * 1e9, ygrid_vec=Ll * 1e9, rmvyLabel=True)
-    plt.savefig(savepath + f"{model_name}_spectral_slice_trans.png")
+    if not show:
+        plt.savefig(savepath + f"{model_name}_spectral_slice_trans.png")
 
     fig = plt.figure(figsize=(15, 15))
     ax = df_plt.addAxis(fig, 2, 2)
@@ -141,9 +145,11 @@ def plot_MLP_Nanofins(model_name):
     df_plt.formatPlots(fig, ax[1], im2, setAspect="auto", xgrid_vec=wx * 1e9, ygrid_vec=wl * 1e9, rmvxLabel=True, rmvyLabel=True)
     df_plt.formatPlots(fig, ax[2], im3, setAspect="auto", xgrid_vec=Lx[0, :] * 1e9, ygrid_vec=Ll * 1e9)
     df_plt.formatPlots(fig, ax[3], im4, setAspect="auto", xgrid_vec=Lx[0, :] * 1e9, ygrid_vec=Ll * 1e9, rmvyLabel=True)
-    plt.savefig(savepath + f"{model_name}_spectral_slice_phase.png")
-
-    plt.close()
+    if not show:
+        plt.savefig(savepath + f"{model_name}_spectral_slice_phase.png")
+        plt.close()
+    else:
+        plt.show()
 
     return
 
