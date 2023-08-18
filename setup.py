@@ -1,7 +1,22 @@
 import os
 import zipfile
-from setuptools import setup
+from setuptools import setup, find_packages, Command
 from setuptools.command.install import install
+import shutil
+
+
+class CleanCommand(Command):
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        shutil.rmtree("build", ignore_errors=True)
+        print("Removed the build directory")
 
 
 class CustomInstallCommand(install):
@@ -24,17 +39,19 @@ class CustomInstallCommand(install):
             "physical_optical_layer/core/material_index.zip",
         ]
         for zippedfold in list_zip:
-            data_dir = os.path.join(package_dir, zippedfold)  # Create the path to the data directory
-            if not os.path.exists(data_dir[:-4]):
-                os.makedirs(data_dir[:-4])
+            data_file = os.path.join(package_dir, zippedfold)
+            extract_dir = os.path.dirname(data_file)
 
-            zip_ref = zipfile.ZipFile(data_dir, "r")
-            zip_ref.extractall(data_dir[:-4])
+            zip_ref = zipfile.ZipFile(data_file, "r")
+            zip_ref.extractall(extract_dir)
             zip_ref.close()
 
 
 setup(
+    packages=find_packages(),
+    include_package_data=True,
     cmdclass={
         "install": CustomInstallCommand,
-    }
+        "clean": CleanCommand,
+    },
 )
