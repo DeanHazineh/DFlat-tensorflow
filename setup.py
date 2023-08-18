@@ -21,6 +21,7 @@ class CustomInstallCommand(install):
             "metasurface_library/core/raw_meta_libraries.zip",
             "neural_optical_layer/core/trained_MLP_models.zip",
             "metasurface_library/core/pregen_lookup_tables.zip",
+            "physical_optical_layer/core/material_index.zip",
         ]
         for zippedfold in list_zip:
             data_dir = os.path.join(package_dir, zippedfold)  # Create the path to the data directory
