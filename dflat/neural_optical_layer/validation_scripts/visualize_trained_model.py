@@ -151,4 +151,7 @@ def plot_MLP_Nanofins(model_name):
 if __name__ == "__main__":
     # Run plotting functions for mlp model
     plot_MLP_Nanofins("MLP_Nanofins_Dense1024_U350_H600")
+    plot_MLP_Nanofins("MLP_Nanofins_Dense512_U350_H600")
+
     plot_MLP_Nanocylinders("MLP_Nanocylinders_Dense256_U180_H600")
+    plot_MLP_Nanocylinders("MLP_Nanocylinders_Dense128_U180_H600")

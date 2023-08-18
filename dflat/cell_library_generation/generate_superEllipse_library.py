@@ -5,7 +5,7 @@ from dflat.cell_library_generation import run_library_gen, assemble_ER_super_ell
 import dflat.data_structure as df_struct
 
 
-def gen_super_ellipse_library(savepath, fourier_modes=11, checkpoint_num=100):
+def gen_super_ellipse_library(savepath, fourier_modes=9, checkpoint_num=100):
     wavelength_set_m = np.arange(350e-9, 750e-9, 5e-9)
     rcwa_parameters = df_struct.rcwa_params(
         {
