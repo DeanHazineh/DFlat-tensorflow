@@ -27,8 +27,8 @@ class MLP_Layer(tf.keras.layers.Layer):
         # Check model request and initialize the chosen model - Model weights are set to non-trainable for inference by default
         self.mlp = load_neuralModel(model_name, dtype)
         self._dtype = dtype
-        self.__check_input_shape = False
-        self.__check_input_type = False
+        self._check_input_shape = False
+        self._check_input_type = False
         self.input_dimensionality = self.mlp.get_input_shape()
         self.param_dimensionality = self.input_dimensionality - 1
 
@@ -49,9 +49,9 @@ class MLP_Layer(tf.keras.layers.Layer):
         """
 
         # Assert input shape
-        if not self.__check_input_shape:
+        if not self._check_input_shape:
             self.check_shape(norm_param)
-        if not self.__check_input_type:
+        if not self._check_input_type:
             norm_param = self.check_dtype(norm_param)
 
         # norm_params passed to MLP need to be reshaped into [N, D]
@@ -72,7 +72,7 @@ class MLP_Layer(tf.keras.layers.Layer):
         if input_tensor.shape[0] != self.param_dimensionality:
             raise ValueError("norm param has unexpected dimensionality. In this case it should be: ", self.param_dimensionality)
 
-        self.__check_input_shape = True
+        self._check_input_shape = True
         return
 
     def check_dtype(self, input_tensor):
@@ -81,7 +81,7 @@ class MLP_Layer(tf.keras.layers.Layer):
         elif input_tensor.dtype != tf.float32:
             input_tensor = tf.cast(input_tensor, tf.float32)
         else:
-            self.__check_input_type = True
+            self._check_input_type = True
 
         return input_tensor
 
@@ -172,9 +172,9 @@ class MLP_Latent_Layer(MLP_Layer):
         """
 
         # Assert inputs
-        if not self.__check_input_shape:
+        if not self._check_input_shape:
             self.check_shape(latent_tensor)
-        if not self.__check_input_type:
+        if not self._check_input_type:
             latent_tensor = self.check_dtype(latent_tensor)
 
         # Ensure input is float32 to match the neural network
