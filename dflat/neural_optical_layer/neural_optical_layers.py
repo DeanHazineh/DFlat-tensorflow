@@ -66,7 +66,7 @@ class MLP_Layer(tf.keras.layers.Layer):
         )
 
     def check_shape(self, input_tensor):
-        if input_tensor.ndim != 3:
+        if len(input_tensor.shape) != 3:
             raise ValueError("norm_param should be a rank 3 tensor: (D, PixelsY, PixelsX)")
 
         if input_tensor.shape[0] != self.param_dimensionality:
