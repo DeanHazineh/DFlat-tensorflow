@@ -2,6 +2,7 @@ import os
 import zipfile
 from setuptools import setup, find_packages, Command
 from setuptools.command.install import install
+from setuptools.command.develop import develop
 import shutil
 
 
@@ -19,7 +20,7 @@ class CleanCommand(Command):
         print("Removed the build directory")
 
 
-class CustomInstallCommand(install):
+class CustomInstallCommandBase:
     """Customized setuptools install command - unzips the data files."""
 
     def run(self):
@@ -47,10 +48,28 @@ class CustomInstallCommand(install):
             zip_ref.close()
 
 
+class CustomInstallCommand(CustomInstallCommandBase, install):
+    """Customized setuptools install command - unzips the data files after installing."""
+
+    def run(self):
+        install.run(self)
+        self.unzip_data_files()
+
+
+class CustomDevelopCommand(CustomInstallCommandBase, develop):
+    """Customized setuptools develop command - unzips the data files after installing in dev mode."""
+
+    def run(self):
+        develop.run(self)
+        self.unzip_data_files()
+
+
 setup(
+    python_requires=">=3.9",
     packages=find_packages(),
     include_package_data=True,
     cmdclass={
+        "develop": CustomDevelopCommand,
         "install": CustomInstallCommand,
         "clean": CleanCommand,
     },
