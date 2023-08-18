@@ -2,7 +2,6 @@ import tensorflow as tf
 import numpy as np
 import os
 import pickle
-from keras_flops import get_flops
 import matplotlib.pyplot as plt
 from pathlib import Path
 
