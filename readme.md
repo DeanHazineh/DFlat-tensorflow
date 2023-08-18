@@ -24,7 +24,9 @@ By treating optical layers in the same fashion as standard, differentiable neura
 ## Version Notes 
 Dflat version 4 presents several changes relative to v3. Some scripts in the Fourier layer have been modified to improve the computational speed and efficiency. The package has also been restructured for easier interpretability; we have removed extra scripts, functions, and files that were related to the original papers and were only there for initial academic benchmarking. Lastly, all data files are now zipped to enable faster downloads and are unpackaged during install.  
 
-Older versions will now be kept as seperate branches for archival purposes.
+Older versions will now be kept as seperate branches for archival purposes. 
+
+Some of these changes might have introduced unexpected bugs or behaviors. Please report if you find something incorrect or errors in runtime.
 
 ## Usage and Documentation:
 
