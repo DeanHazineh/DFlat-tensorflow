@@ -3,9 +3,6 @@ import os
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
-
-plt.rcParams["pdf.fonttype"] = 42
-plt.rcParams["ps.fonttype"] = 42
 import dflat.plot_utilities.graphFunc as gF
 
 

@@ -1,5 +1,5 @@
 import tensorflow as tf
-from dflat.tools.latent_param_utils import latent_to_param, param_to_latent
+from dflat.tools.core.latent_param_utils import latent_to_param, param_to_latent
 from .core.batch_solver import batched_wavelength_rcwa_shape, compute_ref_field, full_rcwa_shape
 
 from .core.ms_parameterization import ALLOWED_PARAMETERIZATION_TYPE, CELL_SHAPE_DEGREE

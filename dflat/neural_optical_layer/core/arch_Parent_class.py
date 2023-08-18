@@ -1,12 +1,13 @@
 import tensorflow as tf
 import numpy as np
 
-from dflat.datasets_metasurface_cells import libraryClass as library
+from dflat.metasurface_library import libraryClass as library
 from .arch_Core_class import MLP_Object
+
 
 ## SUB-BASE: (CHILD - DO NOT ALTER THIS UNLESS YOU KNOW THE DETAILS; ADD NEW CHILDREN FOR DIFFERENT METALIBRARIES)
 class MLP_Nanofins_U350_H600(MLP_Object):
-    def __init__(self, dtype):
+    def __init__(self, dtype=tf.float64):
         super(MLP_Nanofins_U350_H600, self).__init__()
 
         # Define model input normalization during training/inference
@@ -19,18 +20,12 @@ class MLP_Nanofins_U350_H600(MLP_Object):
         __param2Limits = [60e-9, 300e-9]  # corresponds to length y m for data
         __param3Limits = [310e-9, 750e-9]  # corresponds to wavelength m
         paramLimit_labels = ["lenx_m", "leny_m", "wavelength_m"]
-        self.set_preprocessDataBounds([__param1Limits, __param2Limits, __param3Limits], paramLimit_labels)
 
+        self.set_preprocessDataBounds([__param1Limits, __param2Limits, __param3Limits], paramLimit_labels)
         self.set_model_dtype(dtype)
-        self.set_input_shape((3,))
+        self.set_input_shape(3)
+        self.set_output_shape(6)
         self.set_output_pol_state(2)
-        # # Define an example architecture (Keras 2.0)
-        # self._arch = [
-        #     tf.keras.layers.Dense(
-        #         256, activation=leakyrelu100, kernel_initializer=tf.keras.initializers.TruncatedNormal(stddev=0.1)
-        #     ),
-        #     tf.keras.layers.Dense(6, kernel_initializer=tf.keras.initializers.TruncatedNormal(stddev=0.1)),
-        # ]
         return
 
     def returnLibraryAsTrainingData(self):
@@ -38,7 +33,7 @@ class MLP_Nanofins_U350_H600(MLP_Object):
         useLibrary = library.Nanofins_U350nm_H600nm()
         params = useLibrary.params
         phase = useLibrary.phase
-        transmission = useLibrary.transmission
+        transmittance = useLibrary.transmittance
 
         # Normalize inputs (always done based on self model normalize function)
         normalizedParams = self.normalizeInput(params)
@@ -49,8 +44,8 @@ class MLP_Nanofins_U350_H600(MLP_Object):
                 np.sin(phase[0, :, :, :]).flatten(),  # sin of phase x polarized light
                 np.cos(phase[1, :, :, :]).flatten(),  # cos of phase y polarized light
                 np.sin(phase[1, :, :, :]).flatten(),  # sin of phase y polarized light
-                transmission[0, :, :, :].flatten(),  # x transmission
-                transmission[1, :, :, :].flatten(),  # y transmission
+                transmittance[0, :, :, :].flatten(),  # x transmission
+                transmittance[1, :, :, :].flatten(),  # y transmission
             ],
             -1,
         )
@@ -80,7 +75,7 @@ class MLP_Nanofins_U350_H600(MLP_Object):
 
 
 class MLP_Nanocylinders_U180_H600(MLP_Object):
-    def __init__(self, dtype):
+    def __init__(self, dtype=tf.float64):
         super(MLP_Nanocylinders_U180_H600, self).__init__()
 
         # Define model input normalization during training/inference
@@ -92,20 +87,12 @@ class MLP_Nanocylinders_U180_H600(MLP_Object):
         __param1Limits = [30e-9, 150e-9]  # corresponds to radius m of cylinder for data
         __param2Limits = [310e-9, 750e-9]  # corresponds to wavelength m for training data
         paramLimit_labels = ["radius_m", "wavelength_m"]
-        self.set_preprocessDataBounds([__param1Limits, __param2Limits], paramLimit_labels)
 
+        self.set_preprocessDataBounds([__param1Limits, __param2Limits], paramLimit_labels)
         self.set_model_dtype(dtype)
-        self.set_input_shape((2,))
+        self.set_input_shape(2)
+        self.set_output_shape(3)
         self.set_output_pol_state(1)
-        # # # Define an example architecture (Keras 2.0)
-        # # Input: wavelength, radius of pillar
-        # # Output: cos(phase), sin(phase), transmission
-        # self._arch = [
-        #     tf.keras.layers.Dense(
-        #         256, activation=leakyrelu100, kernel_initializer=tf.keras.initializers.TruncatedNormal(stddev=0.1),
-        #     ),
-        #     tf.keras.layers.Dense(3, kernel_initializer=tf.keras.initializers.TruncatedNormal(stddev=0.1)),
-        # ]
         return
 
     def returnLibraryAsTrainingData(self):
@@ -113,7 +100,7 @@ class MLP_Nanocylinders_U180_H600(MLP_Object):
         useLibrary = library.Nanocylinders_U180nm_H600nm()
         params = useLibrary.params
         phase = useLibrary.phase
-        transmission = useLibrary.transmission
+        transmittance = useLibrary.transmittance
 
         # Normalize inputs (always done based on self model normalize function)
         normalizedParams = self.normalizeInput(params)
@@ -122,7 +109,7 @@ class MLP_Nanocylinders_U180_H600(MLP_Object):
             [
                 np.cos(phase[:, :]).flatten(),  # cos of phase x polarized light
                 np.sin(phase[:, :]).flatten(),  # sin of phase x polarized light
-                transmission[:, :].flatten(),  # x transmission
+                transmittance[:, :].flatten(),  # x transmission
             ],
             -1,
         )

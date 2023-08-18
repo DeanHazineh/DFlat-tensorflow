@@ -1,2 +1,2 @@
-recursive-include dflat/ *
+recursive-include dflat/ *.zip
  

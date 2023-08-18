@@ -20,7 +20,6 @@ def get_xyz_bar_CIE1931(channels_nm):
 
 
 def get_rgb_bar_CIE1931(channels_nm):
-
     channels_nm = np.squeeze(channels_nm)
     rgbpath = get_path_to_data("color_space/1931RGBFunctions.txt")
     rgbCIE = np.loadtxt(rgbpath, skiprows=1)
@@ -40,4 +39,3 @@ def get_illuminant_6500(channels_nm):
     illum_ = interpolate.interp1d(illum[:, 0], illum[:, 1], kind="linear")
 
     return illum_(channels_nm)
-

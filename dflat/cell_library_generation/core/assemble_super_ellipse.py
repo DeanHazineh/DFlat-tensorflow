@@ -1,7 +1,12 @@
 from dflat.physical_optical_layer.core.ms_parameterization import get_cartesian_grid
-from dflat.tools import tf_rotate_coord
 import tensorflow as tf
 import numpy as np
+
+
+def tf_rotate_coord(xcart, ycart, theta):
+    xr = xcart * tf.math.cos(theta) + ycart * tf.math.sin(theta)
+    yr = -xcart * tf.math.sin(theta) + ycart * tf.math.cos(theta)
+    return xr, yr
 
 
 def assemble_ER_super_ellipse(rcwa_parameters, lay_eps, params, args):

@@ -1,5 +1,6 @@
 import numpy as np
-from .ops_hankel import radial_2d_transform
+from .ops_transform_util import radial_2d_transform
+from .ops_grid_util import np_coordinate_grid
 
 
 def gen_aperture_disk(parameters):
@@ -21,14 +22,8 @@ def gen_aperture_disk(parameters):
     ms_dx_m = parameters["ms_dx_m"]
     radial_symmetry = parameters["radial_symmetry"]
 
-    # define coordinate on the metasurface plane
-    xx, yy = np.meshgrid(np.arange(ms_samplesM["x"]), np.arange(ms_samplesM["y"]))
-    xx = xx - (xx.shape[1] - 1) / 2
-    yy = yy - (yy.shape[0] - 1) / 2
-    xx = xx * ms_dx_m["x"]
-    yy = yy * ms_dx_m["y"]
-
     # Initialize aperture as uniform square or disk (add small constant to avoid 0)
+    xx, yy = np_coordinate_grid(ms_samplesM, ms_dx_m, False)
     aperture_trans = np.ones_like(xx)
     if radius_m:
         aperture_trans = ((np.sqrt(xx**2 + yy**2) <= radius_m)).astype(np.float32) + 1e-6

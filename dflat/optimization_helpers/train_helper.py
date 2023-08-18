@@ -41,7 +41,7 @@ class LinearRampCosineDecayScheduler(tf.keras.optimizers.schedules.LearningRateS
         }
 
 
-def run_pipeline_optimization(pipeline, optimizer, num_epochs, loss_fn=None, allow_gpu=True):
+def run_pipeline_optimization(pipeline, optimizer, num_epochs, loss_fn=None):
     """Runs the training for DFlat's custom pipelines.
 
     Args:
@@ -61,13 +61,6 @@ def run_pipeline_optimization(pipeline, optimizer, num_epochs, loss_fn=None, all
             return pipeline_output
 
     train_loop(pipeline, optimizer, loss_fn, num_epochs)
-
-    # if not allow_gpu:
-    #     with tf.device("/cpu:0"):
-    #         train_loop(pipeline, optimizer, loss_fn, num_epochs)
-    # else:
-    #     with tf.device("/gpu:0"):
-    #         train_loop(pipeline, optimizer, loss_fn, num_epochs)
 
     return
 
@@ -92,7 +85,7 @@ def train_loop(pipeline, optimizer, loss_fn, num_epochs):
         # Depending on the tensorflow version the following lines might need editing
         try:
             print("Training Log | (Step, time, loss, lr): ", start_iter + epoch, end - start, current_loss, optimizer.learning_rate(epoch).numpy())
-            #print("Training Log | (Step, time, loss, lr): ", start_iter + epoch, end - start, current_loss, optimizer.lr.numpy())
+            # print("Training Log | (Step, time, loss, lr): ", start_iter + epoch, end - start, current_loss, optimizer.lr.numpy())
         except:
             print("Training Log | (Step, time, loss): ", start_iter + epoch, end - start, current_loss)
         lossVec.append(current_loss)

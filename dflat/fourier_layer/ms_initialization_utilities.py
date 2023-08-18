@@ -82,6 +82,35 @@ def focus_lens_init(parameters, wavelength_m_aslist, focal_distance_m_aslist, fo
     )
 
 
+def randomPhase_lens_init(parameters, numlenses):
+    """Generate a random phase profile with unity transmittance.
+
+    Args:
+        `parameters` (prop_param):  Settings object defining field propagation details including metasurface to sensor
+            distance.
+        `numlenses` (int): number n of random transmission and phase profiles to generate
+
+    Returns:
+        `np.float`: Unity transmittance profiles, of shape (n, ms_samplesM["y"], ms_samplesM["x"]) or
+            (n, 1, ms_samplesM["r"]).
+        `np.float`: Random phase profiles, of shape (n, ms_samplesM["y"], ms_samplesM["x"]) or
+            (n, 1, ms_samplesM["r"]).
+        `np.float`: Aperture transmittance profiles, of shape (n, ms_samplesM["y"], ms_samplesM["x"]) or
+            (n, 1, ms_samplesM["r"]).
+        `np.float`: Sqrt of total energy incident on the metasurface, post-aperture, of shape (n, 1, 1).
+    """
+    ms_samplesM = parameters["ms_samplesM"]
+    radial_symmetry = parameters["radial_symmetry"]
+    numpts_y = 1 if radial_symmetry else ms_samplesM["y"]
+    numpts_x = ms_samplesM["r"] if radial_symmetry else ms_samplesM["x"]
+
+    lens_trans = np.ones((numlenses, numpts_y, numpts_x))
+    aperture, sqrt_energy_illum = gen_aperture_disk(parameters)
+    lens_phase = 2 * np.pi * np.random.rand(lens_trans.shape)
+
+    return lens_trans, lens_phase, aperture, sqrt_energy_illum
+
+
 def gen_focusing_profile(ms_samplesM, ms_dx_m, wavelength_m, focal_distance_m, focus_offset_m, sensor_distance_m, radius_m, radial_symmetry):
     """Generate the metasurface phase and transmittance profile for ideal focusing of light. Focusing is designed for a
     single, input wavelength, object plane distance/depth, and sensor distance. The lens may also be specified to focus
@@ -117,22 +146,22 @@ def gen_focusing_profile(ms_samplesM, ms_dx_m, wavelength_m, focal_distance_m, f
 
     # Define focusing profile phase
     lens_phase = (
-        -2 * np.pi / wavelength_m * (np.sqrt(focal_distance_m**2 + xx**2 + yy**2) + np.sqrt(sensor_distance_m**2 + (xx - focus_offset_m["x"]) ** 2 + (yy - focus_offset_m["y"]) ** 2))
+        -2
+        * np.pi
+        / wavelength_m
+        * (
+            np.sqrt(focal_distance_m**2 + xx**2 + yy**2)
+            + np.sqrt(sensor_distance_m**2 + (xx - focus_offset_m["x"]) ** 2 + (yy - focus_offset_m["y"]) ** 2)
+        )
     )
-
-    # Define transmittance of lens space
     lens_transmittance = np.ones_like(lens_phase)
-
-    # Wrap to 2pi
-    complex_lens = lens_transmittance * np.exp(1j * lens_phase)
-    lens_phase = np.angle(complex_lens)
+    lens_phase = np.angle(lens_transmittance * np.exp(1j * lens_phase))
 
     # Define the lens aperture
     # Add a small transmittance to the block portion to avoid nan gradients downstream!
     aperture_transmittance = np.ones_like(lens_phase)
     if radius_m:
-        flg = ((np.sqrt(xx**2 + yy**2) <= radius_m)).astype(np.float32) + 1e-6
-        aperture_transmittance *= flg
+        aperture_transmittance = ((np.sqrt(xx**2 + yy**2) <= radius_m)).astype(np.float32) + 1e-6
 
     # Get measure of total radiance passed through the aperture onto the metasurface which is useful for
     # field normalizations
@@ -147,32 +176,3 @@ def gen_focusing_profile(ms_samplesM, ms_dx_m, wavelength_m, focal_distance_m, f
         aperture_transmittance = aperture_transmittance[ms_samplesM_r - 1 : ms_samplesM_r, ms_samplesM_r - 1 :]
 
     return lens_transmittance, lens_phase, aperture_transmittance, sqrt_energy_illum
-
-
-def randomPhase_lens_init(parameters, numlenses):
-    """Generate a random phase profile with unity transmittance.
-
-    Args:
-        `parameters` (prop_param):  Settings object defining field propagation details including metasurface to sensor
-            distance.
-        `numlenses` (int): number n of random transmission and phase profiles to generate
-
-    Returns:
-        `np.float`: Unity transmittance profiles, of shape (n, ms_samplesM["y"], ms_samplesM["x"]) or
-            (n, 1, ms_samplesM["r"]).
-        `np.float`: Random phase profiles, of shape (n, ms_samplesM["y"], ms_samplesM["x"]) or
-            (n, 1, ms_samplesM["r"]).
-        `np.float`: Aperture transmittance profiles, of shape (n, ms_samplesM["y"], ms_samplesM["x"]) or
-            (n, 1, ms_samplesM["r"]).
-        `np.float`: Sqrt of total energy incident on the metasurface, post-aperture, of shape (n, 1, 1).
-    """
-    ms_samplesM = parameters["ms_samplesM"]
-    radial_symmetry = parameters["radial_symmetry"]
-    numpts_y = 1 if radial_symmetry else ms_samplesM["y"]
-    numpts_x = ms_samplesM["r"] if radial_symmetry else ms_samplesM["x"]
-
-    lens_trans = np.ones((numlenses, numpts_y, numpts_x))
-    aperture, sqrt_energy_illum = gen_aperture_disk(parameters)
-    lens_phase = 2 * np.pi * np.random.rand(lens_trans.shape)
-
-    return lens_trans, lens_phase, aperture, sqrt_energy_illum

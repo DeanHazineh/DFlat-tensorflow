@@ -2,12 +2,18 @@ import tensorflow as tf
 import numpy as np
 
 from .ops_calc_ms_regularizer import regularize_ms_calc_tf
-from .ops_hankel import radial_2d_transform, radial_2d_transform_wrapped_phase
+from .ops_transform_util import radial_2d_transform, radial_2d_transform_wrapped_phase
 from .method_fresnel_integral import fresnel_diffraction_coeffs, fresnel_diffraction_fft
 from .method_angular_spectrum import transfer_function_diffraction, transfer_function_Broadband
-from .ops_detectorResampling import sensorMeasurement_intensity_phase, sensorMeasurement_intensity_phase_radialData
+from .ops_detectorResampling import sensorMeasurement_intensity_phase
+from .ops_grid_util import tf_coordinate_grid
 
-## Faster (but memory intensive) matrix broadband implementation which is appropriate for ASM only
+
+#####################################
+### Faster (but memory intensive) matrix broadband implementation which is appropriate for ASM only
+#####################################
+
+
 def psf_measured_MatrixASM(sim_wavelengths_m, point_source_locs, ms_modulation_trans, ms_modulation_phase, parameters, normby_transmittance):
     """Computes the point-spread function at the sensor-plane then resamples and integrates to yield measurement on a
     user-specified detector pixels. This call directly computes the broadband optical response using large tensor operations
@@ -29,6 +35,7 @@ def psf_measured_MatrixASM(sim_wavelengths_m, point_source_locs, ms_modulation_t
         `tf.float`: Field intensity measured on the detector, of shape (len(sim_wavelengths_m), batch_size, Nps, sensor_pixel_number["y"], sensor_pixel_number["x"]).
         `tf.float`: Fied phase measured on the detector, of shape (len(sim_wavelengths_m), batch_size, Nps, sensor_pixel_number["y"], sensor_pixel_number["x"]).
     """
+
     # compute the PSF at the sensor plane -- note that psf_sensor returns
     # tf.math.abs(field)**2 already with appropriate psf normalization on energy!
     calc_modulation_intensity, calc_modulation_phase = psf_sensor_MatrixASM(
@@ -41,11 +48,10 @@ def psf_measured_MatrixASM(sim_wavelengths_m, point_source_locs, ms_modulation_t
     )
 
     # Predict the measurement on specified detector pixel size and shape
-    (calc_modulation_intensity, calc_modulation_phase,) = sensorMeasurement_intensity_phase(
+    (
         calc_modulation_intensity,
         calc_modulation_phase,
-        parameters,
-    )
+    ) = sensorMeasurement_intensity_phase(calc_modulation_intensity, calc_modulation_phase, parameters, False)
 
     return calc_modulation_intensity, calc_modulation_phase
 
@@ -80,67 +86,89 @@ def psf_sensor_MatrixASM(
         `tf.float`: Field phase at the sensor-plane grid of shape (Nwl, batch_size, Nps, calc_ms_samplesM['y'], calc_ms_samplesM['x']).
     """
 
-    # Add assertions in future
-    all_assertions = [True]
-    with tf.control_dependencies(all_assertions):
+    ## For an accurate calculation, resample ms and add the padding as defined during prop_param initialization
+    calc_modulation_trans, calc_modulation_phase = regularize_ms_calc_tf(ms_modulation_trans, ms_modulation_phase, parameters)
 
-        ## For an accurate calculation, resample ms and add the padding as defined during prop_param initialization
-        calc_modulation_trans, calc_modulation_phase = regularize_ms_calc_tf(ms_modulation_trans, ms_modulation_phase, parameters)
+    ## Get the field after the metasurface, given a point-source spherical wave origin
+    calc_modulation_trans, calc_modulation_phase = wavefront_pointSources_afterms_MatrixASM(sim_wavelengths_m, point_source_locs, calc_modulation_trans, calc_modulation_phase, parameters)
 
-        ## Get the field after the metasurface, given a point-source spherical wave origin
-        calc_modulation_trans, calc_modulation_phase = wavefront_pointSources_afterms_MatrixASM(
-            sim_wavelengths_m, point_source_locs, calc_modulation_trans, calc_modulation_phase, parameters
-        )
+    ## Propagate the field with the modified, broadband ASM Method
+    calc_modulation_trans, calc_modulation_phase = wavefront_afterms_sensor_MatrixASM(calc_modulation_trans, calc_modulation_phase, parameters, sim_wavelengths_m)
 
-        ## Propagate the field with the modified, broadband ASM Method
-        distance_m = parameters["sensor_distance_m"]
-        calc_samplesN = parameters["calc_samplesN"]
-        calc_ms_dx_m = parameters["calc_ms_dx_m"]
-        calc_sensor_dx_m = parameters["calc_sensor_dx_m"]
-        dtype = parameters["dtype"]
-        radial_symmetry = parameters["radial_symmetry"]
-        ASM_Pad_opt = parameters["ASM_Pad_opt"]
-        init_shape = calc_modulation_trans.shape
+    # After calculation is done, if radial symmetry was used, convert back to 2D unless override return radial
+    if parameters["radial_symmetry"] and convert_2D:
+        calc_modulation_trans = tf.squeeze(radial_2d_transform(calc_modulation_trans), -3)
+        calc_modulation_phase = tf.squeeze(radial_2d_transform_wrapped_phase(calc_modulation_phase), -3)
 
-        # The fields passed in are expected to be of form (batch, Nwl, Ny, Nx) so we need some reshaping from the
-        # prevous shape of (Nwl, Nbatch, Nps, Ny, Nx)
-        calc_modulation_trans = tf.reshape(tf.transpose(calc_modulation_trans, [1, 2, 0, 3, 4]), [-1, init_shape[0], init_shape[3], init_shape[4]])
-        calc_modulation_phase = tf.reshape(tf.transpose(calc_modulation_phase, [1, 2, 0, 3, 4]), [-1, init_shape[0], init_shape[3], init_shape[4]])
-        calc_modulation_trans, calc_modulation_phase = transfer_function_Broadband(
-            calc_modulation_trans,
-            calc_modulation_phase,
-            sim_wavelengths_m,
-            distance_m,
-            calc_ms_dx_m,
-            calc_samplesN,
-            calc_sensor_dx_m,
-            dtype,
-            radial_symmetry,
-            ASM_Pad_opt,
-        )
-        # reshape back to the original input format
-        calc_modulation_trans = tf.transpose(
-            tf.reshape(calc_modulation_trans, [init_shape[1], init_shape[2], init_shape[0], init_shape[3], init_shape[4]]),
-            [2, 0, 1, 3, 4],
-        )
-        calc_modulation_phase = tf.transpose(
-            tf.reshape(calc_modulation_phase, [init_shape[1], init_shape[2], init_shape[0], init_shape[3], init_shape[4]]),
-            [2, 0, 1, 3, 4],
-        )
-
-        # After calculation is done, if radial symmetry was used, convert back to 2D unless override return radial
-        if parameters["radial_symmetry"] and convert_2D:
-            calc_modulation_trans = tf.squeeze(radial_2d_transform(calc_modulation_trans), -3)
-            calc_modulation_phase = tf.squeeze(radial_2d_transform_wrapped_phase(calc_modulation_phase), -3)
-
-        ### Normalize by input source energy factor
-        calc_modulation_trans /= normby_transmittance
-        calc_sensor_dx_m = parameters["calc_sensor_dx_m"]
+    ### Normalize by input source energy factor
+    calc_modulation_trans /= normby_transmittance
+    calc_sensor_dx_m = parameters["calc_sensor_dx_m"]
 
     return (
         tf.math.abs(calc_modulation_trans) ** 2 * calc_sensor_dx_m["y"] * calc_sensor_dx_m["x"],
         calc_modulation_phase,
     )
+
+
+def field_propagation_MatrixASM(field_amplitude, field_phase, sim_wavelengths_m, modified_parameters):
+    """Takes a batch of field amplitudes and field phases at an input plane (of a single wavelength) and propagates the
+    field to an output plane. This routine uses the transfer_function_broadband implementation of field propagation.
+
+    The input to output field distances is defined by parameters["sensor_distance_m"].
+    The input grid is defined by parameters["ms_samplesM"] and parameters["ms_dx_m"].
+    The output grid is defined via discretization of parameters["sensor_dx_m"] and number points of
+    parameters["sensor_pixel_number"]; these variable names are used as the architecture builds/reuses the functions
+    initially written for computing psfs.
+
+    Args:
+        `field_amplitude` (tf.float): Initial plane field amplitude, of shape
+            (len(sim_wavelengths) or 1, batch_size, ms_samplesM["y"], ms_samplesM["x"]) or (len(sim_wavelengths) or 1, batch_size, 1, ms_samplesM["r"])
+        `field_phase` (tf.float): Initial plane field phase, the same shape as field_amplitude
+        `sim_wavelengths_m` (tf.float): List of simulation wavelengths to propagate the field with
+        `modified_parameters` (tf.float): Modified propagation parameters, like generated in Propagate_Planes_Layer_MatrixBroadband
+
+    Returns:
+        `tf.float`: Output plane field amplitude, of shape
+            ( len(sim_wavelengths), batch_size, sensor_pixel_number["y"], sensor_pixel_number["x"] )
+        `tf.float`: Output plane field phase, of shape
+            ( len(sim_wavelengths), batch_size, sensor_pixel_number["y"], sensor_pixel_number["x"])"""
+
+    # For an accurate calculation, resample field and add the padding as defined during prop_param initialization
+    calc_field_amplitude, calc_field_phase = regularize_ms_calc_tf(field_amplitude, field_phase, modified_parameters)
+
+    # Propagate the field, using the  with the modified, broadband ASM Method
+    distance_m = modified_parameters["sensor_distance_m"]
+    calc_samplesN = modified_parameters["calc_samplesN"]
+    calc_ms_dx_m = modified_parameters["calc_ms_dx_m"]
+    calc_sensor_dx_m = modified_parameters["calc_sensor_dx_m"]
+    dtype = modified_parameters["dtype"]
+    radial_symmetry = modified_parameters["radial_symmetry"]
+    ASM_Pad_opt = modified_parameters["ASM_Pad_opt"]
+
+    # The fields passed in are expected to be of form (batch, Nwl, Ny, Nx) so we need to transpose the field
+    calc_field_amplitude, calc_field_phase = transfer_function_Broadband(
+        tf.transpose(calc_field_amplitude, [1, 0, 2, 3]),
+        tf.transpose(calc_field_phase, [1, 0, 2, 3]),
+        sim_wavelengths_m,
+        distance_m,
+        calc_ms_dx_m,
+        calc_samplesN,
+        calc_sensor_dx_m,
+        dtype,
+        radial_symmetry,
+        ASM_Pad_opt,
+    )
+    calc_field_amplitude = tf.transpose(calc_field_amplitude, [1, 0, 2, 3])
+    calc_field_phase = tf.transpose(calc_field_phase, [1, 0, 2, 3])
+
+    # Reinterpolate to the user specified grid and also ensure resize
+    sensor_pixel_size_m = modified_parameters["sensor_pixel_size_m"]
+    (calc_field_amplitude, calc_field_phase) = sensorMeasurement_intensity_phase(
+        calc_field_amplitude**2 * calc_sensor_dx_m["x"] * calc_sensor_dx_m["y"], calc_field_phase, modified_parameters, radial_symmetry
+    )
+    calc_field_amplitude = tf.math.sqrt(calc_field_amplitude / sensor_pixel_size_m["x"] / sensor_pixel_size_m["y"])
+
+    return calc_field_amplitude, calc_field_phase
 
 
 def wavefront_pointSources_afterms_MatrixASM(sim_wavelengths_m, point_sources_locs, calc_modulation_trans, calc_modulation_phase, parameters):
@@ -182,30 +210,21 @@ def wavefront_pointSources_afterms_MatrixASM(sim_wavelengths_m, point_sources_lo
     calc_ms_dx_m = parameters["calc_ms_dx_m"]
 
     # create the metasurface grid
-    if radial_symmetry:
-        calc_pixel_x, calc_pixel_y = tf.meshgrid(
-            tf.range(calc_samplesN["r"], dtype=dtype),
-            tf.range(1, dtype=dtype),
-        )
-    else:
-        calc_pixel_x, calc_pixel_y = tf.meshgrid(
-            tf.range(calc_samplesN["x"], dtype=dtype),
-            tf.range(calc_samplesN["y"], dtype=dtype),
-        )
-        calc_pixel_x = calc_pixel_x - (calc_pixel_x.shape[1] - 1) / 2
-        calc_pixel_y = calc_pixel_y - (calc_pixel_y.shape[0] - 1) / 2
-    calc_pixel_x = tf.expand_dims(calc_pixel_x * calc_ms_dx_m["x"], 0)
-    calc_pixel_y = tf.expand_dims(calc_pixel_y * calc_ms_dx_m["y"], 0)
+    radial_symmetry = parameters["radial_symmetry"]
+    dtype = parameters["dtype"]
+    calc_samplesN = parameters["calc_samplesN"]
+    calc_ms_dx_m = parameters["calc_ms_dx_m"]
+
+    calc_pixel_x, calc_pixel_y = tf_coordinate_grid(calc_samplesN, calc_ms_dx_m, radial_symmetry, dtype)
+    calc_pixel_x = calc_pixel_x[tf.newaxis]
+    calc_pixel_y = calc_pixel_y[tf.newaxis]
 
     # index of the points
-    point_source_loc_x = point_sources_locs[:, 0]
-    point_source_loc_y = point_sources_locs[:, 1]
-    point_source_loc_z = point_sources_locs[:, 2]
+    point_source_loc_x = point_sources_locs[:, 0][:, tf.newaxis, tf.newaxis]
+    point_source_loc_y = point_sources_locs[:, 1][:, tf.newaxis, tf.newaxis]
+    point_source_loc_z = point_sources_locs[:, 2][:, tf.newaxis, tf.newaxis]
 
     # computation of distance
-    point_source_loc_x = tf.expand_dims(tf.expand_dims(point_source_loc_x, -1), -1)
-    point_source_loc_y = tf.expand_dims(tf.expand_dims(point_source_loc_y, -1), -1)
-    point_source_loc_z = tf.expand_dims(tf.expand_dims(point_source_loc_z, -1), -1)
     distance_point_ms = tf.sqrt((calc_pixel_x - point_source_loc_x) ** 2 + (calc_pixel_y - point_source_loc_y) ** 2 + point_source_loc_z**2)
     distance_point_ms = distance_point_ms[tf.newaxis, tf.newaxis, :, :, :]
 
@@ -216,7 +235,51 @@ def wavefront_pointSources_afterms_MatrixASM(sim_wavelengths_m, point_sources_lo
     return tf.math.abs(wavefront), tf.math.angle(wavefront)
 
 
-## Single wavelength implementation
+def wavefront_afterms_sensor_MatrixASM(calc_modulation_trans, calc_modulation_phase, parameters, sim_wavelengths_m):
+    ## Propagate the field with the modified, broadband ASM Method
+    distance_m = parameters["sensor_distance_m"]
+    calc_samplesN = parameters["calc_samplesN"]
+    calc_ms_dx_m = parameters["calc_ms_dx_m"]
+    calc_sensor_dx_m = parameters["calc_sensor_dx_m"]
+    dtype = parameters["dtype"]
+    radial_symmetry = parameters["radial_symmetry"]
+    ASM_Pad_opt = parameters["ASM_Pad_opt"]
+    init_shape = calc_modulation_trans.shape
+
+    # The fields passed in are expected to be of form (batch, Nwl, Ny, Nx) so we need some reshaping from the
+    # prevous shape of (Nwl, Nbatch, Nps, Ny, Nx)
+    calc_modulation_trans = tf.reshape(tf.transpose(calc_modulation_trans, [1, 2, 0, 3, 4]), [-1, init_shape[0], init_shape[3], init_shape[4]])
+    calc_modulation_phase = tf.reshape(tf.transpose(calc_modulation_phase, [1, 2, 0, 3, 4]), [-1, init_shape[0], init_shape[3], init_shape[4]])
+
+    calc_modulation_trans, calc_modulation_phase = transfer_function_Broadband(
+        calc_modulation_trans,
+        calc_modulation_phase,
+        sim_wavelengths_m,
+        distance_m,
+        calc_ms_dx_m,
+        calc_samplesN,
+        calc_sensor_dx_m,
+        dtype,
+        radial_symmetry,
+        ASM_Pad_opt,
+    )
+
+    # reshape back to the original input format
+    calc_modulation_trans = tf.transpose(
+        tf.reshape(calc_modulation_trans, [init_shape[1], init_shape[2], init_shape[0], init_shape[3], init_shape[4]]),
+        [2, 0, 1, 3, 4],
+    )
+    calc_modulation_phase = tf.transpose(
+        tf.reshape(calc_modulation_phase, [init_shape[1], init_shape[2], init_shape[0], init_shape[3], init_shape[4]]),
+        [2, 0, 1, 3, 4],
+    )
+
+    return calc_modulation_trans, calc_modulation_phase
+
+
+#####################################
+### Single wavelength implementation
+#####################################
 def psf_measured(point_source_locs, ms_modulation_trans, ms_modulation_phase, parameters, normby_transmittance):
     """Computes the point-spread function at the sensor-plane then resamples and integrates to yield measurement on a
     user-specified detector pixels.
@@ -243,7 +306,7 @@ def psf_measured(point_source_locs, ms_modulation_trans, ms_modulation_phase, pa
     calc_modulation_intensity, calc_modulation_phase = psf_sensor(point_source_locs, ms_modulation_trans, ms_modulation_phase, parameters, normby_transmittance)
 
     # Predict the measurement on specified detector pixel size and shape
-    (calc_modulation_intensity, calc_modulation_phase) = sensorMeasurement_intensity_phase(calc_modulation_intensity, calc_modulation_phase, parameters)
+    (calc_modulation_intensity, calc_modulation_phase) = sensorMeasurement_intensity_phase(calc_modulation_intensity, calc_modulation_phase, parameters, False)
 
     return calc_modulation_intensity, calc_modulation_phase
 
@@ -266,27 +329,23 @@ def psf_sensor(point_source_locs, ms_modulation_trans, ms_modulation_phase, para
         `tf.float`: Field phase at the sensor-plane grid of shape (batch_size, Nps, calc_ms_samplesM['y'], calc_ms_samplesM['x']).
     """
 
-    # Run psf calculation with assertions upheld
-    # all_assertions = psf_sensor_assertions(point_source_locs, ms_modulation_trans, ms_modulation_phase, parameters)
-    all_assertions = [True]
-    with tf.control_dependencies(all_assertions):
-        # For an accurate calculation, resample ms and add the padding as defined during prop_param initialization
-        calc_modulation_trans, calc_modulation_phase = regularize_ms_calc_tf(ms_modulation_trans, ms_modulation_phase, parameters)
+    # For an accurate calculation, resample ms and add the padding as defined during prop_param initialization
+    calc_modulation_trans, calc_modulation_phase = regularize_ms_calc_tf(ms_modulation_trans, ms_modulation_phase, parameters)
 
-        # Get the field after the metasurface, given a point-source spherical wave origin
-        calc_modulation_trans, calc_modulation_phase = wavefront_pointSources_afterms(point_source_locs, calc_modulation_trans, calc_modulation_phase, parameters)
+    # Get the field after the metasurface, given a point-source spherical wave origin
+    calc_modulation_trans, calc_modulation_phase = wavefront_pointSources_afterms(point_source_locs, calc_modulation_trans, calc_modulation_phase, parameters)
 
-        # get finely sampled field just above the sensor
-        (calc_modulation_trans, calc_modulation_phase) = wavefront_afterms_sensor(calc_modulation_trans, calc_modulation_phase, parameters)
+    # get finely sampled field just above the sensor
+    (calc_modulation_trans, calc_modulation_phase) = wavefront_afterms_sensor(calc_modulation_trans, calc_modulation_phase, parameters)
 
-        # After calculation is done, if radial symmetry was used, convert back to 2D unless override return radial
-        if parameters["radial_symmetry"] and convert_2D:
-            calc_modulation_trans = radial_2d_transform(tf.squeeze(calc_modulation_trans, 2))
-            calc_modulation_phase = radial_2d_transform_wrapped_phase(tf.squeeze(calc_modulation_phase, 2))
+    # After calculation is done, if radial symmetry was used, convert back to 2D unless override return radial
+    if parameters["radial_symmetry"] and convert_2D:
+        calc_modulation_trans = radial_2d_transform(tf.squeeze(calc_modulation_trans, 2))
+        calc_modulation_phase = radial_2d_transform_wrapped_phase(tf.squeeze(calc_modulation_phase, 2))
 
-        ### Normalize by input source energy factor
-        calc_modulation_trans /= normby_transmittance
-        calc_sensor_dx_m = parameters["calc_sensor_dx_m"]
+    ### Normalize by input source energy factor
+    calc_modulation_trans /= normby_transmittance
+    calc_sensor_dx_m = parameters["calc_sensor_dx_m"]
 
     return (
         tf.math.abs(calc_modulation_trans) ** 2 * calc_sensor_dx_m["y"] * calc_sensor_dx_m["x"],
@@ -327,30 +386,15 @@ def wavefront_pointSources_afterms(
     TF_ZERO = tf.constant(0.0, dtype=dtype)
 
     # create the metasurface grid
-    if radial_symmetry:
-        calc_pixel_x, calc_pixel_y = tf.meshgrid(
-            tf.range(calc_samplesN["r"], dtype=dtype),
-            tf.range(1, dtype=dtype),
-        )
-    else:
-        calc_pixel_x, calc_pixel_y = tf.meshgrid(
-            tf.range(calc_samplesN["x"], dtype=dtype),
-            tf.range(calc_samplesN["y"], dtype=dtype),
-        )
-        calc_pixel_x = calc_pixel_x - (calc_pixel_x.shape[1] - 1) / 2
-        calc_pixel_y = calc_pixel_y - (calc_pixel_y.shape[0] - 1) / 2
-    calc_pixel_x = tf.expand_dims(calc_pixel_x * calc_ms_dx_m["x"], 0)
-    calc_pixel_y = tf.expand_dims(calc_pixel_y * calc_ms_dx_m["y"], 0)
+    calc_pixel_x, calc_pixel_y = tf_coordinate_grid(calc_samplesN, calc_ms_dx_m, radial_symmetry, dtype)
+    calc_pixel_x = calc_pixel_x[tf.newaxis]
+    calc_pixel_y = calc_pixel_y[tf.newaxis]
 
     # index of the points
-    point_source_loc_x = point_sources_locs[:, 0]
-    point_source_loc_y = point_sources_locs[:, 1]
-    point_source_loc_z = point_sources_locs[:, 2]
+    point_source_loc_x = point_sources_locs[:, 0][:, tf.newaxis, tf.newaxis]
+    point_source_loc_y = point_sources_locs[:, 1][:, tf.newaxis, tf.newaxis]
+    point_source_loc_z = point_sources_locs[:, 2][:, tf.newaxis, tf.newaxis]
 
-    # computation of distance
-    point_source_loc_x = tf.expand_dims(tf.expand_dims(point_source_loc_x, -1), -1)
-    point_source_loc_y = tf.expand_dims(tf.expand_dims(point_source_loc_y, -1), -1)
-    point_source_loc_z = tf.expand_dims(tf.expand_dims(point_source_loc_z, -1), -1)
     distance_point_ms = tf.sqrt((calc_pixel_x - point_source_loc_x) ** 2 + (calc_pixel_y - point_source_loc_y) ** 2 + point_source_loc_z**2)
     distance_point_ms = tf.expand_dims(distance_point_ms, 0)
 
@@ -442,103 +486,6 @@ def wavefront_afterms_sensor(
     return wavefront_trans, wavefront_phase
 
 
-def psf_sensor_assertions(point_source_locs, ms_modulation_trans, ms_modulation_phase, parameters):
-    # create assertions to be controlled when running psf_sensor
-    dtype = parameters["dtype"]
-    TF_ZERO = tf.constant(0.0, dtype=dtype)
-
-    assert1 = tf.debugging.assert_equal(
-        tf.sort(point_source_locs[:, 2]),
-        point_source_locs[:, 2],
-        name="point_source_sequence_assertion",
-        summarize="Point locations must be sorted from close to far",
-    )
-
-    assert2 = tf.debugging.assert_equal(
-        point_source_locs.shape[1],
-        3,
-        name="point_source_shape_assertion",
-        summarize="Point source locations should be Nx3 in dimension",
-    )
-
-    assert3 = tf.debugging.assert_greater(
-        point_source_locs[:, 2],
-        TF_ZERO,
-        name="point_source_positive_z_assertion",
-        summarize="Point source locations should have positive z values",
-    )
-
-    assert4 = tf.debugging.Assert(
-        dtype == tf.float64,
-        dtype,
-        name="datatype_assertion",
-        summarize="calculation data type must be tf.float64",
-    )
-
-    # Check the shape of the data to make sure no mistakes were made
-    # in writing new functions
-    assert5 = tf.debugging.assert_equal(
-        tf.shape(ms_modulation_trans).shape,
-        3,
-        name="lens_intensity_dimension_assertion",
-        summarize="Dimensionality of lens transmittance must be 3",
-    )
-
-    assert6 = tf.debugging.assert_equal(
-        tf.shape(ms_modulation_phase).shape,
-        3,
-        name="lens_phase_dimension_assertion",
-        summarize="Dimension of lens phase must be 3",
-    )
-
-    # check that the input dimensions match what is expected by parameters
-    radial_symmetry = parameters["radial_symmetry"]
-    ms_samplesM = parameters["ms_samplesM"]
-    ms_dimension = tf.cond(
-        radial_symmetry,
-        lambda: tf.cast([1, ms_samplesM["r"]], tf.int32),
-        lambda: tf.cast([ms_samplesM["y"], ms_samplesM["x"]], tf.int32),
-    )
-
-    assert7 = tf.debugging.assert_equal(
-        ms_dimension,
-        tf.shape(ms_modulation_trans)[1:],
-        name="ms_intensity_dimension_assertion",
-        summarize="Check ms transmittance shape",
-    )
-
-    assert8 = tf.debugging.assert_equal(
-        ms_dimension,
-        tf.shape(ms_modulation_phase)[1:],
-        name="ms_phase_dimension_assertion",
-        summarize="Check ms phase shape",
-    )
-
-    # assert9 = tf.debugging.assert_type(point_source_locs, tf.float64, name="point_source_locs_dtype_assetion")
-
-    # assert10 = tf.debugging.assert_type(ms_modulation_trans, tf.float64, name="ms_intensity_dtype_assertion")
-
-    # assert11 = tf.debugging.assert_type(ms_modulation_phase, tf.float64, name="ms_phase_dtype_assertion")
-
-    # return assertions as list
-    all_assertions = [
-        assert1,
-        assert2,
-        assert3,
-        assert4,
-        assert5,
-        assert6,
-        assert7,
-        assert8,
-        # assert9,
-        # assert10,
-        # assert11,
-    ]
-
-    return all_assertions
-
-
-## routine for single wavelength field propagation
 def field_propagation(field_amplitude, field_phase, parameters):
     """Takes a batch of field amplitudes and field phases at an input plane (of a single wavelength) and propagates the
     field to an output plane.
@@ -560,6 +507,7 @@ def field_propagation(field_amplitude, field_phase, parameters):
         `tf.float`: Output plane field amplitude, of shape (batch_size, sensor_pixel_number["y"], sensor_pixel_number["x"])
         `tf.float`: Output plane field phase, of shape (batch_size, sensor_pixel_number["y"], sensor_pixel_number["x"])
     """
+
     # For an accurate calculation, resample field and add the padding as defined during prop_param initialization
     field_amplitude, field_phase = regularize_ms_calc_tf(field_amplitude, field_phase, parameters)
 
@@ -571,77 +519,13 @@ def field_propagation(field_amplitude, field_phase, parameters):
     # Reinterpolate to the user specified grid and also ensure resize
     calc_sensor_dx_m = parameters["calc_sensor_dx_m"]
     sensor_pixel_size_m = parameters["sensor_pixel_size_m"]
-    if parameters["radial_symmetry"]:
-        field_amplitude, field_phase = sensorMeasurement_intensity_phase_radialData(field_amplitude**2 * calc_sensor_dx_m["x"] * calc_sensor_dx_m["y"], field_phase, parameters)
-    else:
-        field_amplitude, field_phase = sensorMeasurement_intensity_phase(field_amplitude**2 * calc_sensor_dx_m["x"] * calc_sensor_dx_m["y"], field_phase, parameters)
+    radial_symmetry = parameters["radial_symmetry"]
+    field_amplitude, field_phase = sensorMeasurement_intensity_phase(
+        field_amplitude**2 * calc_sensor_dx_m["x"] * calc_sensor_dx_m["y"],
+        field_phase,
+        parameters,
+        radial_symmetry,
+    )
     field_amplitude = tf.math.sqrt(field_amplitude / sensor_pixel_size_m["x"] / sensor_pixel_size_m["y"])
 
     return field_amplitude, field_phase
-
-
-## ASM matrix broadband field propagation routine
-def field_propagation_MatrixASM(field_amplitude, field_phase, sim_wavelengths_m, modified_parameters):
-    """Takes a batch of field amplitudes and field phases at an input plane (of a single wavelength) and propagates the
-    field to an output plane. This routine uses the transfer_function_broadband implementation of field propagation.
-
-    The input to output field distances is defined by parameters["sensor_distance_m"].
-    The input grid is defined by parameters["ms_samplesM"] and parameters["ms_dx_m"].
-    The output grid is defined via discretization of parameters["sensor_dx_m"] and number points of
-    parameters["sensor_pixel_number"]; these variable names are used as the architecture builds/reuses the functions
-    initially written for computing psfs.
-
-    Args:
-        `field_amplitude` (tf.float): Initial plane field amplitude, of shape
-            (len(sim_wavelengths) or 1, batch_size, ms_samplesM["y"], ms_samplesM["x"]) or (len(sim_wavelengths) or 1, batch_size, 1, ms_samplesM["r"])
-        `field_phase` (tf.float): Initial plane field phase, the same shape as field_amplitude
-        `sim_wavelengths_m` (tf.float): List of simulation wavelengths to propagate the field with
-        `modified_parameters` (tf.float): Modified propagation parameters, like generated in Propagate_Planes_Layer_MatrixBroadband
-
-    Returns:
-        `tf.float`: Output plane field amplitude, of shape
-            ( len(sim_wavelengths), batch_size, sensor_pixel_number["y"], sensor_pixel_number["x"] )
-        `tf.float`: Output plane field phase, of shape
-            ( len(sim_wavelengths), batch_size, sensor_pixel_number["y"], sensor_pixel_number["x"])"""
-
-    # For an accurate calculation, resample field and add the padding as defined during prop_param initialization
-    calc_field_amplitude, calc_field_phase = regularize_ms_calc_tf(field_amplitude, field_phase, modified_parameters)
-
-    # Propagate the field, using the  with the modified, broadband ASM Method
-    distance_m = modified_parameters["sensor_distance_m"]
-    calc_samplesN = modified_parameters["calc_samplesN"]
-    calc_ms_dx_m = modified_parameters["calc_ms_dx_m"]
-    calc_sensor_dx_m = modified_parameters["calc_sensor_dx_m"]
-    dtype = modified_parameters["dtype"]
-    radial_symmetry = modified_parameters["radial_symmetry"]
-    ASM_Pad_opt = modified_parameters["ASM_Pad_opt"]
-
-    # The fields passed in are expected to be of form (batch, Nwl, Ny, Nx) so we need to transpose the field
-    calc_field_amplitude, calc_field_phase = transfer_function_Broadband(
-        tf.transpose(calc_field_amplitude, [1, 0, 2, 3]),
-        tf.transpose(calc_field_phase, [1, 0, 2, 3]),
-        sim_wavelengths_m,
-        distance_m,
-        calc_ms_dx_m,
-        calc_samplesN,
-        calc_sensor_dx_m,
-        dtype,
-        radial_symmetry,
-        ASM_Pad_opt,
-    )
-    calc_field_amplitude = tf.transpose(calc_field_amplitude, [1, 0, 2, 3])
-    calc_field_phase = tf.transpose(calc_field_phase, [1, 0, 2, 3])
-
-    # Reinterpolate to the user specified grid and also ensure resize
-    sensor_pixel_size_m = modified_parameters["sensor_pixel_size_m"]
-    if radial_symmetry:
-        calc_field_amplitude, calc_field_phase = sensorMeasurement_intensity_phase_radialData(
-            calc_field_amplitude**2 * calc_sensor_dx_m["x"] * calc_sensor_dx_m["y"], calc_field_phase, modified_parameters
-        )
-    else:
-        calc_field_amplitude, calc_field_phase = sensorMeasurement_intensity_phase(
-            calc_field_amplitude**2 * calc_sensor_dx_m["x"] * calc_sensor_dx_m["y"], calc_field_phase, modified_parameters
-        )
-    calc_field_amplitude = tf.math.sqrt(calc_field_amplitude / sensor_pixel_size_m["x"] / sensor_pixel_size_m["y"])
-
-    return calc_field_amplitude, calc_field_phase
