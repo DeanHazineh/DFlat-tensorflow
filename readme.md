@@ -53,8 +53,9 @@ Note that git LFS should be installed if not already via `git lfs install` at th
 
 ```
 git clone https://github.com/DeanHazineh/DFlat
-python setup.py install clean
+pip install .
 ```
+If there are unexpected issues with the pip install, try to install the package via: `python setup.py install clean`. This was needed on google collab but not for local builds for some unknown reason. 
 
 ## Future Notes:
 
