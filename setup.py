@@ -55,6 +55,9 @@ class CustomInstallCommand(CustomInstallCommandBase, install):
         install.run(self)
         self.unzip_data_files()
 
+        shutil.rmtree("build", ignore_errors=True)
+        print("Removed the build directory")
+
 
 class CustomDevelopCommand(CustomInstallCommandBase, develop):
     """Customized setuptools develop command - unzips the data files after installing in dev mode."""
@@ -62,6 +65,9 @@ class CustomDevelopCommand(CustomInstallCommandBase, develop):
     def run(self):
         develop.run(self)
         self.unzip_data_files()
+
+        shutil.rmtree("build", ignore_errors=True)
+        print("Removed the build directory")
 
 
 setup(

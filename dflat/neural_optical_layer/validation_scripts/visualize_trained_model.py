@@ -71,7 +71,7 @@ def plot_MLP_Nanocylinders(model_name, show=False):
     return
 
 
-def plot_MLP_Nanofins(model_name, show=False):
+desf plot_MLP_Nanofins(model_name, show=False):
     savepath = "dflat/neural_optical_layer/validation_scripts/output/"
     use_dtype = tf.float64  # This is the output dtype
     neural_model = df_neural.MLP_Layer(model_name, dtype=use_dtype)
@@ -156,8 +156,9 @@ def plot_MLP_Nanofins(model_name, show=False):
 
 if __name__ == "__main__":
     # Run plotting functions for mlp model
-    plot_MLP_Nanofins("MLP_Nanofins_Dense1024_U350_H600")
-    plot_MLP_Nanofins("MLP_Nanofins_Dense512_U350_H600")
+    # plot_MLP_Nanofins("MLP_Nanofins_Dense1024_U350_H600")
+    # plot_MLP_Nanofins("MLP_Nanofins_Dense512_U350_H600")
+    # plot_MLP_Nanofins("MLP_Nanofins_Dense256_U350_H600")
 
     plot_MLP_Nanocylinders("MLP_Nanocylinders_Dense256_U180_H600")
     plot_MLP_Nanocylinders("MLP_Nanocylinders_Dense128_U180_H600")

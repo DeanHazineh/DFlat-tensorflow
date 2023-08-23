@@ -6,7 +6,7 @@ import dflat.neural_optical_layer.core.arch_DNN as MLP_models
 from sklearn.utils import shuffle
 
 
-def run_training_neural_model(model, epochs, miniEpoch=1000, batch_size=None, lr=1e-3, verbose=False, train=True):
+def run_training_neural_model(model, epochs, miniEpoch=1000, batch_size=None, lr=1e-3, verbose=True, train=True):
     ### Define the model to train and associated parameters
     model.customLoadCheckpoint()
 
@@ -36,16 +36,12 @@ def run_training_neural_model(model, epochs, miniEpoch=1000, batch_size=None, lr
 
 if __name__ == "__main__":
     # Always train neural models with float32 because we do not need float64 and that is not standard
-    run_training_neural_model(
-        model=MLP_models.MLP_Nanofins_Dense1024_U350_H600(dtype=tf.float32), epochs=10, miniEpoch=1000, batch_size=2**19, lr=1e-3, train=True, verbose=False
-    )
-    run_training_neural_model(
-        model=MLP_models.MLP_Nanofins_Dense512_U350_H600(dtype=tf.float32), epochs=10, miniEpoch=1000, batch_size=2**19, lr=1e-3, train=True, verbose=False
-    )
+    # run_training_neural_model(model=MLP_models.MLP_Nanofins_Dense1024_U350_H600(dtype=tf.float32), epochs=10, miniEpoch=1000, batch_size=2**19, lr=1e-3)
+    # run_training_neural_model(model=MLP_models.MLP_Nanofins_Dense512_U350_H600(dtype=tf.float32), epochs=10, miniEpoch=1000, batch_size=2**19, lr=1e-3)
 
     run_training_neural_model(
-        model=MLP_models.MLP_Nanocylinders_Dense256_U180_H600(dtype=tf.float32), epochs=10, miniEpoch=1000, batch_size=None, lr=1e-3, train=True, verbose=False
+        model=MLP_models.MLP_Nanocylinders_Dense256_U180_H600(dtype=tf.float32), epochs=50000, miniEpoch=1000, batch_size=None, lr=1e-3, verbose=False
     )
     run_training_neural_model(
-        model=MLP_models.MLP_Nanocylinders_Dense128_U180_H600(dtype=tf.float32), epochs=10, miniEpoch=1000, batch_size=None, lr=1e-3, train=True, verbose=False
+        model=MLP_models.MLP_Nanocylinders_Dense128_U180_H600(dtype=tf.float32), epochs=50000, miniEpoch=1000, batch_size=None, lr=1e-3, verbose=False
     )
