@@ -177,13 +177,6 @@ class MLP_Latent_Layer(MLP_Layer):
         if not self._check_input_type:
             latent_tensor = self.check_dtype(latent_tensor)
 
-        # Ensure input is float32 to match the neural network
-        # The output of the model will be cast to self.dtype
-        if not tf.is_tensor(latent_tensor):
-            latent_tensor = tf.convert_to_tensor(latent_tensor, dtype=tf.float32)
-        elif latent_tensor.dtype != tf.float32:
-            latent_tensor = tf.cast(latent_tensor, tf.float32)
-
         # params passed to MLP need to be reshaped into [N, D]
         norm_param = latent_to_param(flatten_reshape_shape_parameters(latent_tensor), self.pmin, self.pmax)
         gridShape = [1, latent_tensor.shape[1], latent_tensor.shape[2]]
