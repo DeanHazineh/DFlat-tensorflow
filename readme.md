@@ -22,7 +22,7 @@ D-Flat provides users with:
 By treating optical layers in the same fashion as standard, differentiable neural layers, deep learning pipelines can be built to simultaneously optimize optical hardware and ML computational back-ends for the next generation of computational imaging devices.
 
 ## Version Notes 
-Dflat version 4 presents several changes relative to v3. Some scripts in the Fourier layer have been modified to improve the computational speed and efficiency. The package has also been restructured for easier interpretability; we have removed extra scripts, functions, and files that were related to the original papers and were only there for initial academic benchmarking. Lastly, all data files are now zipped to enable faster downloads and are unpackaged during install.  
+Dflat version 4 presents several changes relative to v3. Some scripts in the Fourier layer have been modified to improve the computational speed and efficiency. The package has also been restructured for easier interpretability; we have removed extra scripts, functions, and files that were related to the original papers and were only there for initial academic benchmarking. Lastly, all data files are now stored on dropbox and downloaded during install.
 
 Older versions will now be kept as seperate branches for archival purposes. 
 
@@ -49,13 +49,12 @@ Google collab versions of current examples can be found in the examples folder a
 
 ### (b) install and run locally:
 
-Note that git LFS should be installed if not already via `git lfs install` at the terminal. Next install the local repository to your venv by entering the following in terminal:
-
+Install the local repository to your venv by entering the following in terminal:
 ```
 git clone https://github.com/DeanHazineh/DFlat
 pip install .
 ```
-If there are unexpected issues with the pip install, try to install the package via: `python setup.py install clean`. This was needed on google collab but not for local builds for some unknown reason. 
+If there are unexpected issues with the pip install, try to install the package via: `python setup.py install`. This was needed on google collab but not for local builds for some unknown reason. 
 
 ## Future Notes:
 
