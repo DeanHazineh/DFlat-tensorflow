@@ -67,12 +67,13 @@ If there are unexpected issues with the pip install, try to install the package 
 If you utilize DFlat or included data sets for your own work, please cite it by copying:
 
 ```
-@INPROCEEDINGS{Hazineh2023,
-  Author = {Dean Hazineh and Soon Wei Daniel Lim and Qi Guo and Federico Capasso and Todd Zickler},
-  booktitle = {2023 IEEE International Conference on Computational Photography (ICCP)}, 
-  Title = {Polarization Multi-Image Synthesis with Birefringent Metasurfaces},
-  Year = {2023},
-}
+@INPROCEEDINGS{10233735,
+  author={Hazineh, Dean and Lim, Soon Wei Daniel and Guo, Qi and Capasso, Federico and Zickler, Todd},
+  booktitle={2023 IEEE International Conference on Computational Photography (ICCP)}, 
+  title={Polarization Multi-Image Synthesis with Birefringent Metasurfaces}, 
+  year={2023},
+  pages={1-12},
+  doi={10.1109/ICCP56744.2023.10233735}}
 ```
 
 This work pulls inspiration from, builds on, or otherwise ports/modifies previous open-source contributions from the following individuals:
