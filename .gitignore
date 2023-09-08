@@ -1,12 +1,4 @@
 .vscode
 DFlat.egg-info/**
 **__pycache__**
-_config.yml
-.readthedocs.yml
-**dev_pending**
-**output**
-dflat/fourier_layer/validation_scripts/heart_singularity_hologram/**
-dflat/metasurface_library/core/pregen_lookup_tables/**
-dflat/metasurface_library/core/raw_meta_libraries/**
-dflat/neural_optical_layer/core/trained_MLP_models/**
-dflat/physical_optical_layer/core/material_index/**
+**build**
