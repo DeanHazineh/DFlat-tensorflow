@@ -17,7 +17,7 @@ def run_training_neural_model(model, epochs, miniEpoch=1000, batch_size=None, lr
     ### If no batch size is specified then use the full training dataset size
     if batch_size == None:
         batch_size = xtrain.shape[0]
-*
+
     ## Call once then print summary
     model(xtrain[0:1, :])
     model.summary()
