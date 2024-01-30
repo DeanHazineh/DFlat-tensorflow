@@ -1,5 +1,5 @@
 # DFlat-tensorflow V4
-# Note: DFlat has moved to a new Pytorch implementation (<a href="https://github.com/DeanHazineh/DFlat" target="_blank">DFlat-pytorch</a>). While this version/repository will remain online, it is no longer supported with updates or improvements.  
+### Note: DFlat has moved to a new Pytorch implementation (<a href="https://github.com/DeanHazineh/DFlat" target="_blank">DFlat-pytorch</a>). While this version/repository will remain online, it is no longer supported with updates or improvements.  
 <div align="center">
   <img src=/docs/imgs/DFlat_Long.png alt="Dflat" width="500"/>
 </div>
