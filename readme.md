@@ -12,11 +12,11 @@
 ![TensorFlow](https://img.shields.io/badge/TensorFlow-%23FF6F00.svg?style=for-the-badge&logo=TensorFlow&logoColor=white)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-`D-Flat` is an auto-differentiable design framework for flat optics, specially geared to the design of dielectric metasurfaces for imaging and sensing tasks. This package was officially released alongside our paper,  <a href="https://deanhazineh.github.io/publications/Multi_Image_Synthesis/MIS_Home.html" target="_blank"> Polarization Multi-Image Synthesis with Birefringent Metasurfaces</a>, published in the proceedings of the 2023 IEEE International Conference of Computational Photography (ICCP). This package is further documented and discussed in the manuscript available on <a href="https://arxiv.org/abs/2207.14780" target="_blank">arxiv</a>. If you use this package, please cite the ICCP paper (See below for details). 
+`D-Flat` is an auto-differentiable design framework for flat optics, specially geared to the design of dielectric metasurfaces for imaging and sensing tasks. This package was first introduced in a 2022 manuscript available at <a href="https://arxiv.org/abs/2207.14780" target="_blank">arxiv</a>. It was later published alongside our paper, <a href="https://deanhazineh.github.io/publications/Multi_Image_Synthesis/MIS_Home.html" target="_blank"> Polarization Multi-Image Synthesis with Birefringent Metasurfaces</a>, in the proceedings of the 2023 IEEE International Conference of Computational Photography (ICCP). 
 
 D-Flat provides users with:
-- A validated, auto-differentiable framework for optical field propagation and rendering built on tensorflow Keras
-- Pre-trained, efficient neural models to describe the optical response of metasurface cells
+- A validated, auto-differentiable framework for field propagation, point-spread function calculations, and image rendering built on tensorflow Keras
+- A growing set of pre-trained, efficient neural networks to model the optical response of metasurface cells (alongside with the released datasets)
 - An auto-differentiable field solver (RCWA) packaged as a TF-Keras layer that is easy to use
 
 By treating optical layers in the same fashion as standard, differentiable neural layers, deep learning pipelines can be built to simultaneously optimize optical hardware and ML computational back-ends for the next generation of computational imaging devices.
