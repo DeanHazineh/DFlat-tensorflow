@@ -1,5 +1,8 @@
 # DFlat-tensorflow V4
-### Note: DFlat has moved to a new Pytorch implementation (<a href="https://github.com/DeanHazineh/DFlat" target="_blank">DFlat-pytorch</a>). While this version/repository will remain online, it is no longer supported with updates or improvements.  
+## Important Notes: 
+### - DFlat has moved to a new Pytorch implementation (<a href="https://github.com/DeanHazineh/DFlat" target="_blank">DFlat-pytorch</a>). While this version/repository will remain online, it is no longer supported with updates or improvements.  
+### - Google colab no longer supports gpu usage for older versions of tensorflow (including the version used in this release). Rather than explicitly upgrade it, dev efforts are moved to maintaining the new pytorch package. 
+
 <div align="center">
   <img src=/docs/imgs/DFlat_Long.png alt="Dflat" width="500"/>
 </div>
