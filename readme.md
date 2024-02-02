@@ -51,7 +51,7 @@ Google collab versions of current examples can be found in the examples folder a
 
 Install the local repository to your venv by entering the following in terminal:
 ```
-git clone https://github.com/DeanHazineh/DFlat
+git clone https://github.com/DeanHazineh/DFlat-tensorflow.git
 pip install .
 ```
 If there are unexpected issues with the pip install, try to install the package via: `python setup.py install`. This was needed on google collab but not for local builds for some unknown reason. 
