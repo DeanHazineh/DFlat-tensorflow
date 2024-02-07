@@ -1,10 +1,6 @@
-# DFlat-tensorflow V4
-
+# DFlat-tensorflow V4.2
 ## Important Notes:
-
-### - DFlat has moved to a new Pytorch implementation (<a href="https://github.com/DeanHazineh/DFlat" target="_blank">DFlat-pytorch</a>). While this version/repository will remain online, it is no longer supported with updates or improvements.
-
-### - Google colab no longer supports gpu usage for older versions of tensorflow (including the version used in this release). At some point, we will minimally upgrade this code to use the newest tensorflow version and fix any subsequent breaks. This maintenance however will take secondary priority to the pytorch package.
+### - DFlat has moved to a new Pytorch implementation (<a href="https://github.com/DeanHazineh/DFlat" target="_blank">DFlat-pytorch</a>). While this version/repository will remain online, it is no longer supported with updates or improvements. The new version is a complete rewrite that is easier to read, modify, and build on the source code. 
 
 <div align="center">
   <img src=/docs/imgs/DFlat_Long.png alt="Dflat" width="500"/>
@@ -73,7 +69,7 @@ If there are unexpected issues with the pip install, try to install the package 
 
 ## Future Notes:
 
-- Please note that Tensorflow v2.10 is the last official tensorflow release with native GPU compatibility for Windows OS. DFlat is currently kept on v2.10 and will likely not be upgraded officially.
+- Please note that Tensorflow v2.10 was the last official tensorflow release with native GPU compatibility for Windows OS. The install was edited on 02/2024 to use the newest tensorflow in order to meet the requirements of google collab gpus. 
 - Importantly, we are porting the package to Pytorch which has now become the dominant ML framework. Dflat-tensorflow will then no longer be updated and new developments will be released on DFlat-pytorch.
 - We expect that the pytorch version will be both faster due to improvements to the back-end and easier to use
 
